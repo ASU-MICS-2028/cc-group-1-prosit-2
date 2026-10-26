@@ -1,0 +1,203 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "back": "Back",
+    "optional": "Optional",
+    "choose": "Choose…"
+  },
+  "nav": {
+    "label": "Main menu",
+    "home": "Home",
+    "patients": "Patients",
+    "appointments": "Visits",
+    "summary": "Summary",
+    "sync": "Sync",
+    "profile": "Profile"
+  },
+  "roles": {
+    "chv": "Community Health Volunteer",
+    "nurse": "Nurse / Midwife",
+    "doctor": "Doctor",
+    "district_officer": "District Health Officer",
+    "admin": "Administrator"
+  },
+  "login": {
+    "demoIntro": "Demo sign-in with synthetic data. Choose a role to continue.",
+    "continueAs": "Continue as {{role}}"
+  },
+  "offline": {
+    "banner_one": "Offline · {{count}} change waiting to sync",
+    "banner_other": "Offline · {{count}} changes waiting to sync"
+  },
+  "home": {
+    "greeting": "Welcome back",
+    "registerPatient": "Register a patient",
+    "patients": "Patients",
+    "upcoming": "Upcoming visits",
+    "waiting": "Waiting to sync"
+  },
+  "patients": {
+    "title": "Patients",
+    "new": "New",
+    "search": "Search by name, community or phone",
+    "empty": "No patients yet. Register the first one.",
+    "noMatch": "No patient matches your search.",
+    "notFound": "This patient is not on this phone.",
+    "age_one": "{{count}} year",
+    "age_other": "{{count}} years"
+  },
+  "sex": {
+    "female": "Female",
+    "male": "Male"
+  },
+  "patient": {
+    "givenName": "First name",
+    "familyName": "Surname",
+    "sex": "Sex",
+    "dateOfBirth": "Date of birth",
+    "ageYears": "Age in years",
+    "age": "Age",
+    "estimated": "estimated",
+    "community": "Community",
+    "district": "District",
+    "phone": "Phone number",
+    "nationalId": "Ghana Card or NHIS number",
+    "preferredLanguage": "Preferred language",
+    "recordVitals": "Record vitals",
+    "book": "Book visit",
+    "vitals": "Vitals",
+    "noVitals": "No vitals recorded yet.",
+    "appointments": "Visits and referrals"
+  },
+  "newPatient": {
+    "title": "Register a patient",
+    "consentTitle": "Consent first",
+    "consentText": "Explain in the patient's language that their health record is kept safely, shared only with their health workers, and that they can say no.",
+    "consentMethod": "How was consent given?",
+    "consentGiven": "The patient agreed to have their health record kept.",
+    "knowsBirthDate": "Does the patient know their date of birth?",
+    "birthDateYes": "Yes",
+    "birthDateNo": "No, enter their age",
+    "save": "Save patient"
+  },
+  "consent": {
+    "verbal": "Spoken agreement",
+    "thumbprint": "Thumbprint",
+    "signature": "Signature"
+  },
+  "vitals": {
+    "title": "Record vitals",
+    "takenAt": "Measured at",
+    "systolic": "Systolic BP",
+    "diastolic": "Diastolic BP",
+    "temperature": "Temperature",
+    "pulse": "Pulse",
+    "perMinute": "per min",
+    "weight": "Weight",
+    "height": "Height",
+    "notes": "Notes",
+    "bp": "BP",
+    "bmi": "BMI",
+    "referToday": "Refer the patient to a health facility today.",
+    "recheck": "Measure again at the next visit and tell the nurse.",
+    "save": "Save vitals"
+  },
+  "flags": {
+    "bpCrisis": "Very high blood pressure",
+    "bpHigh": "High blood pressure",
+    "bpLow": "Low blood pressure",
+    "fever": "Fever",
+    "highFever": "High fever",
+    "lowTemp": "Low body temperature",
+    "pulseHigh": "Fast pulse",
+    "pulseLow": "Slow pulse"
+  },
+  "appointments": {
+    "title": "Upcoming visits",
+    "empty": "No visits booked."
+  },
+  "newAppointment": {
+    "title": "Book a visit or referral",
+    "type": "Type",
+    "when": "Date and time",
+    "facility": "Health facility",
+    "priority": "Priority",
+    "reason": "Reason",
+    "save": "Book"
+  },
+  "appointmentType": {
+    "follow_up": "Follow-up",
+    "antenatal": "Antenatal care",
+    "postnatal": "Postnatal care",
+    "referral": "Referral",
+    "teleconsult": "Teleconsultation"
+  },
+  "priority": {
+    "routine": "Routine",
+    "urgent": "Urgent",
+    "emergency": "Emergency"
+  },
+  "status": {
+    "scheduled": "Booked",
+    "completed": "Done",
+    "missed": "Missed",
+    "cancelled": "Cancelled"
+  },
+  "entity": {
+    "patient": "Patient",
+    "vitals": "Vitals",
+    "appointment": "Visit"
+  },
+  "sync": {
+    "title": "Sync",
+    "online": "Online",
+    "offline": "Offline",
+    "waiting_one": "{{count}} change waiting",
+    "waiting_other": "{{count}} changes waiting",
+    "now": "Sync now",
+    "result": "Sent {{sent}}, not sent {{failed}}.",
+    "allSent": "Everything on this phone has been sent.",
+    "queued": "Waiting",
+    "failed": "Will retry",
+    "conflict": "Needs review"
+  },
+  "surveillance": {
+    "title": "District summary",
+    "district": "{{district}} district · anonymised counts only",
+    "comingSoon": "The summary appears here once the analytics endpoint is connected."
+  },
+  "profile": {
+    "title": "Profile",
+    "language": "Language",
+    "comingSoon": "coming soon",
+    "signOut": "Sign out"
+  },
+  "pwa": {
+    "updateTitle": "A new version is ready",
+    "updateText": "Reload to use it. Your saved records stay on this phone.",
+    "reload": "Reload",
+    "later": "Later",
+    "offlineTitle": "HealthConnect now works offline",
+    "offlineText": "You can open the app and record patients without internet.",
+    "ok": "OK",
+    "installTitle": "Install HealthConnect",
+    "installText": "Add it to your home screen to open it like an app.",
+    "install": "Install",
+    "notNow": "Not now"
+  },
+  "errors": {
+    "required": "Fill this in.",
+    "phone": "Enter a Ghana number, e.g. 0241234567.",
+    "consent": "The patient must agree before you save their record.",
+    "dateOfBirth": "Enter a date in the past.",
+    "age": "Enter an age between 0 and 120.",
+    "range": "This value looks wrong. Check the measurement.",
+    "bothBp": "Enter both blood pressure numbers.",
+    "oneVital": "Enter at least one measurement.",
+    "future": "Choose a time in the future."
+  },
+  "notFound": {
+    "text": "This page does not exist.",
+    "home": "Go home"
+  }
+}
