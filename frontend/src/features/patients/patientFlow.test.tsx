@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 import { db } from "@/db/local"
@@ -48,8 +48,11 @@ describe("register a patient, record vitals, book a visit", () => {
     await waitFor(() =>
       expect(router.state.location.pathname).toBe(`/patients/${patient.id}`)
     )
+    // The vitals form can still be on screen for a moment, so read the flag from the saved list
+    const vitalsHeading = await screen.findByRole("heading", { name: "Vitals" })
+    const vitalsList = vitalsHeading.parentElement!
     expect(
-      await screen.findByText(/Very high blood pressure/)
+      await within(vitalsList).findByText(/Very high blood pressure/)
     ).toBeInTheDocument()
 
     await user.click(await screen.findByRole("link", { name: /Book visit/ }))
