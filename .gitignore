@@ -1,0 +1,40 @@
+# Secrets (never committed; .env.example is the template)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Node / frontend
+node_modules
+dist
+dist-ssr
+*.local
+coverage
+
+# Backend build output (whichever stack the API uses)
+bin/
+obj/
+__pycache__/
+.venv/
+target/
+
+# Editors and OS (the shared VS Code settings are tracked)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sw?
+
+# Personal notes (not shared)
+CLAUDE.md
