@@ -32,4 +32,5 @@ To try it, sign in with a demo role. Records save on the device. Turn the networ
 ## Docs
 
 - [What the frontend needs (API and data contract proposal)](docs/frontend-needs.md)
+- [Deploy and Lab 6 security evidence](deploy/README.md)
 - [Decisions](docs/adr/)

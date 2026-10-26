@@ -1,0 +1,42 @@
+#!/bin/bash
+# First boot of the HealthConnect app server (Amazon Linux 2023). Installs Docker, the
+# PostgreSQL client (for the Lab 6 checks) and writes the non-secret settings. Until the first
+# deploy, a placeholder answers /health so the load balancer and HTTPS can be tested.
+set -euo pipefail
+
+dnf install -y docker postgresql16 jq
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+systemctl enable --now docker
+
+mkdir -p /opt/healthconnect
+# Amazon's CA bundle, so clients can check the database's certificate (sslmode=verify-full).
+curl -fsSL https://truststore.pki.rds.amazonaws.com/${region}/${region}-bundle.pem \
+  -o /opt/healthconnect/rds-ca.pem
+
+# Settings, not secrets: the password is read from Secrets Manager at start-up with the
+# server's own role, never written to disk.
+cat > /opt/healthconnect/settings.env <<EOF
+AWS_REGION=${region}
+DB_HOST=${db_host}
+DB_NAME=healthconnect
+DB_SECRET_ARN=${db_secret}
+DB_SSL_CA=/opt/healthconnect/rds-ca.pem
+MEDIA_BUCKET=${media_bucket}
+REGISTRY=${registry}
+EOF
+
+# Placeholder until the first deploy replaces it.
+mkdir -p /opt/healthconnect/placeholder
+cat > /opt/healthconnect/placeholder/default.conf <<'EOF'
+server {
+  listen 8080;
+  location = /health { return 200 "ok\n"; }
+  location / { return 200 "HealthConnect: first deploy pending\n"; }
+}
+EOF
+docker run -d --name placeholder --restart unless-stopped -p 80:8080 \
+  -v /opt/healthconnect/placeholder/default.conf:/etc/nginx/conf.d/default.conf:ro \
+  nginxinc/nginx-unprivileged:stable-alpine
