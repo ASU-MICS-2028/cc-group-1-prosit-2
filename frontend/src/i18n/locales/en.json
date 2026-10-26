@@ -3,7 +3,9 @@
     "loading": "Loading…",
     "back": "Back",
     "optional": "Optional",
-    "choose": "Choose…"
+    "choose": "Choose…",
+    "next": "Next",
+    "stepOf": "Step {{step}} of {{total}}"
   },
   "nav": {
     "label": "Main menu",
@@ -12,7 +14,8 @@
     "appointments": "Visits",
     "summary": "Summary",
     "sync": "Sync",
-    "profile": "Profile"
+    "profile": "Profile",
+    "add": "Add"
   },
   "roles": {
     "chv": "Community Health Volunteer",
@@ -22,19 +25,22 @@
     "admin": "Administrator"
   },
   "login": {
-    "demoIntro": "Demo sign-in with synthetic data. Choose a role to continue.",
-    "continueAs": "Continue as {{role}}"
+    "welcome": "Welcome",
+    "motto": "Good health starts in the community.",
+    "demoIntro": "Demo sign-in with synthetic data. Continue as:"
   },
   "offline": {
     "banner_one": "Offline · {{count}} change waiting to sync",
     "banner_other": "Offline · {{count}} changes waiting to sync"
   },
   "home": {
-    "greeting": "Welcome back",
+    "greeting": "Welcome, {{name}}",
     "registerPatient": "Register a patient",
     "patients": "Patients",
     "upcoming": "Upcoming visits",
-    "waiting": "Waiting to sync"
+    "waiting": "Waiting to sync",
+    "urgent_one": "{{count}} reading this week said refer today",
+    "urgent_other": "{{count}} readings this week said refer today"
   },
   "patients": {
     "title": "Patients",
@@ -71,14 +77,21 @@
   },
   "newPatient": {
     "title": "Register a patient",
-    "consentTitle": "Consent first",
-    "consentText": "Explain in the patient's language that their health record is kept safely, shared only with their health workers, and that they can say no.",
+    "consentTitle": "Ask for consent",
+    "consentText": "Explain in the patient's language why you keep their record, and that they can say no.",
     "consentMethod": "How was consent given?",
     "consentGiven": "The patient agreed to have their health record kept.",
     "knowsBirthDate": "Does the patient know their date of birth?",
     "birthDateYes": "Yes",
     "birthDateNo": "No, enter their age",
-    "save": "Save patient"
+    "save": "Save patient",
+    "consentPromise": "Their record stays on this phone until it is sent securely to the health service. Only their health workers can see it.",
+    "personTitle": "About the patient",
+    "personText": "Fill in what the patient tells you. If they don't know their birth date, enter their age.",
+    "placeTitle": "Where they live",
+    "placeText": "So the right health worker and facility can follow up.",
+    "phoneWhy": "Optional. Only for visit reminders.",
+    "nationalIdWhy": "Optional. Only for NHIS checks."
   },
   "consent": {
     "verbal": "Spoken agreement",
@@ -199,5 +212,10 @@
   "notFound": {
     "text": "This page does not exist.",
     "home": "Go home"
+  },
+  "routeError": {
+    "title": "This screen didn't load",
+    "text": "Check your connection and try again. Your saved records are safe on this phone.",
+    "retry": "Try again"
   }
 }

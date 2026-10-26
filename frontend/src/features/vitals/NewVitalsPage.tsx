@@ -148,10 +148,10 @@ export function Component() {
           <div
             role="status"
             className={cn(
-              "flex gap-2 rounded-2xl p-3 text-sm font-medium",
+              "flex gap-3 rounded-xl border p-4 text-sm font-medium",
               urgent
-                ? "bg-destructive-soft text-destructive"
-                : "bg-warning-soft text-warning"
+                ? "border-destructive bg-destructive-soft text-destructive"
+                : "border-warning bg-warning-soft text-warning"
             )}
           >
             <TriangleAlert className="size-5 shrink-0" aria-hidden />

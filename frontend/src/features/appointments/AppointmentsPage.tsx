@@ -31,7 +31,7 @@ export function Component() {
             <li key={a.id}>
               <Link
                 to={`/patients/${a.patientId}`}
-                className="block rounded-2xl bg-card p-3 text-sm ring-1 ring-border"
+                className="block rounded-xl border border-border bg-card p-4 text-sm"
               >
                 <p className="flex items-center justify-between gap-2">
                   <span className="font-medium text-foreground">

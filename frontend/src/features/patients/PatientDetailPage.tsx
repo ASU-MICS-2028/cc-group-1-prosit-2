@@ -39,7 +39,7 @@ export function Component() {
   return (
     <div className="space-y-6">
       <PageHeader title={fullName(patient)} back="/patients" />
-      <dl className="grid grid-cols-2 gap-3 rounded-2xl bg-card p-4 text-sm ring-1 ring-border">
+      <dl className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-card p-4 text-sm">
         <Item label={t("patient.sex")} value={t(`sex.${patient.sex}`)} />
         <Item
           label={t("patient.age")}
@@ -58,7 +58,7 @@ export function Component() {
         ) : null}
       </dl>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <Link
           to={`/patients/${patient.id}/vitals/new`}
           className={cn(buttonVariants({ size: "xl" }), "w-full")}
@@ -79,7 +79,9 @@ export function Component() {
       </div>
 
       <section className="space-y-3">
-        <h2 className="font-semibold text-foreground">{t("patient.vitals")}</h2>
+        <h2 className="text-base font-semibold text-heading">
+          {t("patient.vitals")}
+        </h2>
         {vitals?.length === 0 ? (
           <EmptyState>{t("patient.noVitals")}</EmptyState>
         ) : (
@@ -92,7 +94,7 @@ export function Component() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-semibold text-foreground">
+        <h2 className="text-base font-semibold text-heading">
           {t("patient.appointments")}
         </h2>
         {appointments?.length === 0 ? (
@@ -102,7 +104,7 @@ export function Component() {
             {appointments?.map((a) => (
               <li
                 key={a.id}
-                className="rounded-2xl bg-card p-3 text-sm ring-1 ring-border"
+                className="rounded-xl border border-border bg-card p-4 text-sm"
               >
                 <p className="font-medium text-foreground">
                   {t(`appointmentType.${a.type}`)} · {a.facility}
@@ -143,7 +145,7 @@ function VitalsRow({ v }: { v: Vitals }) {
     index ? `${t("vitals.bmi")} ${index}` : null,
   ].filter(Boolean)
   return (
-    <li className="rounded-2xl bg-card p-3 text-sm ring-1 ring-border">
+    <li className="rounded-xl border border-border bg-card p-4 text-sm">
       <p className="text-muted-foreground">{formatDateTime(v.takenAt)}</p>
       <p className="font-medium text-foreground">{parts.join(" · ")}</p>
       {flags.length > 0 ? (

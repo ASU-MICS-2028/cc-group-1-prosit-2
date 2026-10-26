@@ -1,21 +1,19 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+/* Poppins, the design's font, served from the app itself (Latin, 4 weights, ~31 KB) so it is
+   cached with the app and works offline (docs/adr/0002). */
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-500.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-700.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --font-heading: var(--font-sans);
-  /* System font: already on every phone, zero download on 2G (see docs/adr/0011) */
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
+  --font-sans:
+    Poppins, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -28,11 +26,14 @@
   --color-destructive-soft: var(--destructive-soft);
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
-  --color-cream: var(--cream);
+  --color-accent-orange: var(--accent-orange);
+  --color-nav: var(--nav);
+  --color-heading: var(--heading);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
-  /* shadow/floating: the soft green glow under the bottom bar */
-  --shadow-floating: 0 0 14px #0b6e6917;
+  /* M3 elevation 3: the floating add button */
+  --shadow-floating:
+    0 1px 3px 0 rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -47,101 +48,88 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 4px; /* text fields */
+  --radius-md: 5px; /* buttons */
+  --radius-lg: 8px; /* search bar */
+  --radius-xl: 12px; /* cards */
+  --radius-2xl: 16px; /* floating button */
+  --radius-3xl: 28px;
+  --radius-4xl: 32px;
 }
 
 :root {
-  /* Placeholder tokens carried over from AgroConnect with a teal primary; the HealthConnect
-     Figma variables replace them (docs/adr/0002). */
-  --background: #fdfdfd;
-  --foreground: #505050;
+  /* From the HealthCheck Figma file (Style Guide → Color Guide, and the screens' variables). */
+  --background: #f2f3f5; /* screen */
+  --foreground: #1c1b1f; /* M3 on-surface: body text */
+  --heading: #242731; /* page titles */
   --card: #ffffff;
-  --card-foreground: #505050;
+  --card-foreground: #1c1b1f;
   --popover: #ffffff;
-  --popover-foreground: #505050;
-  /* primary teal: about 6:1 against white, readable in sunlight */
-  --primary: #0b6e69;
-  --primary-foreground: #fdfdfd;
-  /* tint: secondary buttons, avatars, nav highlight */
-  --secondary: #dcf0ee;
-  --secondary-foreground: #064b47;
-  --muted: #f4f4f4;
-  /* Figma's text/muted is #939393 (3:1, too faint for small text); this is the same grey at 4.6:1 */
-  --muted-foreground: #6b6b6b;
-  --accent: #dcf0ee;
-  --accent-foreground: #064b47;
-  --destructive: #d81b1b;
-  --destructive-soft: #fde7e7;
-  /* Sync states: waiting (amber), synced (green), failed (red) */
-  --warning: #b26b00;
-  --warning-soft: #fff0d3;
-  /* info: neutral notices */
-  --info: #1f6aa5;
-  --info-soft: #e3eef8;
-  /* accent/cream: banners and illustrations */
-  --cream: #fff0d3;
-  --border: #ededed;
-  --input: #ededed;
-  --ring: #2a9d95;
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.48 0.08 185);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.945 0.03 185);
-  --sidebar-accent-foreground: oklch(0.38 0.07 185);
-  --sidebar-border: oklch(0.92 0.006 185);
-  --sidebar-ring: oklch(0.58 0.09 185);
+  --popover-foreground: #1c1b1f;
+  /* Azul Principal: 4.8:1 on white (text), 4.35:1 on the screen grey (bold/large text only) */
+  --primary: #0066ff;
+  --primary-foreground: #ffffff;
+  /* BTN SECONDARY pressed, tags, avatars */
+  --secondary: #e8f0ff;
+  --secondary-foreground: #0050c8;
+  /* Inputs' grey (#7C828F) is 3.5:1 on the screen grey, too faint for small text; this is the
+     same hue darkened to 5.6:1 */
+  --muted: #eceef1;
+  --muted-foreground: #5c616c;
+  --accent: #e8f0ff;
+  --accent-foreground: #0050c8;
+  /* M3 error red (the input's error state) */
+  --destructive: #b3261e;
+  --destructive-soft: #fceeee;
+  /* Urgent-but-not-emergency and "waiting to sync": a darker orange than the brand #FA5805 so
+     small text stays readable (5.7:1) */
+  --warning: #b34000;
+  --warning-soft: #fff0e6;
+  /* The brand orange: the active "Add" tab and the heart. 3.3:1 with white, so icons only,
+     never text on it */
+  --accent-orange: #fa5805;
+  --info: #365588;
+  --info-soft: #e8f0ff;
+  /* M3 surface 3: the bottom navigation bar and the floating button */
+  --nav: #eee8f4;
+  --border: #b6b6b6; /* card outline */
+  --input: #7c828f; /* text-field outline */
+  --ring: #0066ff;
+  --chart-1: #0066ff;
+  --chart-2: #606bfb;
+  --chart-3: #73cdff;
+  --chart-4: #fa5805;
+  --chart-5: #365588;
+  --radius: 12px;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.74 0.1 185);
-  --primary-foreground: oklch(0.2 0.04 185);
-  --secondary: oklch(0.3 0.04 185);
-  --secondary-foreground: oklch(0.92 0.04 185);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.3 0.04 185);
-  --accent-foreground: oklch(0.92 0.04 185);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-soft: oklch(0.3 0.06 25);
-  --warning: oklch(0.82 0.13 80);
-  --warning-soft: oklch(0.32 0.06 75);
-  --info: oklch(0.78 0.09 245);
-  --info-soft: oklch(0.3 0.05 245);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #121318;
+  --foreground: #e6e1e5;
+  --heading: #f2f3f5;
+  --card: #1e2028;
+  --card-foreground: #e6e1e5;
+  --popover: #1e2028;
+  --popover-foreground: #e6e1e5;
+  --primary: #6291ff;
+  --primary-foreground: #0b1a33;
+  --secondary: #23314d;
+  --secondary-foreground: #c9dbff;
+  --muted: #26282f;
+  --muted-foreground: #a9adb7;
+  --accent: #23314d;
+  --accent-foreground: #c9dbff;
+  --destructive: #f2b8b5;
+  --destructive-soft: #3b1d1c;
+  --warning: #ffb48a;
+  --warning-soft: #3b2417;
+  --accent-orange: #fa5805;
+  --info: #9bb6e6;
+  --info-soft: #23314d;
+  --nav: #2b2930;
+  --border: #44464f;
+  --input: #8e9099;
+  --ring: #6291ff;
 }
 
 @layer base {

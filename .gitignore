@@ -38,3 +38,6 @@ target/
 
 # Personal notes (not shared)
 CLAUDE.md
+
+# Figma exports and design working files (the source of truth is the Figma file)
+design/assets/

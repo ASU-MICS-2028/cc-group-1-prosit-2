@@ -1,56 +1,72 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { ShieldCheck } from "lucide-react"
+import { useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { z } from "zod"
 import { Field, Input, Select } from "@/components/form/Field"
 import { describe } from "@/components/form/describe"
-import { PageHeader } from "@/components/PageHeader"
+import { Stepper } from "@/components/form/Stepper"
+import { Card, PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
 import { newId, saveAndQueue } from "@/db/local"
 import type { Patient } from "@/db/types"
 import { LANGUAGES } from "@/i18n"
 import { estimatedBirthDate } from "@/lib/vitals"
 
-// Messages are translation keys, so errors show in the app's language.
-const schema = z
-  .object({
-    givenName: z.string().trim().min(1, "errors.required"),
-    familyName: z.string().trim().min(1, "errors.required"),
-    sex: z.enum(["female", "male"], { error: "errors.required" }),
-    knowsBirthDate: z.enum(["yes", "no"]),
-    dateOfBirth: z.string().optional(),
-    ageYears: z.string().optional(),
-    phone: z
-      .string()
-      .trim()
-      .regex(/^(\+?233|0)\d{9}$/, "errors.phone")
-      .or(z.literal("")),
-    nationalId: z.string().trim(),
-    community: z.string().trim().min(1, "errors.required"),
-    district: z.string().trim().min(1, "errors.required"),
-    preferredLanguage: z.string(),
-    consentMethod: z.enum(["verbal", "thumbprint", "signature"]),
-    consent: z.literal(true, { error: "errors.consent" }),
-  })
-  .superRefine((v, ctx) => {
-    if (v.knowsBirthDate === "yes") {
-      const ok = v.dateOfBirth && Date.parse(v.dateOfBirth) <= Date.now()
-      if (!ok)
-        ctx.addIssue({
-          code: "custom",
-          path: ["dateOfBirth"],
-          message: "errors.dateOfBirth",
-        })
-    } else {
-      const age = Number(v.ageYears)
-      if (!v.ageYears || !Number.isInteger(age) || age < 0 || age > 120)
-        ctx.addIssue({
-          code: "custom",
-          path: ["ageYears"],
-          message: "errors.age",
-        })
-    }
+// Three steps, as in the Figma "Añadir Contacto" forms. Messages are translation keys, so errors
+// show in the app's language. Each step is checked on its own before Next.
+const consentStep = z.object({
+  consentMethod: z.enum(["verbal", "thumbprint", "signature"]),
+  consent: z.literal(true, { error: "errors.consent" }),
+})
+
+/** Date of birth or age, whichever the patient can give. */
+function birthIssue(v: {
+  knowsBirthDate?: string
+  dateOfBirth?: string
+  ageYears?: string
+}) {
+  if (v.knowsBirthDate === "yes") {
+    const ok = v.dateOfBirth && Date.parse(v.dateOfBirth) <= Date.now()
+    return ok ? null : { path: "dateOfBirth", message: "errors.dateOfBirth" }
+  }
+  const age = Number(v.ageYears)
+  const ok = v.ageYears && Number.isInteger(age) && age >= 0 && age <= 120
+  return ok ? null : { path: "ageYears", message: "errors.age" }
+}
+
+// The birth check is part of each field's own rule (not a refinement on the whole object),
+// so it is reported together with the other missing fields instead of after them.
+const personStep = z.object({
+  givenName: z.string().trim().min(1, "errors.required"),
+  familyName: z.string().trim().min(1, "errors.required"),
+  sex: z.enum(["female", "male"], { error: "errors.required" }),
+  knowsBirthDate: z.enum(["yes", "no"]),
+  dateOfBirth: z.string().optional(),
+  ageYears: z.string().optional(),
+})
+
+const placeStep = z.object({
+  community: z.string().trim().min(1, "errors.required"),
+  district: z.string().trim().min(1, "errors.required"),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^(\+?233|0)\d{9}$/, "errors.phone")
+    .or(z.literal("")),
+  nationalId: z.string().trim(),
+  preferredLanguage: z.string(),
+})
+
+const STEPS = [consentStep, personStep, placeStep] as const
+const schema = consentStep
+  .and(personStep)
+  .and(placeStep)
+  .refine((v) => birthIssue(v) === null, {
+    path: ["dateOfBirth"],
+    message: "errors.dateOfBirth",
   })
 
 type Form = z.input<typeof schema>
@@ -58,13 +74,19 @@ type Form = z.input<typeof schema>
 export function Component() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const [step, setStep] = useState(0)
   const {
     register,
     handleSubmit,
     control,
+    getValues,
+    setError,
+    clearErrors,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<Form>({
     resolver: zodResolver(schema),
+    shouldUnregister: false,
     defaultValues: {
       knowsBirthDate: "yes",
       phone: "",
@@ -77,6 +99,27 @@ export function Component() {
   const err = (key: keyof Form) => {
     const message = errors[key]?.message
     return message ? t(message as "errors.required") : undefined
+  }
+
+  function next() {
+    clearErrors()
+    const values = getValues()
+    const result = STEPS[step].safeParse(values)
+    const issues = (result.success ? [] : result.error.issues).map((i) => ({
+      path: String(i.path[0]),
+      message: i.message,
+    }))
+    const birth = step === 1 ? birthIssue(values) : null
+    if (birth) issues.push(birth)
+    if (issues.length === 0) {
+      setStep(step + 1)
+      window.scrollTo(0, 0)
+      return
+    }
+    for (const issue of issues) {
+      setError(issue.path as keyof Form, { message: issue.message })
+    }
+    setFocus(issues[0].path as keyof Form)
   }
 
   async function onSubmit(v: Form) {
@@ -104,174 +147,212 @@ export function Component() {
     navigate(`/patients/${patient.id}`, { replace: true })
   }
 
+  const titles = [
+    t("newPatient.consentTitle"),
+    t("newPatient.personTitle"),
+    t("newPatient.placeTitle"),
+  ]
+  const subtitles = [
+    t("newPatient.consentText"),
+    t("newPatient.personText"),
+    t("newPatient.placeText"),
+  ]
+  const last = step === STEPS.length - 1
+
   return (
-    <>
-      <PageHeader title={t("newPatient.title")} back="/patients" />
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        <fieldset className="space-y-4 rounded-2xl bg-secondary/60 p-4">
-          <legend className="sr-only">{t("newPatient.consentTitle")}</legend>
-          <p className="font-medium text-foreground">
-            {t("newPatient.consentTitle")}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {t("newPatient.consentText")}
-          </p>
-          <Field id="consentMethod" label={t("newPatient.consentMethod")}>
-            <Select {...register("consentMethod")} id="consentMethod">
-              <option value="verbal">{t("consent.verbal")}</option>
-              <option value="thumbprint">{t("consent.thumbprint")}</option>
-              <option value="signature">{t("consent.signature")}</option>
-            </Select>
-          </Field>
-          <label className="flex items-start gap-3 text-sm text-foreground">
-            <input
-              type="checkbox"
-              className="mt-0.5 size-5 accent-primary"
-              {...register("consent")}
-              aria-invalid={errors.consent ? true : undefined}
-            />
-            {t("newPatient.consentGiven")}
-          </label>
-          {errors.consent ? (
-            <p role="alert" className="text-sm text-destructive">
-              {err("consent")}
-            </p>
-          ) : null}
-        </fieldset>
+    <div className="mx-auto max-w-lg">
+      <PageHeader
+        title={titles[step]}
+        subtitle={subtitles[step]}
+        back={step === 0 ? "/patients" : () => setStep(step - 1)}
+      >
+        <Stepper step={step} total={STEPS.length} />
+      </PageHeader>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            id="givenName"
-            label={t("patient.givenName")}
-            error={err("givenName")}
-          >
-            <Input
-              autoComplete="off"
-              {...register("givenName")}
-              {...describe("givenName", err("givenName"))}
-            />
-          </Field>
-          <Field
-            id="familyName"
-            label={t("patient.familyName")}
-            error={err("familyName")}
-          >
-            <Input
-              autoComplete="off"
-              {...register("familyName")}
-              {...describe("familyName", err("familyName"))}
-            />
-          </Field>
-        </div>
+      <form
+        noValidate
+        onSubmit={
+          last
+            ? handleSubmit(onSubmit)
+            : (e) => {
+                e.preventDefault()
+                next()
+              }
+        }
+        className="space-y-5"
+      >
+        {step === 0 ? (
+          <>
+            <Card className="flex gap-3 p-4">
+              <ShieldCheck
+                className="size-6 shrink-0 text-primary"
+                aria-hidden
+              />
+              <p className="text-sm text-foreground">
+                {t("newPatient.consentPromise")}
+              </p>
+            </Card>
+            <Field id="consentMethod" label={t("newPatient.consentMethod")}>
+              <Select {...register("consentMethod")} id="consentMethod">
+                <option value="verbal">{t("consent.verbal")}</option>
+                <option value="thumbprint">{t("consent.thumbprint")}</option>
+                <option value="signature">{t("consent.signature")}</option>
+              </Select>
+            </Field>
+            <label className="flex min-h-11 items-start gap-3 text-sm text-foreground">
+              <input
+                type="checkbox"
+                className="mt-0.5 size-5 shrink-0 accent-primary"
+                {...register("consent")}
+                aria-invalid={errors.consent ? true : undefined}
+              />
+              {t("newPatient.consentGiven")}
+            </label>
+            {errors.consent ? (
+              <p role="alert" className="text-xs font-medium text-destructive">
+                {err("consent")}
+              </p>
+            ) : null}
+          </>
+        ) : null}
 
-        <Field id="sex" label={t("patient.sex")} error={err("sex")}>
-          <Select
-            {...register("sex")}
-            {...describe("sex", err("sex"))}
-            defaultValue=""
-          >
-            <option value="" disabled>
-              {t("common.choose")}
-            </option>
-            <option value="female">{t("sex.female")}</option>
-            <option value="male">{t("sex.male")}</option>
-          </Select>
-        </Field>
+        {step === 1 ? (
+          <>
+            <Field
+              id="givenName"
+              label={t("patient.givenName")}
+              error={err("givenName")}
+            >
+              <Input
+                autoComplete="off"
+                {...register("givenName")}
+                {...describe("givenName", err("givenName"))}
+              />
+            </Field>
+            <Field
+              id="familyName"
+              label={t("patient.familyName")}
+              error={err("familyName")}
+            >
+              <Input
+                autoComplete="off"
+                {...register("familyName")}
+                {...describe("familyName", err("familyName"))}
+              />
+            </Field>
+            <Field id="sex" label={t("patient.sex")} error={err("sex")}>
+              <Select
+                {...register("sex")}
+                {...describe("sex", err("sex"))}
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  {t("common.choose")}
+                </option>
+                <option value="female">{t("sex.female")}</option>
+                <option value="male">{t("sex.male")}</option>
+              </Select>
+            </Field>
+            <Field id="knowsBirthDate" label={t("newPatient.knowsBirthDate")}>
+              <Select {...register("knowsBirthDate")} id="knowsBirthDate">
+                <option value="yes">{t("newPatient.birthDateYes")}</option>
+                <option value="no">{t("newPatient.birthDateNo")}</option>
+              </Select>
+            </Field>
+            {knowsBirthDate ? (
+              <Field
+                id="dateOfBirth"
+                label={t("patient.dateOfBirth")}
+                error={err("dateOfBirth")}
+              >
+                <Input
+                  type="date"
+                  {...register("dateOfBirth")}
+                  {...describe("dateOfBirth", err("dateOfBirth"))}
+                />
+              </Field>
+            ) : (
+              <Field
+                id="ageYears"
+                label={t("patient.ageYears")}
+                error={err("ageYears")}
+              >
+                <Input
+                  inputMode="numeric"
+                  {...register("ageYears")}
+                  {...describe("ageYears", err("ageYears"))}
+                />
+              </Field>
+            )}
+          </>
+        ) : null}
 
-        <Field id="knowsBirthDate" label={t("newPatient.knowsBirthDate")}>
-          <Select {...register("knowsBirthDate")} id="knowsBirthDate">
-            <option value="yes">{t("newPatient.birthDateYes")}</option>
-            <option value="no">{t("newPatient.birthDateNo")}</option>
-          </Select>
-        </Field>
-        {knowsBirthDate ? (
-          <Field
-            id="dateOfBirth"
-            label={t("patient.dateOfBirth")}
-            error={err("dateOfBirth")}
-          >
-            <Input
-              type="date"
-              {...register("dateOfBirth")}
-              {...describe("dateOfBirth", err("dateOfBirth"))}
-            />
-          </Field>
-        ) : (
-          <Field
-            id="ageYears"
-            label={t("patient.ageYears")}
-            error={err("ageYears")}
-          >
-            <Input
-              inputMode="numeric"
-              {...register("ageYears")}
-              {...describe("ageYears", err("ageYears"))}
-            />
-          </Field>
-        )}
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            id="community"
-            label={t("patient.community")}
-            error={err("community")}
-          >
-            <Input
-              {...register("community")}
-              {...describe("community", err("community"))}
-            />
-          </Field>
-          <Field
-            id="district"
-            label={t("patient.district")}
-            error={err("district")}
-          >
-            <Input
-              {...register("district")}
-              {...describe("district", err("district"))}
-            />
-          </Field>
-        </div>
-
-        <Field
-          id="phone"
-          label={t("patient.phone")}
-          hint={t("common.optional")}
-          error={err("phone")}
-        >
-          <Input
-            type="tel"
-            inputMode="tel"
-            {...register("phone")}
-            {...describe("phone", err("phone"))}
-          />
-        </Field>
-        <Field
-          id="nationalId"
-          label={t("patient.nationalId")}
-          hint={t("common.optional")}
-        >
-          <Input {...register("nationalId")} {...describe("nationalId")} />
-        </Field>
-        <Field id="preferredLanguage" label={t("patient.preferredLanguage")}>
-          <Select {...register("preferredLanguage")} id="preferredLanguage">
-            {LANGUAGES.map((l) => (
-              <option key={l.code} value={l.code}>
-                {l.label}
-              </option>
-            ))}
-          </Select>
-        </Field>
+        {step === 2 ? (
+          <>
+            <Field
+              id="community"
+              label={t("patient.community")}
+              error={err("community")}
+            >
+              <Input
+                {...register("community")}
+                {...describe("community", err("community"))}
+              />
+            </Field>
+            <Field
+              id="district"
+              label={t("patient.district")}
+              error={err("district")}
+            >
+              <Input
+                {...register("district")}
+                {...describe("district", err("district"))}
+              />
+            </Field>
+            <Field
+              id="phone"
+              label={t("patient.phone")}
+              hint={t("newPatient.phoneWhy")}
+              error={err("phone")}
+            >
+              <Input
+                type="tel"
+                inputMode="tel"
+                {...register("phone")}
+                {...describe("phone", err("phone"))}
+              />
+            </Field>
+            <Field
+              id="nationalId"
+              label={t("patient.nationalId")}
+              hint={t("newPatient.nationalIdWhy")}
+            >
+              <Input {...register("nationalId")} {...describe("nationalId")} />
+            </Field>
+            <Field
+              id="preferredLanguage"
+              label={t("patient.preferredLanguage")}
+            >
+              <Select {...register("preferredLanguage")} id="preferredLanguage">
+                {LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </>
+        ) : null}
 
         <Button
           type="submit"
           size="xl"
-          className="w-full"
+          className="mt-4 w-full"
           disabled={isSubmitting}
         >
-          {t("newPatient.save")}
+          {last ? t("newPatient.save") : t("common.next")}
         </Button>
       </form>
-    </>
+    </div>
   )
 }
