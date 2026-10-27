@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { z } from "zod"
 import { Field, Input, Select, Textarea } from "@/components/form/Field"
 import { describe } from "@/components/form/describe"
@@ -33,6 +33,16 @@ export function Component() {
   const navigate = useNavigate()
   const { id = "" } = useParams()
   const patient = usePatient(id)
+  // The "Refer today" screen opens this form with the referral already filled in.
+  const [query] = useSearchParams()
+  const pick = <T extends string>(
+    key: string,
+    allowed: readonly T[],
+    fallback: T
+  ): T =>
+    (allowed as readonly string[]).includes(query.get(key) ?? "")
+      ? (query.get(key) as T)
+      : fallback
   const {
     register,
     handleSubmit,
@@ -40,10 +50,14 @@ export function Component() {
   } = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: {
-      type: "follow_up",
-      priority: "routine",
+      type: pick("type", APPOINTMENT_TYPES, "follow_up"),
+      priority: pick(
+        "priority",
+        ["routine", "urgent", "emergency"] as const,
+        "routine"
+      ),
       facility: "",
-      reason: "",
+      reason: query.get("reason") ?? "",
     },
   })
   const err = (key: keyof Form) => {

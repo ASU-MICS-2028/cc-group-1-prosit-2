@@ -37,7 +37,7 @@ describe("register a patient, record vitals, book a visit", () => {
     await user.click(screen.getByRole("button", { name: "Next" }))
     await user.type(await screen.findByLabelText("First name"), "Ama")
     await user.type(screen.getByLabelText("Surname"), "Owusu")
-    await user.selectOptions(screen.getByLabelText("Sex"), "female")
+    await user.click(screen.getByRole("radio", { name: "Female" }))
     await user.selectOptions(
       screen.getByLabelText(/know their date of birth/),
       "no"
@@ -48,41 +48,46 @@ describe("register a patient, record vitals, book a visit", () => {
     await user.type(screen.getByLabelText("District"), "Shai-Osudoku")
     await user.click(screen.getByRole("button", { name: "Save patient" }))
 
+    // Registered! then straight on to vitals
     expect(
-      await screen.findByRole("heading", { name: "Ama Owusu" })
+      await screen.findByRole("heading", { name: "Registered!" })
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByText("Ama Owusu is registered.")
     ).toBeInTheDocument()
     const [patient] = await db.patients.toArray()
     expect(patient).toMatchObject({
+      sex: "female",
       birthDateEstimated: true,
       consent: { given: true, method: "verbal" },
     })
 
-    await user.click(await screen.findByRole("link", { name: /Record vitals/ }))
+    await user.click(screen.getByRole("link", { name: /Record vitals now/ }))
     await user.type(await screen.findByLabelText(/Systolic/), "190")
     await user.type(screen.getByLabelText(/Diastolic/), "100")
     expect(await screen.findByText(/Refer the patient/)).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Save vitals" }))
-    // Back on the patient's page, the saved reading carries its flag
-    await waitFor(() =>
-      expect(router.state.location.pathname).toBe(`/patients/${patient.id}`)
-    )
-    // The vitals form can still be on screen for a moment, so read the flag from the saved list
-    const vitalsHeading = await screen.findByRole("heading", { name: "Vitals" })
-    const vitalsList = vitalsHeading.parentElement!
-    expect(
-      await within(vitalsList).findByText(/Very high blood pressure/)
-    ).toBeInTheDocument()
 
-    await user.click(await screen.findByRole("link", { name: /Book visit/ }))
-    await user.selectOptions(await screen.findByLabelText("Type"), "referral")
+    // An urgent reading goes straight to Refer today, with the referral pre-filled
+    expect(
+      await screen.findByRole("heading", { name: "Refer today" })
+    ).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe(`/patients/${patient.id}/refer`)
+    await user.click(screen.getByRole("link", { name: "Book the referral" }))
+    expect(await screen.findByLabelText("Type")).toHaveValue("referral")
+    expect(screen.getByLabelText("Priority")).toHaveValue("urgent")
+    expect(
+      (screen.getByLabelText("Reason") as HTMLTextAreaElement).value
+    ).toContain("Very high blood pressure")
     const tomorrow = new Date(Date.now() + 86_400_000)
-    const local = tomorrow.toISOString().slice(0, 16)
-    await user.type(screen.getByLabelText("Date and time"), local)
+    await user.type(
+      screen.getByLabelText("Date and time"),
+      tomorrow.toISOString().slice(0, 16)
+    )
     await user.type(
       screen.getByLabelText("Health facility"),
       "Dodowa District Hospital"
     )
-    await user.type(screen.getByLabelText("Reason"), "BP 190/100")
     await user.click(screen.getByRole("button", { name: "Book" }))
 
     await waitFor(() =>
@@ -91,7 +96,59 @@ describe("register a patient, record vitals, book a visit", () => {
     expect(
       await screen.findByText(/Referral · Dodowa District Hospital/)
     ).toBeInTheDocument()
+    // the latest-reading card carries the flag in words
+    const latest = screen.getByRole("heading", {
+      name: "Latest readings",
+    }).parentElement!
+    expect(within(latest).getByText("190/100")).toBeInTheDocument()
+    expect(
+      within(latest).getByText("Very high blood pressure")
+    ).toBeInTheDocument()
     expect(await db.outbox.count()).toBe(3)
+  })
+
+  it("a normal reading goes back to the patient, not to Refer today", async () => {
+    const user = userEvent.setup()
+    const id = "p-normal"
+    await db.patients.add({
+      id,
+      givenName: "Kofi",
+      familyName: "Mensah",
+      sex: "male",
+      dateOfBirth: "1980-01-01",
+      birthDateEstimated: false,
+      community: "Dodowa",
+      district: "Shai-Osudoku",
+      preferredLanguage: "en",
+      consent: { given: true, method: "verbal", at: new Date().toISOString() },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      version: 0,
+    })
+    const { router } = renderRoute(`/patients/${id}/vitals/new`)
+    await user.type(await screen.findByLabelText(/Systolic/), "118")
+    await user.type(screen.getByLabelText(/Diastolic/), "76")
+    await user.click(
+      screen.getByRole("button", { name: /Add weight and height/ })
+    )
+    expect(
+      screen.getByRole("spinbutton", { name: "Weight (kg)" })
+    ).toHaveAttribute("aria-valuenow", "60")
+    const height = screen.getByRole("spinbutton", { name: "Height (cm)" })
+    height.focus()
+    await user.keyboard("{ArrowDown}{ArrowDown}{PageDown}")
+    expect(height).toHaveAttribute("aria-valuenow", "172")
+    await user.click(screen.getByRole("button", { name: "Save vitals" }))
+    await waitFor(() =>
+      expect(router.state.location.pathname).toBe(`/patients/${id}`)
+    )
+    const [v] = await db.vitals.toArray()
+    expect(v).toMatchObject({
+      systolic: 118,
+      diastolic: 76,
+      weightKg: 60,
+      heightCm: 172,
+    })
   })
 
   it("finds patients by community", async () => {

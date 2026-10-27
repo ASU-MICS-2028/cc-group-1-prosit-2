@@ -51,6 +51,18 @@ export const routes: RouteObject[] = [
         lazy: () => import("@/features/patients/PatientDetailPage"),
       },
       {
+        path: "patients/:id/registered",
+        loader: clinical,
+        handle: { hideBottomNav: true },
+        lazy: () => import("@/features/patients/RegisteredPage"),
+      },
+      {
+        path: "patients/:id/refer",
+        loader: clinical,
+        handle: { hideBottomNav: true },
+        lazy: () => import("@/features/vitals/ReferPage"),
+      },
+      {
         path: "patients/:id/vitals/new",
         loader: clinical,
         handle: { hideBottomNav: true },

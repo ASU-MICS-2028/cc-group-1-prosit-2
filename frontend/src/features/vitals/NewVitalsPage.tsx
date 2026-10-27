@@ -1,11 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { TriangleAlert } from "lucide-react"
-import { useForm, useWatch } from "react-hook-form"
+import { Ruler, TriangleAlert, X } from "lucide-react"
+import { useState } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
 import { z } from "zod"
 import { Field, Input, Textarea } from "@/components/form/Field"
 import { describe } from "@/components/form/describe"
+import { NumberWheel } from "@/components/form/NumberWheel"
 import { PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
 import { newId, saveAndQueue } from "@/db/local"
@@ -60,6 +62,7 @@ export function Component() {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<Form>({
     resolver: zodResolver(schema),
@@ -87,6 +90,13 @@ export function Component() {
     pulse: num(v.pulse ?? ""),
   })
   const urgent = flags.some((f) => URGENT_FLAGS.includes(f))
+  // Weight and height are optional and picked on wheels (Figma "Altura y Peso").
+  const [body, setBody] = useState(false)
+  function toggleBody(on: boolean) {
+    setBody(on)
+    setValue("weightKg", on ? "60" : "")
+    setValue("heightCm", on ? "160" : "")
+  }
 
   async function onSubmit(f: Form) {
     const now = new Date().toISOString()
@@ -105,7 +115,13 @@ export function Component() {
       version: 0,
     }
     await saveAndQueue("vitals", vitals)
-    navigate(`/patients/${id}`, { replace: true })
+    // Something needs a facility today: go straight to the referral prompt.
+    const needsReferral = vitalsFlags(vitals).some((f) =>
+      URGENT_FLAGS.includes(f)
+    )
+    navigate(needsReferral ? `/patients/${id}/refer` : `/patients/${id}`, {
+      replace: true,
+    })
   }
 
   const number = (key: keyof Form, label: string, unit: string, step = "1") => (
@@ -141,9 +157,67 @@ export function Component() {
           {number("diastolic", t("vitals.diastolic"), "mmHg")}
           {number("temperatureC", t("vitals.temperature"), "°C", "0.1")}
           {number("pulse", t("vitals.pulse"), t("vitals.perMinute"))}
-          {number("weightKg", t("vitals.weight"), "kg", "0.1")}
-          {number("heightCm", t("vitals.height"), "cm", "0.1")}
         </div>
+        {body ? (
+          <fieldset className="rounded-xl border border-border bg-card p-4">
+            <legend className="sr-only">{t("vitals.bodyTitle")}</legend>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="font-semibold text-foreground">
+                {t("vitals.bodyTitle")}
+              </p>
+              <button
+                type="button"
+                onClick={() => toggleBody(false)}
+                className="flex h-11 items-center gap-1 px-2 text-sm font-semibold text-primary"
+              >
+                <X className="size-4" aria-hidden />
+                {t("vitals.bodyRemove")}
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Controller
+                control={control}
+                name="weightKg"
+                render={({ field }) => (
+                  <NumberWheel
+                    label={t("vitals.weight")}
+                    unit="kg"
+                    min={2}
+                    max={200}
+                    step={0.5}
+                    value={Number(field.value) || 60}
+                    onChange={(n) => field.onChange(String(n))}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="heightCm"
+                render={({ field }) => (
+                  <NumberWheel
+                    label={t("vitals.height")}
+                    unit="cm"
+                    min={40}
+                    max={220}
+                    value={Number(field.value) || 160}
+                    onChange={(n) => field.onChange(String(n))}
+                  />
+                )}
+              />
+            </div>
+          </fieldset>
+        ) : (
+          <Button
+            type="button"
+            size="xl"
+            variant="secondary"
+            className="w-full"
+            onClick={() => toggleBody(true)}
+          >
+            <Ruler aria-hidden />
+            {t("vitals.bodyAdd")}
+          </Button>
+        )}
         {flags.length > 0 ? (
           <div
             role="status"

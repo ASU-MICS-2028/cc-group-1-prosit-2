@@ -54,7 +54,8 @@
   },
   "sex": {
     "female": "Female",
-    "male": "Male"
+    "male": "Male",
+    "other": "Other"
   },
   "patient": {
     "givenName": "First name",
@@ -73,7 +74,8 @@
     "book": "Book visit",
     "vitals": "Vitals",
     "noVitals": "No vitals recorded yet.",
-    "appointments": "Visits and referrals"
+    "appointments": "Visits and referrals",
+    "latest": "Latest readings"
   },
   "newPatient": {
     "title": "Register a patient",
@@ -94,7 +96,7 @@
     "nationalIdWhy": "Optional. Only for NHIS checks."
   },
   "consent": {
-    "verbal": "Spoken agreement",
+    "verbal": "Spoken",
     "thumbprint": "Thumbprint",
     "signature": "Signature"
   },
@@ -113,7 +115,10 @@
     "bmi": "BMI",
     "referToday": "Refer the patient to a health facility today.",
     "recheck": "Measure again at the next visit and tell the nurse.",
-    "save": "Save vitals"
+    "save": "Save vitals",
+    "bodyTitle": "Weight and height",
+    "bodyAdd": "Add weight and height",
+    "bodyRemove": "Remove"
   },
   "flags": {
     "bpCrisis": "Very high blood pressure",
@@ -217,5 +222,28 @@
     "title": "This screen didn't load",
     "text": "Check your connection and try again. Your saved records are safe on this phone.",
     "retry": "Try again"
+  },
+  "registered": {
+    "title": "Registered!",
+    "saved": "{{name}} is registered.",
+    "savedPlain": "The patient is registered.",
+    "text": "The record is saved on this phone and will be sent when there is network.",
+    "recordVitals": "Record vitals now",
+    "done": "Done"
+  },
+  "refer": {
+    "title": "Refer today",
+    "text": "{{name}}'s readings need a health facility today.",
+    "tip1": "Explain to the patient why they need to go today, in their language.",
+    "tip2": "If they cannot travel, call the facility and tell the nurse on duty.",
+    "book": "Book the referral",
+    "later": "Not now"
+  },
+  "chart": {
+    "title": "Blood pressure",
+    "systolic": "Systolic",
+    "diastolic": "Diastolic",
+    "aria_one": "Blood pressure over {{count}} visit, latest {{sys}}/{{dia}} mmHg",
+    "aria_other": "Blood pressure over {{count}} visits, latest {{sys}}/{{dia}} mmHg"
   }
 }
