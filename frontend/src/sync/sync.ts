@@ -13,6 +13,8 @@ export interface SyncResult {
   sent: number
   failed: number
   conflicts: number
+  /** files (consent evidence, photos) uploaded */
+  uploaded?: number
 }
 
 let running: Promise<SyncResult> | null = null
@@ -52,7 +54,61 @@ async function send(): Promise<SyncResult> {
       if (!(error instanceof ApiError)) break
     }
   }
+  if (result.failed === 0) {
+    const uploaded = await upload()
+    if (uploaded) result.uploaded = uploaded
+  }
   return result
+}
+
+/**
+ * Uploads files after the records they belong to. The API answers with a short-lived S3 link
+ * (presigned PUT, SSE-KMS bucket); the file goes straight to S3, never through the API server.
+ *   POST /api/media/<id>/upload-url  { kind, mime, size, sha256, patientId, ownerEntity, ownerId }
+ *     -> { url, headers? }
+ */
+async function upload(): Promise<number> {
+  let uploaded = 0
+  const waiting = await db.media.filter((m) => !m.uploadedAt).toArray()
+  for (const m of waiting) {
+    try {
+      const { url, headers } = await api<{
+        url: string
+        headers?: Record<string, string>
+      }>(`/media/${m.id}/upload-url`, {
+        method: "POST",
+        body: {
+          kind: m.kind,
+          mime: m.mime,
+          size: m.size,
+          sha256: m.sha256,
+          patientId: m.patientId,
+          ownerEntity: m.ownerEntity,
+          ownerId: m.ownerId,
+        },
+      })
+      const res = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": m.mime, ...headers },
+        body: m.blob,
+      })
+      if (!res.ok) throw new ApiError(res.status, res.statusText)
+      await db.media.update(m.id, { uploadedAt: new Date().toISOString() })
+      uploaded++
+    } catch (error) {
+      await db.media.update(m.id, {
+        attempts: m.attempts + 1,
+        lastError: String(error),
+      })
+      if (!(error instanceof ApiError)) break // offline: try again next time
+    }
+  }
+  return uploaded
+}
+
+/** Files still waiting to upload, kept up to date. */
+export function usePendingMedia(): number | undefined {
+  return useLiveQuery(() => db.media.filter((m) => !m.uploadedAt).count(), [])
 }
 
 /** The changes still waiting, kept up to date. */

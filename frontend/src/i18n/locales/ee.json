@@ -85,7 +85,13 @@
     "noVitals": "Womeŋlɔ dzidzeme aɖeke haɖe o.",
     "appointments": "Sraɖekpɔwo kple ɖoɖowo",
     "latest": "Dzidzeme mamlɛtɔwo",
-    "call": "Yɔ {{phone}}"
+    "call": "Yɔ {{phone}}",
+    "consentTitle": "Lɔlɔ̃",
+    "consentOn": "Elɔ̃ {{date}} · nyawo {{version}}",
+    "witness": "Ɖaseɖila: {{name}}",
+    "fileWaiting": "Ele lalam be woaɖoe ɖa",
+    "fileSent": "Woɖoe ɖa",
+    "noEvidence": "Womexɔe ɖe gbe me o: ɖaseɖila aɖe ɖi ɖase."
   },
   "newPatient": {
     "title": "Ŋlɔ dɔnɔ ƒe ŋkɔ",
@@ -103,10 +109,13 @@
     "placeTitle": "Afi si wònɔna",
     "placeText": "Ale be lãmesẽ dɔwɔla kple dɔyɔƒe si dze nalé ŋku ɖe eŋu.",
     "phoneWhy": "Mehiã o. Ɖeko na sraɖekpɔ ŋkuɖodzi.",
-    "nationalIdWhy": "Mehiã o. Ɖeko na NHIS dodokpɔ."
+    "nationalIdWhy": "Mehiã o. Ɖeko na NHIS dodokpɔ.",
+    "statementTitle": "Xlẽ esia na dɔnɔ la",
+    "statement": "Míedi be míadzra wò lãmesẽ ŋuti nuŋlɔɖiwo ɖo fon sia dzi, eye míaɖo wo ɖe Ghana Health Service le mɔ dedie dzi, ale be wò lãmesẽdɔwɔlawo nate ŋu akpɔ wò ɖe ŋu. Wò lãmesẽdɔwɔlawo ɖeɖe koe akpɔe. Àte ŋu agblɔ be ao, eye àte ŋu agblɔ na mí be míadzudzɔ ɣesiaɣi. Èlɔ̃a?",
+    "statementVersion": "Lɔlɔ̃ ŋuti nyawo {{version}}"
   },
   "consent": {
-    "verbal": "Kple nu",
+    "spoken": "Kple nu",
     "thumbprint": "Asibidɛ dzesi",
     "signature": "Asidede"
   },
@@ -187,7 +196,9 @@
     "allSent": "Woɖo nu sia nu si le telefon sia dzi ɖa.",
     "queued": "Le lalam",
     "failed": "Agagbugbɔ adze agbagba",
-    "conflict": "Ehiã be woakpɔe"
+    "conflict": "Ehiã be woakpɔe",
+    "files_one": "Faɛl {{count}} le lalam",
+    "files_other": "Faɛl {{count}} le lalam"
   },
   "surveillance": {
     "title": "Nutome ƒe kpuie",
@@ -248,7 +259,8 @@
     "range": "Nu sia medze abe nyateƒe ene o. Gakpɔ dzidzeme la.",
     "bothBp": "Ŋlɔ BP xexlẽdzesi eveawo siaa.",
     "oneVital": "Ŋlɔ dzidzeme ɖeka ya teti.",
-    "future": "Tia ɣeyiɣi si gbɔna."
+    "future": "Tia ɣeyiɣi si gbɔna.",
+    "evidence": "Xɔ dɔnɔ la ƒe lɔlɔ̃ ɖe gbe me, de asi alo ɖe eƒe foto gbã."
   },
   "notFound": {
     "text": "Axa sia meli o.",
@@ -329,5 +341,25 @@
     "minute": "Aɖabaƒoƒowo",
     "now": "Fifia",
     "done": "Wu enu"
+  },
+  "capture": {
+    "record": "Xɔ lɔlɔ̃ la ɖe gbe me",
+    "stop": "Dzudzɔ gbexɔxɔ",
+    "again": "Gaxɔe ɖe gbe me",
+    "recording": "Wole gbe xɔm… sekend {{seconds}} susɔ",
+    "spokenHint": "Xlẽ nyawo, emegbe xɔ dɔnɔ la ƒe gbe esime wòle ɛ̃ gblɔm. Sekend 30 me.",
+    "noMic": "Fon sia mate ŋu axɔ gbe o. Na ame bubu si se be dɔnɔ la lɔ̃ la nàŋlɔ eƒe ŋkɔ ɖe ete.",
+    "signHere": "De asi ɖe afi sia",
+    "signHint": "Dɔnɔ la atsɔ asibide ade asi.",
+    "clear": "Tutui",
+    "signatureLabel": "Dɔnɔ la ƒe asidede",
+    "takePhoto": "Ɖe asibidetsu ƒe foto",
+    "thumbHint": "Tsɔ dɔnɔ la ƒe asibidetsu si wosi atike na la ƒo ɖe lɔlɔ̃ agbalẽ la dzi, emegbe ɖe eƒe foto.",
+    "photoAlt": "Dɔnɔ la ƒe asibidetsu ƒe foto",
+    "retake": "Gaɖee",
+    "witness": "Ɖaseɖila ƒe ŋkɔ",
+    "witnessHint": "Mehiã o. Ame bubu si se be dɔnɔ la lɔ̃.",
+    "witnessNeeded": "Ehiã ne gbexɔxɔ meli o.",
+    "recorded": "Woxɔe · sekend {{seconds}}"
   }
 }

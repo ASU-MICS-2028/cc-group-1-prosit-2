@@ -16,6 +16,12 @@ import { z } from "zod"
 import { ChoiceTiles } from "@/components/form/ChoiceTiles"
 import { DatePicker } from "@/components/form/DatePicker"
 import { Dropdown } from "@/components/form/Dropdown"
+import { AudioRecorder } from "@/components/capture/AudioRecorder"
+import { canRecordAudio } from "@/lib/audio"
+import { PhotoCapture } from "@/components/capture/PhotoCapture"
+import { SignaturePad } from "@/components/capture/SignaturePad"
+import { useSession } from "@/auth/session"
+import { saveMedia } from "@/lib/media"
 import { Segmented } from "@/components/form/Segmented"
 import { Field, Input } from "@/components/form/Field"
 import { describe } from "@/components/form/describe"
@@ -23,16 +29,42 @@ import { Stepper } from "@/components/form/Stepper"
 import { Card, PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
 import { newId, saveAndQueue } from "@/db/local"
-import type { Patient } from "@/db/types"
+import {
+  CONSENT_STATEMENT_VERSION,
+  type ConsentMethod,
+  type MediaKind,
+  type Patient,
+} from "@/db/types"
 import { LANGUAGES } from "@/i18n"
 import { estimatedBirthDate } from "@/lib/vitals"
 
 // Three steps, as in the Figma "Añadir Contacto" forms. Messages are translation keys, so errors
 // show in the app's language. Each step is checked on its own before Next.
-const consentStep = z.object({
-  consentMethod: z.enum(["verbal", "thumbprint", "signature"]),
-  consent: z.literal(true, { error: "errors.consent" }),
-})
+// Consent needs proof: a voice clip, a signature or a photo of the inked thumbprint. A phone
+// that can't record sound falls back to a named witness for spoken consent.
+const consentStep = z
+  .object({
+    consentMethod: z.enum(["spoken", "thumbprint", "signature"]),
+    consentEvidence: z.custom<Blob>((v) => v instanceof Blob).optional(),
+    noRecorder: z.boolean(),
+    witness: z.string().trim(),
+    consent: z.literal(true, { error: "errors.consent" }),
+  })
+  .superRefine((v, ctx) => {
+    const fallback = v.consentMethod === "spoken" && v.noRecorder
+    if (fallback && !v.witness)
+      ctx.addIssue({
+        code: "custom",
+        path: ["witness"],
+        message: "capture.witnessNeeded",
+      })
+    if (!fallback && !v.consentEvidence)
+      ctx.addIssue({
+        code: "custom",
+        path: ["consentEvidence"],
+        message: "errors.evidence",
+      })
+  })
 
 /** Date of birth or age, whichever the patient can give. */
 function birthIssue(v: {
@@ -83,15 +115,23 @@ const schema = consentStep
 
 type Form = z.input<typeof schema>
 
+const EVIDENCE_KIND: Record<ConsentMethod, MediaKind> = {
+  spoken: "consent-audio",
+  signature: "consent-signature",
+  thumbprint: "consent-photo",
+}
+
 export function Component() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const session = useSession()
   const [step, setStep] = useState(0)
   const {
     register,
     handleSubmit,
     control,
     getValues,
+    setValue,
     setError,
     clearErrors,
     setFocus,
@@ -104,10 +144,14 @@ export function Component() {
       phone: "",
       nationalId: "",
       preferredLanguage: i18n.language,
-      consentMethod: "verbal",
+      consentMethod: "spoken",
+      noRecorder: !canRecordAudio(),
+      witness: "",
     },
   })
   const knowsBirthDate = useWatch({ control, name: "knowsBirthDate" }) === "yes"
+  const consentMethod = useWatch({ control, name: "consentMethod" })
+  const noRecorder = useWatch({ control, name: "noRecorder" })
   const err = (key: keyof Form) => {
     const message = errors[key]?.message
     return message ? t(message as "errors.required") : undefined
@@ -136,8 +180,18 @@ export function Component() {
 
   async function onSubmit(v: Form) {
     const now = new Date().toISOString()
+    const id = newId()
+    const evidence = v.consentEvidence
+      ? await saveMedia({
+          blob: v.consentEvidence,
+          kind: EVIDENCE_KIND[v.consentMethod],
+          patientId: id,
+          ownerEntity: "patient",
+          ownerId: id,
+        })
+      : null
     const patient: Patient = {
-      id: newId(),
+      id,
       givenName: v.givenName.trim(),
       familyName: v.familyName.trim(),
       sex: v.sex,
@@ -150,7 +204,22 @@ export function Component() {
       community: v.community.trim(),
       district: v.district.trim(),
       preferredLanguage: v.preferredLanguage,
-      consent: { given: true, method: v.consentMethod, at: now },
+      consent: {
+        given: true,
+        method: v.consentMethod,
+        at: now,
+        statementVersion: CONSENT_STATEMENT_VERSION,
+        language: i18n.language,
+        obtainedBy: session?.user.id,
+        witness: v.witness.trim() || undefined,
+        evidence: evidence
+          ? {
+              mediaId: evidence.id,
+              sha256: evidence.sha256,
+              mime: evidence.mime,
+            }
+          : undefined,
+      },
       createdAt: now,
       updatedAt: now,
       version: 0,
@@ -198,15 +267,24 @@ export function Component() {
             <img
               src="/illustrations/consent.svg"
               alt=""
-              className="mx-auto h-36 w-auto"
+              className="mx-auto h-28 w-auto"
             />
-            <Card className="flex gap-3 p-4">
-              <ShieldCheck
-                className="size-6 shrink-0 text-primary"
-                aria-hidden
-              />
-              <p className="text-sm text-foreground">
-                {t("newPatient.consentPromise")}
+            {/* the exact words the evidence proves the patient agreed to */}
+            <Card className="space-y-2 p-4">
+              <p className="flex items-center gap-2 text-sm font-semibold text-heading">
+                <ShieldCheck
+                  className="size-5 shrink-0 text-primary"
+                  aria-hidden
+                />
+                {t("newPatient.statementTitle")}
+              </p>
+              <p className="text-base leading-relaxed text-foreground">
+                {t("newPatient.statement")}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("newPatient.statementVersion", {
+                  version: CONSENT_STATEMENT_VERSION,
+                })}
               </p>
             </Card>
             <Controller
@@ -217,11 +295,15 @@ export function Component() {
                   name="consentMethod"
                   legend={t("newPatient.consentMethod")}
                   value={field.value}
-                  onChange={field.onChange}
+                  onChange={(method) => {
+                    field.onChange(method)
+                    setValue("consentEvidence", undefined)
+                    clearErrors(["consentEvidence", "witness"])
+                  }}
                   choices={[
                     {
-                      value: "verbal",
-                      label: t("consent.verbal"),
+                      value: "spoken",
+                      label: t("consent.spoken"),
                       icon: MessageCircle,
                     },
                     {
@@ -238,6 +320,62 @@ export function Component() {
                 />
               )}
             />
+            <Controller
+              control={control}
+              name="consentEvidence"
+              render={({ field }) => (
+                <div className="space-y-1.5">
+                  {consentMethod === "spoken" && !noRecorder ? (
+                    <AudioRecorder
+                      value={field.value}
+                      onChange={field.onChange}
+                      onUnavailable={() => setValue("noRecorder", true)}
+                    />
+                  ) : consentMethod === "spoken" ? (
+                    <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-card">
+                      {t("capture.noMic")}
+                    </p>
+                  ) : consentMethod === "signature" ? (
+                    <SignaturePad
+                      label={t("capture.signatureLabel")}
+                      onChange={field.onChange}
+                    />
+                  ) : (
+                    <PhotoCapture
+                      value={field.value}
+                      onChange={field.onChange}
+                      label={t("capture.takePhoto")}
+                      hint={t("capture.thumbHint")}
+                      alt={t("capture.photoAlt")}
+                    />
+                  )}
+                  {errors.consentEvidence ? (
+                    <p
+                      role="alert"
+                      className="text-xs font-medium text-destructive"
+                    >
+                      {err("consentEvidence")}
+                    </p>
+                  ) : null}
+                </div>
+              )}
+            />
+            <Field
+              id="witness"
+              label={t("capture.witness")}
+              hint={
+                consentMethod === "spoken" && noRecorder
+                  ? t("capture.witnessNeeded")
+                  : t("capture.witnessHint")
+              }
+              error={err("witness")}
+            >
+              <Input
+                autoComplete="off"
+                {...register("witness")}
+                {...describe("witness", err("witness"))}
+              />
+            </Field>
             <label className="flex min-h-11 items-start gap-3 text-sm text-foreground">
               <input
                 type="checkbox"

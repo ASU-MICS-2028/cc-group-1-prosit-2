@@ -85,7 +85,13 @@
     "noVitals": "Wɔnkyerɛw nsusuiɛ biara mmaeɛ.",
     "appointments": "Nsrahwɛ ne nsoma",
     "latest": "Nsusuiɛ a ɛtwa toɔ",
-    "call": "Frɛ {{phone}}"
+    "call": "Frɛ {{phone}}",
+    "consentTitle": "Penee",
+    "consentOn": "Ɔpenee {{date}} · nsɛm {{version}}",
+    "witness": "Adansefoɔ: {{name}}",
+    "fileWaiting": "Ɛretwɛn sɛ ɛbɛkɔ",
+    "fileSent": "Ɛkɔ dedaw",
+    "noEvidence": "Wɔankyere: adansefoɔ bi di ho adanse."
   },
   "newPatient": {
     "title": "Kyerɛw ɔyarefoɔ din",
@@ -103,10 +109,13 @@
     "placeTitle": "Baabi a ɔte",
     "placeText": "Sɛnea ɛbɛyɛ a apɔmuden adwumayɛfoɔ ne ayaresabea a ɛfata bɛtumi ahwɛ no.",
     "phoneWhy": "Ɛho nhia. Ɛyɛ nsrahwɛ nkaeɛ nko ara.",
-    "nationalIdWhy": "Ɛho nhia. Ɛyɛ NHIS nhwehwɛmu nko ara."
+    "nationalIdWhy": "Ɛho nhia. Ɛyɛ NHIS nhwehwɛmu nko ara.",
+    "statementTitle": "Kenkan yei kyerɛ ayarefoɔ no",
+    "statement": "Yɛpɛ sɛ yɛkora wo apɔwmuden ho nsɛm wɔ fon yi so, na yɛde kɔma Ghana Health Service wɔ ɔkwan a ɛho tɔ so so, sɛnea wo apɔwmuden adwumayɛfoɔ bɛtumi ahwɛ wo yie. Wo apɔwmuden adwumayɛfoɔ nko ara na wɔbɛhunu. Wobɛtumi aka sɛ dabi, na wobɛtumi aka akyerɛ yɛn sɛ yɛnnyae bere biara. Wopene so?",
+    "statementVersion": "Penee ho nsɛm {{version}}"
   },
   "consent": {
-    "verbal": "Ɔkasa mu",
+    "spoken": "Ɔkasa mu",
     "thumbprint": "Nsateaa nsɛnkyerɛnne",
     "signature": "Nsaano"
   },
@@ -187,7 +196,9 @@
     "allSent": "Wɔasoma biribiara a ɛwɔ fon yi so.",
     "queued": "Ɛretwɛn",
     "failed": "Ɛbɛsan abɔ mmɔden",
-    "conflict": "Ɛhia sɛ wɔhwɛ"
+    "conflict": "Ɛhia sɛ wɔhwɛ",
+    "files_one": "Fael {{count}} retwɛn",
+    "files_other": "Fael {{count}} retwɛn"
   },
   "surveillance": {
     "title": "Mansin nsɛm tiawa",
@@ -248,7 +259,8 @@
     "range": "Eyi nte sɛ nokware. Hwɛ nsusuiɛ no bio.",
     "bothBp": "Kyerɛw BP nɔma abien no nyinaa.",
     "oneVital": "Kyerɛw nsusuiɛ baako pɛ, anyɛ yiye koraa.",
-    "future": "Paw bere a ɛreba."
+    "future": "Paw bere a ɛreba.",
+    "evidence": "Kyere, hyɛ nsa anaa twa ayarefoɔ no penee no mfonini kane."
   },
   "notFound": {
     "text": "Krataafa yi nni hɔ.",
@@ -329,5 +341,25 @@
     "minute": "Simma",
     "now": "Seesei",
     "done": "Wie"
+  },
+  "capture": {
+    "record": "Kyere penee no",
+    "stop": "Gyae kyere",
+    "again": "San kyere bio",
+    "recording": "Ɛrekyere… sɛkɛn {{seconds}} aka",
+    "spokenHint": "Kenkan nsɛm no, na kyere ayarefoɔ no sɛ ɔreka sɛ aane. Sɛkɛn 30 mu.",
+    "noMic": "Fon yi ntumi nkyere nne. Ma obi foforɔ a ɔtee sɛ ayarefoɔ no pene so no nkyerɛw ne din wɔ aseɛ ha.",
+    "signHere": "Hyɛ wo nsa ha",
+    "signHint": "Ayarefoɔ no de ne nsateaa hyɛ ne nsa.",
+    "clear": "Pepa",
+    "signatureLabel": "Ayarefoɔ no nsahyɛ",
+    "takePhoto": "Twa nsateaa nsɛnkyerɛnne no mfonini",
+    "thumbHint": "Fa ayarefoɔ no kokuromotie a wɔde aduru asra no hyɛ penee krataa no so, na twa ho mfonini.",
+    "photoAlt": "Ayarefoɔ no kokuromotie nsɛnkyerɛnne mfonini",
+    "retake": "San twa bio",
+    "witness": "Adansefoɔ din",
+    "witnessHint": "Ɛnyɛ dɛ ɛsɛ. Obi foforɔ a ɔtee sɛ ayarefoɔ no pene so.",
+    "witnessNeeded": "Ɛho hia bere a nne nni hɔ.",
+    "recorded": "Wɔakyere · sɛkɛn {{seconds}}"
   }
 }

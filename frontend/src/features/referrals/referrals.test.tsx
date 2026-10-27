@@ -16,7 +16,7 @@ const patient: Patient = {
   community: "Dodowa",
   district: "Shai-Osudoku",
   preferredLanguage: "tw",
-  consent: { given: true, method: "verbal", at: now },
+  consent: { given: true, method: "spoken", at: now },
   createdAt: now,
   updatedAt: now,
   version: 0,

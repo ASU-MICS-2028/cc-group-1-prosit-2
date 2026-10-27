@@ -14,9 +14,28 @@ describe("register a patient, record vitals, book a visit", () => {
     ).toBeInTheDocument()
   })
 
+  it("asks for a witness when the phone can't record, and for proof for the other methods", async () => {
+    const user = userEvent.setup()
+    renderRoute("/patients/new")
+    await user.click(await screen.findByRole("checkbox"))
+    await user.click(screen.getByRole("button", { name: "Next" }))
+    expect(
+      await screen.findAllByText("Needed when there is no recording.")
+    ).not.toHaveLength(0)
+    await user.click(screen.getByRole("radio", { name: "Thumbprint" }))
+    await user.click(screen.getByRole("button", { name: "Next" }))
+    expect(
+      await screen.findByText(
+        "Record, sign or photograph the patient's consent first."
+      )
+    ).toBeInTheDocument()
+  })
+
   it("checks each step before the next, and Back keeps what was typed", async () => {
     const user = userEvent.setup()
     renderRoute("/patients/new")
+    // jsdom can't record sound, so spoken consent falls back to a witness
+    await user.type(await screen.findByLabelText("Witness name"), "Esi Boateng")
     await user.click(await screen.findByRole("checkbox"))
     await user.click(screen.getByRole("button", { name: "Next" }))
     await user.type(await screen.findByLabelText("First name"), "Kofi")
@@ -33,6 +52,7 @@ describe("register a patient, record vitals, book a visit", () => {
   it("works end to end on the phone and queues everything for sync", async () => {
     const user = userEvent.setup()
     const { router } = renderRoute("/patients/new")
+    await user.type(await screen.findByLabelText("Witness name"), "Esi Boateng")
     await user.click(await screen.findByRole("checkbox"))
     await user.click(screen.getByRole("button", { name: "Next" }))
     await user.type(await screen.findByLabelText("First name"), "Ama")
@@ -56,7 +76,13 @@ describe("register a patient, record vitals, book a visit", () => {
     expect(patient).toMatchObject({
       sex: "female",
       birthDateEstimated: true,
-      consent: { given: true, method: "verbal" },
+      consent: {
+        given: true,
+        method: "spoken",
+        statementVersion: "v1",
+        language: "en",
+        witness: "Esi Boateng",
+      },
     })
 
     await user.click(screen.getByRole("link", { name: /Record vitals now/ }))
@@ -128,7 +154,7 @@ describe("register a patient, record vitals, book a visit", () => {
       community: "Dodowa",
       district: "Shai-Osudoku",
       preferredLanguage: "en",
-      consent: { given: true, method: "verbal", at: new Date().toISOString() },
+      consent: { given: true, method: "spoken", at: new Date().toISOString() },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       version: 0,

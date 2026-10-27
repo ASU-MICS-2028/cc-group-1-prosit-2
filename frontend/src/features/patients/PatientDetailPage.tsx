@@ -1,8 +1,11 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import {
+  Fingerprint,
   HeartPulse,
   MapPin,
   Mars,
+  MessageCircle,
+  PenLine,
   Phone,
   ShieldCheck,
   Thermometer,
@@ -20,6 +23,7 @@ import { db } from "@/db/local"
 import type { Appointment, AppointmentType, Patient, Vitals } from "@/db/types"
 import { ReferralStatusChip } from "@/features/referrals/ReferralStatusChip"
 import { formatDateTime } from "@/lib/dates"
+import { useMediaFor, useObjectUrl } from "@/lib/media"
 import { cn } from "@/lib/utils"
 import {
   ageFrom,
@@ -111,7 +115,87 @@ export function Component() {
           </ul>
         )}
       </section>
+      <ConsentRecord patient={patient} />
     </div>
+  )
+}
+
+const CONSENT_ICON = {
+  spoken: MessageCircle,
+  thumbprint: Fingerprint,
+  signature: PenLine,
+}
+
+/**
+ * What the patient agreed to, how, and the proof: play the voice clip or see the signature or
+ * thumbprint photo. Lets a nurse or an auditor check consent without leaving the record.
+ */
+function ConsentRecord({ patient }: { patient: Patient }) {
+  const { t } = useTranslation()
+  const { consent } = patient
+  const media = useMediaFor(patient.id)?.find(
+    (m) => m.id === consent.evidence?.mediaId
+  )
+  const url = useObjectUrl(media?.blob)
+  const Icon = CONSENT_ICON[consent.method]
+  return (
+    <section className="space-y-3">
+      <h2 className="text-base font-semibold text-heading">
+        {t("patient.consentTitle")}
+      </h2>
+      <Card className="space-y-3 p-4 text-sm">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-secondary text-primary">
+            <Icon className="size-5" aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-heading">
+              {t(`consent.${consent.method}`)}
+            </p>
+            <p className="text-muted-foreground">
+              {t("patient.consentOn", {
+                date: formatDateTime(consent.at),
+                version: consent.statementVersion ?? "v1",
+              })}
+            </p>
+            {consent.witness ? (
+              <p className="text-muted-foreground">
+                {t("patient.witness", { name: consent.witness })}
+              </p>
+            ) : null}
+          </div>
+          {media ? (
+            <span
+              className={cn(
+                "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold",
+                media.uploadedAt
+                  ? "bg-secondary text-primary"
+                  : "bg-warning/10 text-warning"
+              )}
+            >
+              {media.uploadedAt
+                ? t("patient.fileSent")
+                : t("patient.fileWaiting")}
+            </span>
+          ) : null}
+        </div>
+        {url && media?.kind === "consent-audio" ? (
+          <audio controls src={url} className="w-full" />
+        ) : url ? (
+          <img
+            src={url}
+            alt={
+              media?.kind === "consent-photo"
+                ? t("capture.photoAlt")
+                : t("capture.signatureLabel")
+            }
+            className="max-h-48 w-full rounded-lg bg-secondary/50 object-contain"
+          />
+        ) : !consent.evidence ? (
+          <p className="text-muted-foreground">{t("patient.noEvidence")}</p>
+        ) : null}
+      </Card>
+    </section>
   )
 }
 

@@ -70,3 +70,39 @@ describe("syncNow", () => {
     expect(items.map((i) => i.attempts)).toEqual([1, 0])
   })
 })
+
+describe("file uploads", () => {
+  it("asks for an upload link, PUTs the file to it, and marks it uploaded", async () => {
+    const { saveMedia } = await import("@/lib/media")
+    const media = await saveMedia({
+      blob: new Blob(["voice"], { type: "audio/webm" }),
+      kind: "consent-audio",
+      patientId: "p1",
+      ownerEntity: "patient",
+      ownerId: "p1",
+    })
+    expect(media.sha256).toMatch(/^[0-9a-f]{64}$/)
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({ url: "https://bucket.s3/upload?sig=1" })
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+    vi.stubGlobal("fetch", fetch)
+    expect(await syncNow()).toMatchObject({ uploaded: 1 })
+    expect(fetch).toHaveBeenNthCalledWith(
+      1,
+      `/api/media/${media.id}/upload-url`,
+      expect.objectContaining({ method: "POST" })
+    )
+    expect(fetch).toHaveBeenNthCalledWith(
+      2,
+      "https://bucket.s3/upload?sig=1",
+      expect.objectContaining({
+        method: "PUT",
+        headers: { "Content-Type": "audio/webm" },
+      })
+    )
+    expect((await db.media.get(media.id))?.uploadedAt).toBeTruthy()
+  })
+})

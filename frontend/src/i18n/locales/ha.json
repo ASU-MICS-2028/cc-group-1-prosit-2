@@ -85,7 +85,13 @@
     "noVitals": "Ba a rubuta awo ba tukuna.",
     "appointments": "Ziyara da turawa",
     "latest": "Awo na baya-bayan nan",
-    "call": "Kira {{phone}}"
+    "call": "Kira {{phone}}",
+    "consentTitle": "Yarda",
+    "consentOn": "An bayar {{date}} · bayani {{version}}",
+    "witness": "Shaida: {{name}}",
+    "fileWaiting": "Yana jiran a tura",
+    "fileSent": "An tura",
+    "noEvidence": "Babu naɗi: wani shaida ya tabbatar."
   },
   "newPatient": {
     "title": "Yi wa mara lafiya rajista",
@@ -103,10 +109,13 @@
     "placeTitle": "Inda yake zaune",
     "placeText": "Don ma'aikacin lafiya da asibitin da ya dace su iya bibiyarsa.",
     "phoneWhy": "Ba dole ba. Don tunatarwar ziyara kawai.",
-    "nationalIdWhy": "Ba dole ba. Don binciken NHIS kawai."
+    "nationalIdWhy": "Ba dole ba. Don binciken NHIS kawai.",
+    "statementTitle": "Karanta wa majiyyaci wannan",
+    "statement": "Muna so mu ajiye bayanan lafiyarka a wannan wayar mu kuma tura su lafiya zuwa Ghana Health Service, domin ma'aikatan lafiyarka su ci gaba da kula da kai. Ma'aikatan lafiyarka kaɗai ne za su gani. Za ka iya cewa a'a, kuma za ka iya cewa mu daina a kowane lokaci. Ka yarda?",
+    "statementVersion": "Bayanin yarda {{version}}"
   },
   "consent": {
-    "verbal": "Da baki",
+    "spoken": "Da baki",
     "thumbprint": "Hoton yatsa",
     "signature": "Sa hannu"
   },
@@ -187,7 +196,9 @@
     "allSent": "An aika duk abin da ke wannan wayar.",
     "queued": "Yana jira",
     "failed": "Za a sake gwadawa",
-    "conflict": "Yana buƙatar dubawa"
+    "conflict": "Yana buƙatar dubawa",
+    "files_one": "Fayil {{count}} yana jira",
+    "files_other": "Fayiloli {{count}} suna jira"
   },
   "surveillance": {
     "title": "Taƙaitawar gunduma",
@@ -248,7 +259,8 @@
     "range": "Wannan ƙimar ba ta yi daidai ba. Duba awon.",
     "bothBp": "Shigar da lambobin BP guda biyu.",
     "oneVital": "Shigar da awo guda aƙalla.",
-    "future": "Zaɓi lokaci mai zuwa."
+    "future": "Zaɓi lokaci mai zuwa.",
+    "evidence": "Ka naɗi, sa hannu ko ɗauki hoton yardar majiyyacin tukuna."
   },
   "notFound": {
     "text": "Wannan shafin babu shi.",
@@ -329,5 +341,25 @@
     "minute": "Mintuna",
     "now": "Yanzu",
     "done": "An gama"
+  },
+  "capture": {
+    "record": "Naɗi yardar",
+    "stop": "Dakatar da naɗi",
+    "again": "Sake naɗi",
+    "recording": "Ana naɗi… saura daƙiƙa {{seconds}}",
+    "spokenHint": "Karanta bayanin, sannan ka naɗi majiyyacin yana cewa eh. Har zuwa daƙiƙa 30.",
+    "noMic": "Wannan wayar ba za ta iya naɗar sauti ba. Ka sa wani wanda ya ji majiyyacin ya yarda ya rubuta sunansa a ƙasa.",
+    "signHere": "Sa hannu a nan",
+    "signHint": "Majiyyacin zai sa hannu da yatsa.",
+    "clear": "Goge",
+    "signatureLabel": "Sa hannun majiyyaci",
+    "takePhoto": "Ɗauki hoton zanen babban yatsa",
+    "thumbHint": "Danna babban yatsan majiyyacin da aka shafa wa tawada a kan takardar yarda, sannan ka ɗauki hotonsa.",
+    "photoAlt": "Hoton zanen babban yatsan majiyyaci",
+    "retake": "Sake ɗauka",
+    "witness": "Sunan shaida",
+    "witnessHint": "Ba dole ba ne. Wani wanda ya ji majiyyacin ya yarda.",
+    "witnessNeeded": "Ana buƙata idan babu naɗi.",
+    "recorded": "An naɗa · daƙiƙa {{seconds}}"
   }
 }
