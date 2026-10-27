@@ -105,3 +105,10 @@ export interface OutboxItem {
   attempts: number
   lastError?: string
 }
+
+/** A health worker's profile photo: resized on the phone, stored on the phone only. */
+export interface ProfilePhoto {
+  userId: string
+  photo: Blob
+  updatedAt: string
+}

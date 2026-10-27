@@ -1,1 +1,321 @@
-{}
+{
+  "common": {
+    "loading": "Ele vavam…",
+    "back": "Trɔ yi megbe",
+    "optional": "Mehiã o",
+    "choose": "Tia…",
+    "next": "Yi edzi",
+    "stepOf": "Afɔɖeɖe {{step}} le {{total}} me",
+    "draft": "Gɔmeɖeɖe gbãtɔ"
+  },
+  "nav": {
+    "label": "Menu vevitɔ",
+    "home": "Aƒeme",
+    "patients": "Dɔnɔwo",
+    "appointments": "Sraɖekpɔwo",
+    "summary": "Kpuie",
+    "sync": "Ɖo ɖa",
+    "profile": "Nye nyatakakawo",
+    "add": "Tsɔ kpe ɖe eŋu",
+    "referrals": "Ɖoɖowo"
+  },
+  "roles": {
+    "chv": "Nutoa me Lãmesẽ Kpekpeɖeŋunala",
+    "nurse": "Dɔyɔla / Vixɔla",
+    "doctor": "Dɔkta",
+    "district_officer": "Nutome Lãmesẽ Dɔdzikpɔla",
+    "admin": "Dɔdzikpɔla"
+  },
+  "login": {
+    "title": "Ge ɖe eme",
+    "text": "Ŋlɔ wò telefon xexlẽdzesi. Míaɖo kood si me xexlẽdzesi 6 le ɖe wò le SMS dzi.",
+    "phone": "Telefon xexlẽdzesi",
+    "phoneHint": "Xexlẽdzesi si nèzã ŋlɔ wò ŋkɔ ɖe lãmesẽ dɔwɔƒea.",
+    "sendCode": "Ɖo kood la ɖa",
+    "unknownNumber": "Womeŋlɔ xexlẽdzesi sia abe lãmesẽ dɔwɔla tɔ ene o. Kpɔe ɖa, alo bia wò nutome ɔfis.",
+    "network": "Míete ŋu ɖo sɛva la gbɔ o. Kpɔ wò intanɛt eye nàgate kpɔ.",
+    "demoTitle": "Akɔntawo na dodokpɔ (menye vavãtɔwo o)",
+    "demoText": "Zi xexlẽdzesi aɖe dzi be wòayɔ eme. Kood lae nye {{code}}.",
+    "changeLanguage": "Trɔ gbe"
+  },
+  "offline": {
+    "banner_one": "Intanɛt meli o · tɔtrɔ {{count}} le lalam",
+    "banner_other": "Intanɛt meli o · tɔtrɔ {{count}} le lalam"
+  },
+  "home": {
+    "greeting": "Woezɔ, {{name}}",
+    "registerPatient": "Ŋlɔ dɔnɔ ƒe ŋkɔ",
+    "patients": "Dɔnɔwo",
+    "upcoming": "Sraɖekpɔ siwo gbɔna",
+    "waiting": "Le lalam be woaɖoe ɖa",
+    "urgent_one": "Dzidzeme {{count}} le kɔsiɖa sia me gblɔ be woakplɔ dɔnɔ la ayi dɔyɔƒe egbe",
+    "urgent_other": "Dzidzeme {{count}} le kɔsiɖa sia me gblɔ be woakplɔ dɔnɔawo ayi dɔyɔƒe egbe"
+  },
+  "patients": {
+    "title": "Dɔnɔwo",
+    "new": "Yeye",
+    "search": "Di ŋkɔ, kɔƒe alo telefon xexlẽdzesi",
+    "empty": "Dɔnɔ aɖeke meli haɖe o. Ŋlɔ gbãtɔ ƒe ŋkɔ.",
+    "noMatch": "Dɔnɔ aɖeke mesɔ kple wò didi o.",
+    "notFound": "Dɔnɔ sia mele telefon sia dzi o.",
+    "age_one": "Ƒe {{count}}",
+    "age_other": "Ƒe {{count}}"
+  },
+  "sex": {
+    "female": "Nyɔnu",
+    "male": "Ŋutsu",
+    "other": "Bubu"
+  },
+  "patient": {
+    "givenName": "Ŋkɔ gbãtɔ",
+    "familyName": "Ƒomeŋkɔ",
+    "sex": "Nyɔnu alo ŋutsu",
+    "dateOfBirth": "Dzigbezã",
+    "ageYears": "Ƒe nɛ xexlẽ",
+    "age": "Ƒe",
+    "estimated": "susu",
+    "community": "Kɔƒe",
+    "district": "Nutome",
+    "phone": "Telefon xexlẽdzesi",
+    "nationalId": "Ghana Card alo NHIS xexlẽdzesi",
+    "preferredLanguage": "Gbe si dzi eyɔ",
+    "recordVitals": "Ŋlɔ dzidzemewo",
+    "book": "Ɖo sraɖekpɔ",
+    "vitals": "Dzidzemewo",
+    "noVitals": "Womeŋlɔ dzidzeme aɖeke haɖe o.",
+    "appointments": "Sraɖekpɔwo kple ɖoɖowo",
+    "latest": "Dzidzeme mamlɛtɔwo"
+  },
+  "newPatient": {
+    "title": "Ŋlɔ dɔnɔ ƒe ŋkɔ",
+    "consentTitle": "Bia eƒe lɔlɔ̃",
+    "consentText": "Ɖe nusita nèle eƒe nyatakakawo dzram ɖo la gɔme na dɔnɔ la le eƒe gbe me, eye be ate ŋu agbe.",
+    "consentMethod": "Aleke wòlɔ̃ ɖoe?",
+    "consentGiven": "Dɔnɔ la lɔ̃ be woadzra eƒe lãmesẽ nyatakakawo ɖo.",
+    "knowsBirthDate": "Dɔnɔ la nya eƒe dzigbezã?",
+    "birthDateYes": "Ɛ̃",
+    "birthDateNo": "Ao, ŋlɔ eƒe ƒe",
+    "save": "Dzra dɔnɔ la ɖo",
+    "consentPromise": "Eƒe nyatakakawo anɔ telefon sia dzi va se ɖe esime woaɖo wo ɖe lãmesẽ dɔwɔƒea le dedie me. Eƒe lãmesẽ dɔwɔlawo ɖeɖeko akpɔ wo.",
+    "personTitle": "Dɔnɔ la ŋuti nyatakakawo",
+    "personText": "Ŋlɔ nu si dɔnɔ la gblɔ na wò. Ne menya eƒe dzigbezã o la, ŋlɔ eƒe ƒe.",
+    "placeTitle": "Afi si wònɔna",
+    "placeText": "Ale be lãmesẽ dɔwɔla kple dɔyɔƒe si dze nalé ŋku ɖe eŋu.",
+    "phoneWhy": "Mehiã o. Ɖeko na sraɖekpɔ ŋkuɖodzi.",
+    "nationalIdWhy": "Mehiã o. Ɖeko na NHIS dodokpɔ."
+  },
+  "consent": {
+    "verbal": "Kple nu",
+    "thumbprint": "Asibidɛ dzesi",
+    "signature": "Asidede"
+  },
+  "vitals": {
+    "title": "Ŋlɔ dzidzemewo",
+    "takenAt": "Ɣeyiɣi si wodzidze",
+    "systolic": "BP dzi",
+    "diastolic": "BP te",
+    "temperature": "Lãme dzoxɔxɔ",
+    "pulse": "Dzi ƒe ƒoƒo",
+    "perMinute": "le miniti ɖeka me",
+    "weight": "Kpekpeme",
+    "height": "Kɔkɔme",
+    "notes": "Nyatakaka bubuwo",
+    "bp": "BP",
+    "bmi": "BMI",
+    "referToday": "Kplɔ dɔnɔ la yi dɔyɔƒe egbe.",
+    "recheck": "Gadzidze le sraɖekpɔ si kplɔe ɖo me eye nàgblɔe na dɔyɔla.",
+    "save": "Dzra dzidzemewo ɖo",
+    "bodyTitle": "Kpekpeme kple kɔkɔme",
+    "bodyAdd": "Tsɔ kpekpeme kple kɔkɔme kpe ɖe eŋu",
+    "bodyRemove": "Ɖe ɖa"
+  },
+  "flags": {
+    "bpCrisis": "Ʋuƒoƒo kɔkɔ ŋutɔ",
+    "bpHigh": "Ʋuƒoƒo kɔkɔ",
+    "bpLow": "Ʋuƒoƒo bɔbɔ",
+    "fever": "Lãme xɔxɔ",
+    "highFever": "Lãme xɔxɔ sesẽ",
+    "lowTemp": "Lãme fafa akpa",
+    "pulseHigh": "Dzi ƒoƒo kabakaba",
+    "pulseLow": "Dzi ƒoƒo blewu"
+  },
+  "appointments": {
+    "title": "Sraɖekpɔ siwo gbɔna",
+    "empty": "Womeɖo sraɖekpɔ aɖeke o."
+  },
+  "newAppointment": {
+    "title": "Ɖo sraɖekpɔ alo ɖoɖo",
+    "type": "Ƒomevi",
+    "when": "Ŋkeke kple ɣeyiɣi",
+    "facility": "Dɔyɔƒe",
+    "priority": "Vevienyenye",
+    "reason": "Susu",
+    "save": "Ɖoe"
+  },
+  "appointmentType": {
+    "follow_up": "Gbugbɔgasra",
+    "antenatal": "Fukpɔkpɔ hafi dzidzi",
+    "postnatal": "Dzidzi megbe kpɔkpɔ",
+    "referral": "Ɖoɖo",
+    "teleconsult": "Dɔkta kpɔkpɔ le telefon dzi"
+  },
+  "priority": {
+    "routine": "Gbe sia gbe tɔ",
+    "urgent": "Kabakaba",
+    "emergency": "Kpata"
+  },
+  "status": {
+    "scheduled": "Woɖoe",
+    "completed": "Ewu enu",
+    "missed": "Meva o",
+    "cancelled": "Wotutui"
+  },
+  "entity": {
+    "patient": "Dɔnɔ",
+    "vitals": "Dzidzemewo",
+    "appointment": "Sraɖekpɔ"
+  },
+  "sync": {
+    "title": "Ɖo ɖa",
+    "online": "Intanɛt li",
+    "offline": "Intanɛt meli o",
+    "waiting_one": "Tɔtrɔ {{count}} le lalam",
+    "waiting_other": "Tɔtrɔ {{count}} le lalam",
+    "now": "Ɖo ɖa fifia",
+    "result": "Woɖo {{sent}} ɖa, womeɖo {{failed}} ɖa o.",
+    "allSent": "Woɖo nu sia nu si le telefon sia dzi ɖa.",
+    "queued": "Le lalam",
+    "failed": "Agagbugbɔ adze agbagba",
+    "conflict": "Ehiã be woakpɔe"
+  },
+  "surveillance": {
+    "title": "Nutome ƒe kpuie",
+    "district": "{{district}} · xexlẽme siwo me ŋkɔ mele o",
+    "demo": "Dodokpɔ nyatakakawo va se ɖe esime API la adze dɔwɔwɔ gɔme",
+    "offline": "Kpuie la hiã intanɛt. Gatee kpɔ ne intanɛt va.",
+    "week": "Kɔsiɖa",
+    "month": "Ɣleti",
+    "weekOf": "Kɔsiɖa si dze egɔme {{date}}",
+    "seen": "Dɔnɔ siwo wokpɔ",
+    "highBp": "Ʋuƒoƒo kɔkɔ",
+    "fever": "Lãme xɔxɔ",
+    "vsLast": "{{diff}} ne wotsɔe sɔ kple ɣeyiɣi si do ŋgɔ",
+    "partial": "Kɔsiɖa aɖewo me dɔnɔwo mede 5 o, eya ta míexlẽ wo o be míakpɔ wo ta.",
+    "seenChart": "Dɔnɔ siwo wokpɔ",
+    "feverChart": "Dɔnɔ siwo ƒe lãme xɔ",
+    "fewer": "<5",
+    "empty": "Nyatakaka aɖeke meli na wò nutome haɖe o.",
+    "allDistricts": "Nutome blibowo le kɔsiɖa sia me",
+    "colDistrict": "Nutome",
+    "privacy": "Míeɣla xexlẽme siwo mede 5 o be ame aɖeke nagate ŋu adze si dɔnɔ aɖeke o (Act 843 s.24(3)).",
+    "signalTitle": "Lãme xɔxɔ le dzidzim ɖe edzi le {{district}}",
+    "signalText": "Dɔnɔ {{now}} ƒe lãme xɔ le kɔsiɖa si va yi me, gake {{avg}} wònye le kɔsiɖa 4 siwo do ŋgɔ me. Bia nutome ƒe hamea.",
+    "lastFullWeek": "Kɔsiɖa blibo mamlɛtɔ: {{label}}",
+    "soFar": "{{label}} va se ɖe fifia"
+  },
+  "profile": {
+    "title": "Nye nyatakakawo",
+    "language": "Gbe",
+    "comingSoon": "le vava ge",
+    "signOut": "Do le eme",
+    "addPhoto": "Tsɔ foto kpe ɖe eŋu",
+    "changePhoto": "Trɔ foto",
+    "removePhoto": "Ɖe foto ɖa",
+    "choosePhoto": "Tia wò foto",
+    "photoHint": "Wò foto la nɔa telefon sia dzi ɖeɖeko.",
+    "photoError": "Míete ŋu zã foto ma o. Tia bubu."
+  },
+  "pwa": {
+    "updateTitle": "Nɔnɔme yeye ɖe le klalo",
+    "updateText": "Gaʋui be nàzãe. Nyatakaka siwo nèdzra ɖo la anɔ telefon sia dzi.",
+    "reload": "Gaʋui",
+    "later": "Emegbe",
+    "offlineTitle": "HealthConnect wɔa dɔ fifia esime intanɛt meli o",
+    "offlineText": "Àte ŋu aʋu app la eye nàŋlɔ dɔnɔwo esime intanɛt meli o.",
+    "ok": "Yoo",
+    "installTitle": "Tsɔ HealthConnect de wò telefon dzi",
+    "installText": "Tsɔe de wò telefon ŋgɔ ale be nàʋui abe app ene.",
+    "install": "Tsɔe de edzi",
+    "notNow": "Menye fifia o"
+  },
+  "errors": {
+    "required": "Yɔ esia me.",
+    "phone": "Ŋlɔ Ghana xexlẽdzesi, abe 0241234567 ene.",
+    "consent": "Ele be dɔnɔ la nalɔ̃ hafi nàdzra eƒe nyatakakawo ɖo.",
+    "dateOfBirth": "Ŋlɔ ŋkeke si va yi.",
+    "age": "Ŋlɔ ƒe si le 0 kple 120 dome.",
+    "range": "Nu sia medze abe nyateƒe ene o. Gakpɔ dzidzeme la.",
+    "bothBp": "Ŋlɔ BP xexlẽdzesi eveawo siaa.",
+    "oneVital": "Ŋlɔ dzidzeme ɖeka ya teti.",
+    "future": "Tia ɣeyiɣi si gbɔna."
+  },
+  "notFound": {
+    "text": "Axa sia meli o.",
+    "home": "Yi aƒeme"
+  },
+  "routeError": {
+    "title": "Axa sia meʋu o",
+    "text": "Kpɔ wò intanɛt eye nàgatee kpɔ. Nyatakaka siwo nèdzra ɖo le dedie le telefon sia dzi.",
+    "retry": "Gatee kpɔ"
+  },
+  "registered": {
+    "title": "Woŋlɔ ŋkɔ la!",
+    "saved": "Woŋlɔ {{name}} ƒe ŋkɔ.",
+    "savedPlain": "Woŋlɔ dɔnɔ la ƒe ŋkɔ.",
+    "text": "Wodzra nyatakakawo ɖo ɖe telefon sia dzi eye woaɖo wo ɖa ne intanɛt va.",
+    "recordVitals": "Ŋlɔ dzidzemewo fifia",
+    "done": "Ewu enu"
+  },
+  "refer": {
+    "title": "Kplɔe yi dɔyɔƒe egbe",
+    "text": "{{name}} ƒe dzidzemewo fia be ele be wòayi dɔyɔƒe egbe.",
+    "tip1": "Ɖe nusita wòle be wòayi egbe la gɔme na dɔnɔ la le eƒe gbe me.",
+    "tip2": "Ne mate ŋu azɔ mɔ o la, yɔ dɔyɔƒe la eye nàgblɔe na dɔyɔla si le dɔ dzi.",
+    "book": "Ɖo ɖoɖo la",
+    "later": "Menye fifia o"
+  },
+  "chart": {
+    "title": "Ʋuƒoƒo",
+    "systolic": "Dzi",
+    "diastolic": "Te",
+    "aria_one": "Ʋuƒoƒo le sraɖekpɔ {{count}} me, mamlɛtɔ {{sys}}/{{dia}} mmHg",
+    "aria_other": "Ʋuƒoƒo le sraɖekpɔ {{count}} me, mamlɛtɔ {{sys}}/{{dia}} mmHg",
+    "sysShort": "dzi",
+    "diaShort": "te"
+  },
+  "welcome": {
+    "language": "Tia wò gbe",
+    "soon": "Le vava ge",
+    "start": "Dze egɔme",
+    "draftNote": "Twi, Ewe kple Hausa gɔmeɖeɖewo nye gbãtɔwo siwo gbe la dzrolawo gale ŋku lém ɖe wo ŋu."
+  },
+  "code": {
+    "title": "Ŋlɔ kood la",
+    "text": "Míeɖo kood si me xexlẽdzesi 6 le ɖe {{phone}}.",
+    "label": "Kood si me xexlẽdzesi 6 le",
+    "verify": "Kpɔ kood la",
+    "wrong": "Kood la mesɔ o. Kpɔ SMS la eye nàgatee kpɔ.",
+    "noCode": "Kood la meva haɖe o?",
+    "resend": "Gaɖoe ɖa",
+    "resendIn_one": "Gaɖoe ɖa le sekɛnd {{count}} me",
+    "resendIn_other": "Gaɖoe ɖa le sekɛnd {{count}} me"
+  },
+  "referrals": {
+    "title": "Ɖoɖowo",
+    "open_one": "Nusiwo nàwɔ ({{count}})",
+    "open_other": "Nusiwo nàwɔ ({{count}})",
+    "done_one": "Ewu enu ({{count}})",
+    "done_other": "Ewu enu ({{count}})",
+    "emptyOpen": "Ɖoɖo aɖeke mele lalam o.",
+    "emptyDone": "Wòmewɔ naneke haɖe o.",
+    "accept": "Xɔe",
+    "decline": "Gbee",
+    "markSeen": "De dzesii be wokpɔe"
+  },
+  "referralStatus": {
+    "requested": "Le lalam",
+    "accepted": "Woxɔe",
+    "declined": "Wogbee",
+    "seen": "Wokpɔe"
+  }
+}

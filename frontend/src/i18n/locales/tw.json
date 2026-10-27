@@ -1,1 +1,321 @@
-{}
+{
+  "common": {
+    "loading": "Ɛreba…",
+    "back": "San kɔ akyi",
+    "optional": "Ɛho nhia",
+    "choose": "Paw…",
+    "next": "Toa so",
+    "stepOf": "Anammɔn {{step}} wɔ {{total}} mu",
+    "draft": "Nkyerɛaseɛ a ɛnwieeɛ"
+  },
+  "nav": {
+    "label": "Menu titiriw",
+    "home": "Fie",
+    "patients": "Ayarefoɔ",
+    "appointments": "Nsrahwɛ",
+    "summary": "Nsɛm tiawa",
+    "sync": "Soma",
+    "profile": "Me ho nsɛm",
+    "add": "Fa ka ho",
+    "referrals": "Nsoma"
+  },
+  "roles": {
+    "chv": "Mpɔtam Apɔmuden Boafoɔ",
+    "nurse": "Nɔɔse / Awogyefoɔ",
+    "doctor": "Dɔkota",
+    "district_officer": "Mansin Apɔmuden Panyin",
+    "admin": "Ɔhwɛfoɔ"
+  },
+  "login": {
+    "title": "Wura mu",
+    "text": "Kyerɛw wo fon nɔma. Yɛde kood a ɛyɛ nɔma 6 bɛmena wo wɔ SMS so.",
+    "phone": "Fon nɔma",
+    "phoneHint": "Nɔma a wode kyerɛw wo din wɔ apɔmuden dwumadie no mu.",
+    "sendCode": "Soma kood",
+    "unknownNumber": "Wɔnkyerɛw nɔma yi sɛ apɔmuden adwumayɛfoɔ. Hwɛ bio, anaa bisa wo mansin ɔfese.",
+    "network": "Yɛantumi anka sɛva no. Hwɛ wo intanɛt na bɔ mmɔden bio.",
+    "demoTitle": "Akontaa a wɔde sɔ hwɛ (ɛnyɛ nokware)",
+    "demoText": "Mia nɔma bi so na ɛbɛhyɛ mu ama wo. Kood no ne {{code}}.",
+    "changeLanguage": "Sesa kasa"
+  },
+  "offline": {
+    "banner_one": "Intanɛt nni hɔ · nsakraeɛ {{count}} retwɛn",
+    "banner_other": "Intanɛt nni hɔ · nsakraeɛ {{count}} retwɛn"
+  },
+  "home": {
+    "greeting": "Akwaaba, {{name}}",
+    "registerPatient": "Kyerɛw ɔyarefoɔ din",
+    "patients": "Ayarefoɔ",
+    "upcoming": "Nsrahwɛ a ɛreba",
+    "waiting": "Ɛretwɛn sɛ ɛbɛkɔ",
+    "urgent_one": "Nsusuiɛ {{count}} nnawɔtwe yi ka sɛ wɔmfa ɔyarefoɔ nkɔ ayaresabea ɛnnɛ",
+    "urgent_other": "Nsusuiɛ {{count}} nnawɔtwe yi ka sɛ wɔmfa ayarefoɔ nkɔ ayaresabea ɛnnɛ"
+  },
+  "patients": {
+    "title": "Ayarefoɔ",
+    "new": "Foforɔ",
+    "search": "Hwehwɛ din, kuro anaa fon nɔma",
+    "empty": "Ɔyarefoɔ biara nni hɔ. Kyerɛw nea ɔdi kan din.",
+    "noMatch": "Ɔyarefoɔ biara nhyia wo nhwehwɛmu no.",
+    "notFound": "Ɔyarefoɔ yi nni fon yi so.",
+    "age_one": "Afe {{count}}",
+    "age_other": "Mfeɛ {{count}}"
+  },
+  "sex": {
+    "female": "Ɔbaa",
+    "male": "Ɔbarima",
+    "other": "Ebi"
+  },
+  "patient": {
+    "givenName": "Din a ɛdi kan",
+    "familyName": "Abusua din",
+    "sex": "Ɔbaa anaa ɔbarima",
+    "dateOfBirth": "Awoda",
+    "ageYears": "Mfeɛ dodoɔ",
+    "age": "Mfeɛ",
+    "estimated": "nsusuiɛ",
+    "community": "Kuro",
+    "district": "Mansin",
+    "phone": "Fon nɔma",
+    "nationalId": "Ghana Card anaa NHIS nɔma",
+    "preferredLanguage": "Kasa a ɔpɛ",
+    "recordVitals": "Kyerɛw nsusuiɛ",
+    "book": "Hyɛ nsrahwɛ da",
+    "vitals": "Nsusuiɛ",
+    "noVitals": "Wɔnkyerɛw nsusuiɛ biara mmaeɛ.",
+    "appointments": "Nsrahwɛ ne nsoma",
+    "latest": "Nsusuiɛ a ɛtwa toɔ"
+  },
+  "newPatient": {
+    "title": "Kyerɛw ɔyarefoɔ din",
+    "consentTitle": "Bisa ne pene",
+    "consentText": "Kyerɛ ɔyarefoɔ no wɔ ne kasa mu nea enti a wokora ne nsɛm, na ka kyerɛ no sɛ ɔbɛtumi apo.",
+    "consentMethod": "Ɔkwan bɛn so na ɔpenee so?",
+    "consentGiven": "Ɔyarefoɔ no apene so sɛ wɔnkora n'apɔmuden nsɛm.",
+    "knowsBirthDate": "Ɔyarefoɔ no nim n'awoda?",
+    "birthDateYes": "Aane",
+    "birthDateNo": "Daabi, kyerɛw ne mfeɛ",
+    "save": "Kora ɔyarefoɔ no",
+    "consentPromise": "Ne nsɛm bɛtena fon yi so kɔsi sɛ wɔde bɛkɔ apɔmuden dwumadie no hɔ wɔ ahobammɔ mu. Ne apɔmuden adwumayɛfoɔ nko ara na wɔbɛhunu.",
+    "personTitle": "Ɔyarefoɔ no ho nsɛm",
+    "personText": "Kyerɛw nea ɔyarefoɔ no ka kyerɛ wo. Sɛ onnim n'awoda a, kyerɛw ne mfeɛ.",
+    "placeTitle": "Baabi a ɔte",
+    "placeText": "Sɛnea ɛbɛyɛ a apɔmuden adwumayɛfoɔ ne ayaresabea a ɛfata bɛtumi ahwɛ no.",
+    "phoneWhy": "Ɛho nhia. Ɛyɛ nsrahwɛ nkaeɛ nko ara.",
+    "nationalIdWhy": "Ɛho nhia. Ɛyɛ NHIS nhwehwɛmu nko ara."
+  },
+  "consent": {
+    "verbal": "Ɔkasa mu",
+    "thumbprint": "Nsateaa nsɛnkyerɛnne",
+    "signature": "Nsaano"
+  },
+  "vitals": {
+    "title": "Kyerɛw nsusuiɛ",
+    "takenAt": "Bere a wɔsusuiɛ",
+    "systolic": "BP soro",
+    "diastolic": "BP fam",
+    "temperature": "Ɔhyeɛ",
+    "pulse": "Koma bɔ",
+    "perMinute": "simma biara",
+    "weight": "Mu duru",
+    "height": "Tenten",
+    "notes": "Nsɛm foforɔ",
+    "bp": "BP",
+    "bmi": "BMI",
+    "referToday": "Fa ɔyarefoɔ no kɔ ayaresabea ɛnnɛ.",
+    "recheck": "Susu bio wɔ nsrahwɛ a ɛdi hɔ no mu na ka kyerɛ nɔɔse no.",
+    "save": "Kora nsusuiɛ no",
+    "bodyTitle": "Mu duru ne tenten",
+    "bodyAdd": "Fa mu duru ne tenten ka ho",
+    "bodyRemove": "Yi fi hɔ"
+  },
+  "flags": {
+    "bpCrisis": "Mogya mmoroso a ano yɛ den paa",
+    "bpHigh": "Mogya mmoroso",
+    "bpLow": "Mogya a ɛkɔ fam",
+    "fever": "Atiridiiɛ",
+    "highFever": "Atiridiiɛ a ano yɛ den",
+    "lowTemp": "Nipadua ɔhyeɛ a ɛsɛ fam",
+    "pulseHigh": "Koma bɔ ntɛmntɛm",
+    "pulseLow": "Koma bɔ brɛoo"
+  },
+  "appointments": {
+    "title": "Nsrahwɛ a ɛreba",
+    "empty": "Wɔnhyɛɛ nsrahwɛ biara da."
+  },
+  "newAppointment": {
+    "title": "Hyɛ nsrahwɛ anaa nsoma da",
+    "type": "Ɛsuo",
+    "when": "Da ne bere",
+    "facility": "Ayaresabea",
+    "priority": "Ɛhia sɛn",
+    "reason": "Nea enti",
+    "save": "Hyɛ da"
+  },
+  "appointmentType": {
+    "follow_up": "Nsrahwɛ bio",
+    "antenatal": "Ahwɛ ansa na wɔawo",
+    "postnatal": "Ahwɛ wɔ awoɔ akyi",
+    "referral": "Nsoma",
+    "teleconsult": "Fon so dɔkota nhwehwɛmu"
+  },
+  "priority": {
+    "routine": "Daa daa",
+    "urgent": "Ɛhia ntɛm",
+    "emergency": "Ntɛmpɛ"
+  },
+  "status": {
+    "scheduled": "Wɔahyɛ da",
+    "completed": "Awie",
+    "missed": "Ɔannya ammɛ",
+    "cancelled": "Wɔatwa mu"
+  },
+  "entity": {
+    "patient": "Ɔyarefoɔ",
+    "vitals": "Nsusuiɛ",
+    "appointment": "Nsrahwɛ"
+  },
+  "sync": {
+    "title": "Soma",
+    "online": "Intanɛt wɔ hɔ",
+    "offline": "Intanɛt nni hɔ",
+    "waiting_one": "Nsakraeɛ {{count}} retwɛn",
+    "waiting_other": "Nsakraeɛ {{count}} retwɛn",
+    "now": "Soma seesei",
+    "result": "Wɔasoma {{sent}}, wɔnsomaa {{failed}}.",
+    "allSent": "Wɔasoma biribiara a ɛwɔ fon yi so.",
+    "queued": "Ɛretwɛn",
+    "failed": "Ɛbɛsan abɔ mmɔden",
+    "conflict": "Ɛhia sɛ wɔhwɛ"
+  },
+  "surveillance": {
+    "title": "Mansin nsɛm tiawa",
+    "district": "{{district}} · akontabuo a wɔmfa din nka ho",
+    "demo": "Sɔhwɛ nsɛm kɔsi sɛ API no bɛyɛ adwuma",
+    "offline": "Nsɛm tiawa no hia intanɛt. Bɔ mmɔden bio sɛ intanɛt ba a.",
+    "week": "Nnawɔtwe",
+    "month": "Bosome",
+    "weekOf": "Nnawɔtwe a ɛfiri {{date}}",
+    "seen": "Ayarefoɔ a wɔhunuu wɔn",
+    "highBp": "Mogya mmoroso",
+    "fever": "Atiridiiɛ",
+    "vsLast": "{{diff}} sɛ yɛde toto bere a atwam ho",
+    "partial": "Nnawɔtwe bi wɔ hɔ a ayarefoɔ nnu 5, enti yɛnkan wɔn, sɛnea ɛbɛbɔ wɔn ho ban.",
+    "seenChart": "Ayarefoɔ a wɔhunuu wɔn",
+    "feverChart": "Ayarefoɔ a wɔwɔ atiridiiɛ",
+    "fewer": "<5",
+    "empty": "Nsɛm biara nni hɔ mma wo mansin mmaeɛ.",
+    "allDistricts": "Mansin nyinaa nnawɔtwe yi",
+    "colDistrict": "Mansin",
+    "privacy": "Yɛde akontabuo a ɛsua sene 5 sie sɛnea obiara rentumi nhunu ɔyarefoɔ biara (Act 843 s.24(3)).",
+    "signalTitle": "Atiridiiɛ redɔɔso wɔ {{district}}",
+    "signalText": "Ayarefoɔ {{now}} na na wɔwɔ atiridiiɛ nnawɔtwe a atwam no, nanso na ɛyɛ {{avg}} wɔ nnawɔtwe 4 a ɛdi kan no mu. Bisa mansin kuo no.",
+    "lastFullWeek": "Nnawɔtwe a etwa toɔ: {{label}}",
+    "soFar": "{{label}} kɔsi seesei"
+  },
+  "profile": {
+    "title": "Me ho nsɛm",
+    "language": "Kasa",
+    "comingSoon": "ɛreba",
+    "signOut": "Fi mu",
+    "addPhoto": "Fa mfonini ka ho",
+    "changePhoto": "Sesa mfonini",
+    "removePhoto": "Yi mfonini",
+    "choosePhoto": "Paw wo mfonini",
+    "photoHint": "Wo mfonini no tena fon yi so nko ara.",
+    "photoError": "Yɛantumi amfa mfonini no anni dwuma. Paw foforɔ."
+  },
+  "pwa": {
+    "updateTitle": "Nhyehyɛeɛ foforɔ aba",
+    "updateText": "San bue na fa di dwuma. Nsɛm a woakora no bɛtena fon yi so.",
+    "reload": "San bue",
+    "later": "Akyiri yi",
+    "offlineTitle": "HealthConnect yɛ adwuma seesei a intanɛt nni hɔ",
+    "offlineText": "Wobɛtumi abue app no na woakyerɛw ayarefoɔ a intanɛt nni hɔ.",
+    "ok": "Yoo",
+    "installTitle": "Fa HealthConnect hyɛ wo fon so",
+    "installText": "Fa to wo fon anim sɛnea wobɛbue no sɛ app.",
+    "install": "Fa hyɛ so",
+    "notNow": "Ɛnyɛ seesei"
+  },
+  "errors": {
+    "required": "Hyɛ eyi ma.",
+    "phone": "Kyerɛw Ghana nɔma, te sɛ 0241234567.",
+    "consent": "Ɛsɛ sɛ ɔyarefoɔ no pene so ansa na woakora ne nsɛm.",
+    "dateOfBirth": "Kyerɛw da a atwam.",
+    "age": "Kyerɛw mfeɛ a ɛwɔ 0 ne 120 ntam.",
+    "range": "Eyi nte sɛ nokware. Hwɛ nsusuiɛ no bio.",
+    "bothBp": "Kyerɛw BP nɔma abien no nyinaa.",
+    "oneVital": "Kyerɛw nsusuiɛ baako pɛ, anyɛ yiye koraa.",
+    "future": "Paw bere a ɛreba."
+  },
+  "notFound": {
+    "text": "Krataafa yi nni hɔ.",
+    "home": "Kɔ fie"
+  },
+  "routeError": {
+    "title": "Krataafa yi amma",
+    "text": "Hwɛ wo intanɛt na bɔ mmɔden bio. Nsɛm a woakora no wɔ fon yi so wɔ ahobammɔ mu.",
+    "retry": "Bɔ mmɔden bio"
+  },
+  "registered": {
+    "title": "Wɔakyerɛw din!",
+    "saved": "Wɔakyerɛw {{name}} din.",
+    "savedPlain": "Wɔakyerɛw ɔyarefoɔ no din.",
+    "text": "Wɔakora nsɛm no wɔ fon yi so, na ɛbɛkɔ bere a intanɛt aba.",
+    "recordVitals": "Kyerɛw nsusuiɛ seesei",
+    "done": "Awie"
+  },
+  "refer": {
+    "title": "Fa kɔ ayaresabea ɛnnɛ",
+    "text": "{{name}} nsusuiɛ kyerɛ sɛ ɛsɛ sɛ ɔkɔ ayaresabea ɛnnɛ.",
+    "tip1": "Kyerɛ ɔyarefoɔ no wɔ ne kasa mu nea enti a ɛsɛ sɛ ɔkɔ ɛnnɛ.",
+    "tip2": "Sɛ ɔrentumi nkɔ a, frɛ ayaresabea no na ka kyerɛ nɔɔse a ɔwɔ hɔ no.",
+    "book": "Hyɛ nsoma no da",
+    "later": "Ɛnyɛ seesei"
+  },
+  "chart": {
+    "title": "Mogya mmoroso",
+    "systolic": "Soro",
+    "diastolic": "Fam",
+    "aria_one": "Mogya mmoroso wɔ nsrahwɛ {{count}} mu, nea etwa toɔ {{sys}}/{{dia}} mmHg",
+    "aria_other": "Mogya mmoroso wɔ nsrahwɛ {{count}} mu, nea etwa toɔ {{sys}}/{{dia}} mmHg",
+    "sysShort": "soro",
+    "diaShort": "fam"
+  },
+  "welcome": {
+    "language": "Paw wo kasa",
+    "soon": "Ɛreba",
+    "start": "Hyɛ aseɛ",
+    "draftNote": "Twi, Ewe ne Hausa nkyerɛaseɛ yi nwieeɛ; kasa no ankasa kasafoɔ rehwɛ mu."
+  },
+  "code": {
+    "title": "Kyerɛw kood no",
+    "text": "Yɛde kood a ɛyɛ nɔma 6 akɔ {{phone}}.",
+    "label": "Kood a ɛyɛ nɔma 6",
+    "verify": "Hwɛ kood no",
+    "wrong": "Kood no nyɛ nokware. Hwɛ SMS no na bɔ mmɔden bio.",
+    "noCode": "Kood no mmaeɛ?",
+    "resend": "Soma bio",
+    "resendIn_one": "Soma bio wɔ sɛkɛn {{count}} mu",
+    "resendIn_other": "Soma bio wɔ sɛkɛn {{count}} mu"
+  },
+  "referrals": {
+    "title": "Nsoma",
+    "open_one": "Deɛ ɛsɛ sɛ woyɛ ({{count}})",
+    "open_other": "Deɛ ɛsɛ sɛ woyɛ ({{count}})",
+    "done_one": "Awie ({{count}})",
+    "done_other": "Awie ({{count}})",
+    "emptyOpen": "Nsoma biara ntwɛn.",
+    "emptyDone": "Woanyɛ biribiara mmaeɛ.",
+    "accept": "Gye tom",
+    "decline": "Po",
+    "markSeen": "Hyɛ no nsɛnkyerɛnne sɛ wɔahunu no"
+  },
+  "referralStatus": {
+    "requested": "Ɛretwɛn",
+    "accepted": "Wɔagye atom",
+    "declined": "Wɔapo",
+    "seen": "Wɔahunu no"
+  }
+}

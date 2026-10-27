@@ -66,7 +66,11 @@ export function Component() {
                     {l.label}
                   </span>
                   <span className="block text-xs text-muted-foreground">
-                    {l.ready ? l.sub : t("welcome.soon")}
+                    {!l.ready
+                      ? t("welcome.soon")
+                      : l.draft
+                        ? `${l.sub} · ${t("common.draft")}`
+                        : l.sub}
                   </span>
                 </span>
                 {selected ? (
@@ -76,6 +80,9 @@ export function Component() {
             )
           })}
         </div>
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          {t("welcome.draftNote")}
+        </p>
       </fieldset>
       <Button
         size="xl"

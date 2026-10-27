@@ -3,14 +3,16 @@ import { initReactI18next } from "react-i18next"
 import en from "./locales/en.json"
 
 // The five languages in the brief. Each is written in itself; `sub` is the name an English speaker
-// knows it by. `ready: false` lists a language but stops it being chosen until native speakers have
-// translated it; any text missing from a file shows in English.
+// knows it by. `ready: false` lists a language but stops it being chosen; `draft: true` marks a
+// translation that native speakers have not checked yet, and the app says so. Any text missing from
+// a file shows in English.
 export const LANGUAGES = [
-  { code: "en", label: "English", sub: "English", ready: true },
-  { code: "tw", label: "Twi", sub: "Akan", ready: false },
-  { code: "ee", label: "Eʋegbe", sub: "Ewe", ready: false },
-  { code: "dag", label: "Dagbanli", sub: "Dagbani", ready: false },
-  { code: "ha", label: "Hausa", sub: "Hausa", ready: false },
+  { code: "en", label: "English", sub: "English", ready: true, draft: false },
+  { code: "tw", label: "Twi", sub: "Akan", ready: true, draft: true },
+  { code: "ee", label: "Eʋegbe", sub: "Ewe", ready: true, draft: true },
+  { code: "ha", label: "Hausa", sub: "Hausa", ready: true, draft: true },
+  // Not machine-drafted: health instructions in Dagbani need a native speaker first.
+  { code: "dag", label: "Dagbanli", sub: "Dagbani", ready: false, draft: true },
 ] as const
 
 export type LanguageCode = (typeof LANGUAGES)[number]["code"]
@@ -59,17 +61,18 @@ export function hasChosenLanguage(): boolean {
 
 /** Switches the app language and remembers it on this phone. */
 export async function setLanguage(code: LanguageCode) {
+  // Remember the choice first, so it sticks even if the person moves on before the file loads.
+  try {
+    localStorage.setItem(STORAGE_KEY, code)
+  } catch {
+    // ignore: the choice just won't be remembered
+  }
   if (code !== "en" && !i18n.hasResourceBundle(code, "translation")) {
     const bundle = await loaders[code]()
     i18n.addResourceBundle(code, "translation", bundle.default)
   }
   await i18n.changeLanguage(code)
   document.documentElement.lang = code
-  try {
-    localStorage.setItem(STORAGE_KEY, code)
-  } catch {
-    // ignore: the choice just won't be remembered
-  }
 }
 
 void i18n.use(initReactI18next).init({
