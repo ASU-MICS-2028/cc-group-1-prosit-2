@@ -374,5 +374,10 @@
     "witnessHint": "Mehiã o. Ame bubu si se be dɔnɔ la lɔ̃.",
     "witnessNeeded": "Ehiã ne gbexɔxɔ meli o.",
     "recorded": "Woxɔe · sekend {{seconds}}"
+  },
+  "editPatient": {
+    "title": "Trɔ nyatakakawo",
+    "save": "Dzra tɔtrɔwo ɖo",
+    "edit": "Trɔe"
   }
 }

@@ -374,5 +374,10 @@
     "witnessHint": "Ɛnyɛ dɛ ɛsɛ. Obi foforɔ a ɔtee sɛ ayarefoɔ no pene so.",
     "witnessNeeded": "Ɛho hia bere a nne nni hɔ.",
     "recorded": "Wɔakyere · sɛkɛn {{seconds}}"
+  },
+  "editPatient": {
+    "title": "Sesa nsɛm no",
+    "save": "Kora nsakraeɛ no",
+    "edit": "Sesa"
   }
 }

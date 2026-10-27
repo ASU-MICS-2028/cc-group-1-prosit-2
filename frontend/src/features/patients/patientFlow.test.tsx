@@ -190,3 +190,46 @@ describe("register a patient, record vitals, book a visit", () => {
     expect(await screen.findByText(/No patients yet/)).toBeInTheDocument()
   })
 })
+
+describe("edit a patient", () => {
+  it("fixes a name and phone, keeps consent, and queues an update", async () => {
+    const user = userEvent.setup()
+    const now = new Date().toISOString()
+    await db.patients.add({
+      id: "p9",
+      givenName: "Yaa",
+      familyName: "Asantewa",
+      sex: "female",
+      dateOfBirth: "1970-07-01",
+      birthDateEstimated: true,
+      community: "Dodowa",
+      district: "Shai-Osudoku",
+      preferredLanguage: "tw",
+      consent: { given: true, method: "signature", at: now },
+      createdAt: now,
+      updatedAt: now,
+      version: 3,
+    })
+    const { router } = renderRoute("/patients/p9")
+    await user.click(await screen.findByRole("link", { name: "Edit" }))
+    const given = await screen.findByLabelText("First name")
+    await user.clear(given)
+    await user.type(given, "Yaa Kumiwaa")
+    await user.type(screen.getByLabelText("Phone number"), "0241234567")
+    await user.click(screen.getByRole("button", { name: "Save changes" }))
+    await waitFor(() =>
+      expect(router.state.location.pathname).toBe("/patients/p9")
+    )
+    const saved = await db.patients.get("p9")
+    expect(saved).toMatchObject({
+      givenName: "Yaa Kumiwaa",
+      phone: "0241234567",
+      dateOfBirth: "1970-07-01", // the estimate didn't drift
+      consent: { method: "signature" },
+      version: 3,
+    })
+    expect(await db.outbox.toArray()).toMatchObject([
+      { entity: "patient", entityId: "p9", op: "update" },
+    ])
+  })
+})

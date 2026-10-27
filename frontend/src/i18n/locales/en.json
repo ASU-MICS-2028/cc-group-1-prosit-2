@@ -374,5 +374,10 @@
     "witnessHint": "Optional. Someone else who heard the patient agree.",
     "witnessNeeded": "Needed when there is no recording.",
     "recorded": "Recorded · {{seconds}} s"
+  },
+  "editPatient": {
+    "title": "Edit details",
+    "save": "Save changes",
+    "edit": "Edit"
   }
 }

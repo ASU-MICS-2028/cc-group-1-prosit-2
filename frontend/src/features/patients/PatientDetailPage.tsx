@@ -61,7 +61,19 @@ export function Component() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={fullName(patient)} back="/patients" />
+      <PageHeader
+        title={fullName(patient)}
+        back="/patients"
+        action={
+          <Link
+            to={`/patients/${patient.id}/edit`}
+            className="mb-0.5 inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-secondary px-4 text-sm font-semibold text-primary"
+          >
+            <PenLine className="size-4" aria-hidden />
+            {t("editPatient.edit")}
+          </Link>
+        }
+      />
       <Summary
         patient={patient}
         readings={vitals?.length ?? 0}

@@ -374,5 +374,10 @@
     "witnessHint": "Ba dole ba ne. Wani wanda ya ji majiyyacin ya yarda.",
     "witnessNeeded": "Ana buƙata idan babu naɗi.",
     "recorded": "An naɗa · daƙiƙa {{seconds}}"
+  },
+  "editPatient": {
+    "title": "Gyara bayanai",
+    "save": "Ajiye canje-canje",
+    "edit": "Gyara"
   }
 }
