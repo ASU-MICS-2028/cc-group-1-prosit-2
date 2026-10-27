@@ -83,7 +83,7 @@ export function Component() {
           e.preventDefault()
           if (code.length === 6) void verify(code)
         }}
-        className="space-y-5"
+        className="flex flex-1 flex-col gap-5"
       >
         <CodeInput
           value={code}
@@ -102,7 +102,7 @@ export function Component() {
         <Button
           type="submit"
           size="xl"
-          className="w-full"
+          className="mt-auto w-full"
           disabled={busy || code.length < 6}
         >
           {t("code.verify")}

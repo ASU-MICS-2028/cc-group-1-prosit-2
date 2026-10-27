@@ -38,10 +38,7 @@ describe("register a patient, record vitals, book a visit", () => {
     await user.type(await screen.findByLabelText("First name"), "Ama")
     await user.type(screen.getByLabelText("Surname"), "Owusu")
     await user.click(screen.getByRole("radio", { name: "Female" }))
-    await user.selectOptions(
-      screen.getByLabelText(/know their date of birth/),
-      "no"
-    )
+    await user.click(screen.getByRole("radio", { name: "No, enter their age" }))
     await user.type(await screen.findByLabelText("Age in years"), "34")
     await user.click(screen.getByRole("button", { name: "Next" }))
     await user.type(await screen.findByLabelText("Community"), "Dodowa")
@@ -74,8 +71,8 @@ describe("register a patient, record vitals, book a visit", () => {
     ).toBeInTheDocument()
     expect(router.state.location.pathname).toBe(`/patients/${patient.id}/refer`)
     await user.click(screen.getByRole("link", { name: "Book the referral" }))
-    expect(await screen.findByLabelText("Type")).toHaveValue("referral")
-    expect(screen.getByLabelText("Priority")).toHaveValue("urgent")
+    expect(await screen.findByLabelText("Type")).toHaveTextContent("Referral")
+    expect(screen.getByRole("radio", { name: "Urgent" })).toBeChecked()
     expect(
       (screen.getByLabelText("Reason") as HTMLTextAreaElement).value
     ).toContain("Very high blood pressure")

@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { z } from "zod"
-import { Field, Input, Select, Textarea } from "@/components/form/Field"
+import { Dropdown } from "@/components/form/Dropdown"
+import { Field, Input, Textarea } from "@/components/form/Field"
+import { Segmented } from "@/components/form/Segmented"
 import { describe } from "@/components/form/describe"
 import { PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
@@ -45,6 +47,7 @@ export function Component() {
       : fallback
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<Form>({
@@ -89,22 +92,34 @@ export function Component() {
   }
 
   return (
-    <>
+    <div className="mx-auto flex min-h-[calc(100svh-5rem)] flex-col max-w-lg">
       <PageHeader title={t("newAppointment.title")} back={`/patients/${id}`} />
       {patient ? (
         <p className="-mt-3 mb-5 text-sm text-muted-foreground">
           {fullName(patient)}
         </p>
       ) : null}
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <form
+        noValidate
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-1 flex-col gap-5"
+      >
         <Field id="type" label={t("newAppointment.type")}>
-          <Select {...register("type")} id="type">
-            {APPOINTMENT_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {t(`appointmentType.${type}`)}
-              </option>
-            ))}
-          </Select>
+          <Controller
+            control={control}
+            name="type"
+            render={({ field }) => (
+              <Dropdown
+                id="type"
+                value={field.value}
+                onChange={field.onChange}
+                options={APPOINTMENT_TYPES.map((type) => ({
+                  value: type,
+                  label: t(`appointmentType.${type}`),
+                }))}
+              />
+            )}
+          />
         </Field>
         <Field
           id="scheduledAt"
@@ -127,13 +142,31 @@ export function Component() {
             {...describe("facility", err("facility"))}
           />
         </Field>
-        <Field id="priority" label={t("newAppointment.priority")}>
-          <Select {...register("priority")} id="priority">
-            <option value="routine">{t("priority.routine")}</option>
-            <option value="urgent">{t("priority.urgent")}</option>
-            <option value="emergency">{t("priority.emergency")}</option>
-          </Select>
-        </Field>
+        <Controller
+          control={control}
+          name="priority"
+          render={({ field }) => (
+            <Segmented
+              name="priority"
+              legend={t("newAppointment.priority")}
+              value={field.value}
+              onChange={field.onChange}
+              tone={(p) =>
+                p === "emergency"
+                  ? "destructive"
+                  : p === "urgent"
+                    ? "warning"
+                    : "primary"
+              }
+              options={(["routine", "urgent", "emergency"] as const).map(
+                (p) => ({
+                  value: p,
+                  label: t(`priority.${p}`),
+                })
+              )}
+            />
+          )}
+        />
         <Field
           id="reason"
           label={t("newAppointment.reason")}
@@ -147,12 +180,12 @@ export function Component() {
         <Button
           type="submit"
           size="xl"
-          className="w-full"
+          className="mt-auto w-full"
           disabled={isSubmitting}
         >
           {t("newAppointment.save")}
         </Button>
       </form>
-    </>
+    </div>
   )
 }

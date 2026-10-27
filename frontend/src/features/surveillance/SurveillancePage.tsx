@@ -178,7 +178,7 @@ export function Component() {
             aria-selected={period === k}
             onClick={() => setPeriod(k)}
             className={cn(
-              "h-11 rounded-md text-sm font-semibold",
+              "h-11 rounded-[14px] text-sm font-semibold",
               period === k
                 ? "bg-primary text-primary-foreground"
                 : "text-foreground hover:bg-muted"

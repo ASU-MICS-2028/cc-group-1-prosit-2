@@ -24,7 +24,7 @@ export function PageHeader({
 }) {
   const { t } = useTranslation()
   const backClass =
-    "-ml-2 mb-4 inline-flex h-11 items-center gap-3 rounded-md px-2 text-sm font-semibold text-heading"
+    "-ml-2 mb-6 inline-flex h-11 items-center gap-3 rounded-md px-2 text-base font-semibold text-heading"
   const backContent = (
     <>
       <ArrowLeft className="size-6" aria-hidden />

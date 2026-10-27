@@ -2,7 +2,8 @@ import { LogOut } from "@/components/icons"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { clearSession, useSession } from "@/auth/session"
-import { Field, Select } from "@/components/form/Field"
+import { Dropdown } from "@/components/form/Dropdown"
+import { Field } from "@/components/form/Field"
 import { PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
 import { LANGUAGES, setLanguage, type LanguageCode } from "@/i18n"
@@ -29,18 +30,17 @@ export function Component() {
           </p>
         </div>
         <Field id="language" label={t("profile.language")}>
-          <Select
+          <Dropdown
             id="language"
-            value={i18n.language}
-            onChange={(e) => void setLanguage(e.target.value as LanguageCode)}
-          >
-            {LANGUAGES.map((l) => (
-              <option key={l.code} value={l.code} disabled={!l.ready}>
-                {l.label}
-                {l.ready ? "" : ` (${t("profile.comingSoon")})`}
-              </option>
-            ))}
-          </Select>
+            value={i18n.language as LanguageCode}
+            onChange={(code) => void setLanguage(code)}
+            options={LANGUAGES.map((l) => ({
+              value: l.code,
+              label: l.label,
+              hint: l.ready ? l.sub : t("profile.comingSoon"),
+              disabled: !l.ready,
+            }))}
+          />
         </Field>
         <Button
           size="xl"
