@@ -9,6 +9,9 @@ import { DatePicker } from "@/components/form/DatePicker"
 import { Field, Input, Textarea } from "@/components/form/Field"
 import { describe } from "@/components/form/describe"
 import { NumberWheel } from "@/components/form/NumberWheel"
+import { DictateButton } from "@/components/capture/DictateButton"
+import { PhotoStrip } from "@/components/capture/PhotoStrip"
+import { saveMedia } from "@/lib/media"
 import { PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
 import { newId, saveAndQueue } from "@/db/local"
@@ -64,6 +67,7 @@ export function Component() {
     handleSubmit,
     control,
     setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<Form>({
     resolver: zodResolver(schema),
@@ -93,6 +97,8 @@ export function Component() {
   const urgent = flags.some((f) => URGENT_FLAGS.includes(f))
   // Weight and height are optional and picked on wheels (Figma "Altura y Peso").
   const [body, setBody] = useState(false)
+  // Wound or skin photos (optional), saved with the reading and uploaded on sync.
+  const [photos, setPhotos] = useState<Blob[]>([])
   function toggleBody(on: boolean) {
     setBody(on)
     setValue("weightKg", on ? "60" : "")
@@ -116,6 +122,14 @@ export function Component() {
       version: 0,
     }
     await saveAndQueue("vitals", vitals)
+    for (const blob of photos)
+      await saveMedia({
+        blob,
+        kind: "wound-photo",
+        patientId: id,
+        ownerEntity: "vitals",
+        ownerId: vitals.id,
+      })
     // Something needs a facility today: go straight to the referral prompt.
     const needsReferral = vitalsFlags(vitals).some((f) =>
       URGENT_FLAGS.includes(f)
@@ -252,9 +266,28 @@ export function Component() {
             </div>
           </div>
         ) : null}
+        <section className="space-y-2">
+          <h2 className="text-sm font-medium tracking-[0.01em] text-foreground">
+            {t("vitals.photos")}
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            {t("vitals.photosHint")}
+          </p>
+          <PhotoStrip photos={photos} onChange={setPhotos} />
+        </section>
         <Field id="notes" label={t("vitals.notes")} hint={t("common.optional")}>
           <Textarea {...register("notes")} {...describe("notes")} />
         </Field>
+        <div className="-mt-3">
+          <DictateButton
+            onText={(text) =>
+              setValue(
+                "notes",
+                [getValues("notes").trim(), text].filter(Boolean).join(" ")
+              )
+            }
+          />
+        </div>
         <Button
           type="submit"
           size="xl"

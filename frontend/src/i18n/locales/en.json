@@ -137,7 +137,9 @@
     "save": "Save vitals",
     "bodyTitle": "Weight and height",
     "bodyAdd": "Add weight and height",
-    "bodyRemove": "Remove"
+    "bodyRemove": "Remove",
+    "photos": "Photos of a wound or rash",
+    "photosHint": "Optional. Up to 3. Only for the patient's care; ask before taking them."
   },
   "flags": {
     "bpCrisis": "Very high blood pressure",
@@ -373,7 +375,12 @@
     "witness": "Witness name",
     "witnessHint": "Optional. Someone else who heard the patient agree.",
     "witnessNeeded": "Needed when there is no recording.",
-    "recorded": "Recorded · {{seconds}} s"
+    "recorded": "Recorded · {{seconds}} s",
+    "addPhoto": "Add photo",
+    "photoN": "Photo {{n}}",
+    "removePhoto": "Remove {{label}}",
+    "dictate": "Speak notes",
+    "listening": "Listening… tap to stop"
   },
   "editPatient": {
     "title": "Edit details",

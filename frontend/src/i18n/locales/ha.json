@@ -137,7 +137,9 @@
     "save": "Ajiye awo",
     "bodyTitle": "Nauyi da tsawo",
     "bodyAdd": "Ƙara nauyi da tsawo",
-    "bodyRemove": "Cire"
+    "bodyRemove": "Cire",
+    "photos": "Hotunan rauni ko kurji",
+    "photosHint": "Ba dole ba ne. Har zuwa 3. Don kula da majiyyaci kawai; ka tambaya kafin ka ɗauka."
   },
   "flags": {
     "bpCrisis": "Hawan jini mai tsanani sosai",
@@ -373,7 +375,12 @@
     "witness": "Sunan shaida",
     "witnessHint": "Ba dole ba ne. Wani wanda ya ji majiyyacin ya yarda.",
     "witnessNeeded": "Ana buƙata idan babu naɗi.",
-    "recorded": "An naɗa · daƙiƙa {{seconds}}"
+    "recorded": "An naɗa · daƙiƙa {{seconds}}",
+    "addPhoto": "Ƙara hoto",
+    "photoN": "Hoto {{n}}",
+    "removePhoto": "Cire {{label}}",
+    "dictate": "Faɗi bayanai",
+    "listening": "Ana saurare… taɓa don tsayawa"
   },
   "editPatient": {
     "title": "Gyara bayanai",

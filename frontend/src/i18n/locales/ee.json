@@ -137,7 +137,9 @@
     "save": "Dzra dzidzemewo ɖo",
     "bodyTitle": "Kpekpeme kple kɔkɔme",
     "bodyAdd": "Tsɔ kpekpeme kple kɔkɔme kpe ɖe eŋu",
-    "bodyRemove": "Ɖe ɖa"
+    "bodyRemove": "Ɖe ɖa",
+    "photos": "Abi alo ŋutigbalẽdɔ ƒe fotowo",
+    "photosHint": "Mehiã o. Va se ɖe 3. Dɔnɔ la ƒe dɔyɔyɔ ko ŋuti; bia hafi nàɖee."
   },
   "flags": {
     "bpCrisis": "Ʋuƒoƒo kɔkɔ ŋutɔ",
@@ -373,7 +375,12 @@
     "witness": "Ɖaseɖila ƒe ŋkɔ",
     "witnessHint": "Mehiã o. Ame bubu si se be dɔnɔ la lɔ̃.",
     "witnessNeeded": "Ehiã ne gbexɔxɔ meli o.",
-    "recorded": "Woxɔe · sekend {{seconds}}"
+    "recorded": "Woxɔe · sekend {{seconds}}",
+    "addPhoto": "Tsɔ foto kpe ɖe eŋu",
+    "photoN": "Foto {{n}}",
+    "removePhoto": "Ɖe {{label}} ɖa",
+    "dictate": "Ƒo nu ŋlɔ nyawo",
+    "listening": "Ele to ɖom… zi edzi nàdzudzɔ"
   },
   "editPatient": {
     "title": "Trɔ nyatakakawo",

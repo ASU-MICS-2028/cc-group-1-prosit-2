@@ -137,7 +137,9 @@
     "save": "Kora nsusuiɛ no",
     "bodyTitle": "Mu duru ne tenten",
     "bodyAdd": "Fa mu duru ne tenten ka ho",
-    "bodyRemove": "Yi fi hɔ"
+    "bodyRemove": "Yi fi hɔ",
+    "photos": "Kuro anaa honam ho yareɛ mfonini",
+    "photosHint": "Ɛnyɛ dɛ ɛsɛ. Kɔsi 3. Ayarefoɔ no ayaresa nko ara; bisa ansa na woatwa."
   },
   "flags": {
     "bpCrisis": "Mogya mmoroso a ano yɛ den paa",
@@ -373,7 +375,12 @@
     "witness": "Adansefoɔ din",
     "witnessHint": "Ɛnyɛ dɛ ɛsɛ. Obi foforɔ a ɔtee sɛ ayarefoɔ no pene so.",
     "witnessNeeded": "Ɛho hia bere a nne nni hɔ.",
-    "recorded": "Wɔakyere · sɛkɛn {{seconds}}"
+    "recorded": "Wɔakyere · sɛkɛn {{seconds}}",
+    "addPhoto": "Fa mfonini ka ho",
+    "photoN": "Mfonini {{n}}",
+    "removePhoto": "Yi {{label}} fi hɔ",
+    "dictate": "Kasa kyerɛw nsɛm",
+    "listening": "Ɛretie… mia na ɛngyae"
   },
   "editPatient": {
     "title": "Sesa nsɛm no",

@@ -368,6 +368,7 @@ function VitalsRow({ v }: { v: Vitals }) {
     <li className="rounded-xl bg-card shadow-card p-4 text-sm">
       <p className="text-muted-foreground">{formatDateTime(v.takenAt)}</p>
       <p className="font-medium text-foreground">{parts.join(" · ")}</p>
+      <VitalsPhotos vitalsId={v.id} />
       {flags.length > 0 ? (
         <p
           className={cn(
@@ -381,6 +382,33 @@ function VitalsRow({ v }: { v: Vitals }) {
       ) : null}
     </li>
   )
+}
+
+/** Wound or skin photos taken with a reading, as small thumbnails. */
+function VitalsPhotos({ vitalsId }: { vitalsId: string }) {
+  const media = useMediaFor(vitalsId)
+  if (!media?.length) return null
+  return (
+    <div className="mt-2 flex gap-2">
+      {media.map((m, i) => (
+        <MediaThumb key={m.id} blob={m.blob} n={i + 1} />
+      ))}
+    </div>
+  )
+}
+
+function MediaThumb({ blob, n }: { blob: Blob; n: number }) {
+  const { t } = useTranslation()
+  const url = useObjectUrl(blob)
+  return url ? (
+    <a href={url} target="_blank" rel="noreferrer">
+      <img
+        src={url}
+        alt={t("capture.photoN", { n })}
+        className="size-16 rounded-lg object-cover"
+      />
+    </a>
+  ) : null
 }
 
 /**
