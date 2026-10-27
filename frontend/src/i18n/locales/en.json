@@ -84,7 +84,8 @@
     "vitals": "Vitals",
     "noVitals": "No vitals recorded yet.",
     "appointments": "Visits and referrals",
-    "latest": "Latest readings"
+    "latest": "Latest readings",
+    "call": "Call {{phone}}"
   },
   "newPatient": {
     "title": "Register a patient",
@@ -317,5 +318,16 @@
     "accepted": "Accepted",
     "declined": "Declined",
     "seen": "Seen"
+  },
+  "date": {
+    "choose": "Choose a date",
+    "chooseYear": "Choose the year",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "time": "Time",
+    "hour": "Hour",
+    "minute": "Minutes",
+    "now": "Now",
+    "done": "Done"
   }
 }

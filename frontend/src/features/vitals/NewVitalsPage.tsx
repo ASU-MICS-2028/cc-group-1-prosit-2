@@ -5,6 +5,7 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
 import { z } from "zod"
+import { DatePicker } from "@/components/form/DatePicker"
 import { Field, Input, Textarea } from "@/components/form/Field"
 import { describe } from "@/components/form/describe"
 import { NumberWheel } from "@/components/form/NumberWheel"
@@ -150,10 +151,20 @@ export function Component() {
         className="flex flex-1 flex-col gap-5"
       >
         <Field id="takenAt" label={t("vitals.takenAt")} error={err("takenAt")}>
-          <Input
-            type="datetime-local"
-            {...register("takenAt")}
-            {...describe("takenAt", err("takenAt"))}
+          <Controller
+            control={control}
+            name="takenAt"
+            render={({ field }) => (
+              <DatePicker
+                id="takenAt"
+                withTime
+                value={field.value}
+                onChange={field.onChange}
+                max={new Date()}
+                invalid={!!err("takenAt")}
+                describedBy={err("takenAt") ? "takenAt-error" : undefined}
+              />
+            )}
           />
         </Field>
         <div className="grid grid-cols-2 gap-4">

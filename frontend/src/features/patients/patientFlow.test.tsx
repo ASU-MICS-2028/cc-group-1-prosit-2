@@ -76,11 +76,22 @@ describe("register a patient, record vitals, book a visit", () => {
     expect(
       (screen.getByLabelText("Reason") as HTMLTextAreaElement).value
     ).toContain("Very high blood pressure")
+    // the app's own calendar: tomorrow (maybe next month), then the default 09:00
     const tomorrow = new Date(Date.now() + 86_400_000)
-    await user.type(
-      screen.getByLabelText("Date and time"),
-      tomorrow.toISOString().slice(0, 16)
+    await user.click(screen.getByLabelText("Date and time"))
+    if (tomorrow.getDate() === 1)
+      await user.click(
+        await screen.findByRole("button", { name: "Next month" })
+      )
+    await user.click(
+      await screen.findByRole("button", {
+        name: new Intl.DateTimeFormat("en", { dateStyle: "full" }).format(
+          tomorrow
+        ),
+      })
     )
+    await user.click(screen.getByRole("button", { name: "Done" }))
+    expect(screen.getByLabelText("Date and time")).toHaveTextContent(/9:00/)
     await user.type(
       screen.getByLabelText("Health facility"),
       "Dodowa District Hospital"

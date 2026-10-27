@@ -84,7 +84,8 @@
     "vitals": "Awo",
     "noVitals": "Ba a rubuta awo ba tukuna.",
     "appointments": "Ziyara da turawa",
-    "latest": "Awo na baya-bayan nan"
+    "latest": "Awo na baya-bayan nan",
+    "call": "Kira {{phone}}"
   },
   "newPatient": {
     "title": "Yi wa mara lafiya rajista",
@@ -317,5 +318,16 @@
     "accepted": "An karɓa",
     "declined": "An ƙi",
     "seen": "An gani"
+  },
+  "date": {
+    "choose": "Zaɓi kwanan wata",
+    "chooseYear": "Zaɓi shekara",
+    "prevMonth": "Watan da ya wuce",
+    "nextMonth": "Wata mai zuwa",
+    "time": "Lokaci",
+    "hour": "Awa",
+    "minute": "Mintuna",
+    "now": "Yanzu",
+    "done": "An gama"
   }
 }

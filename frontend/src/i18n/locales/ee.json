@@ -84,7 +84,8 @@
     "vitals": "Dzidzemewo",
     "noVitals": "Womeŋlɔ dzidzeme aɖeke haɖe o.",
     "appointments": "Sraɖekpɔwo kple ɖoɖowo",
-    "latest": "Dzidzeme mamlɛtɔwo"
+    "latest": "Dzidzeme mamlɛtɔwo",
+    "call": "Yɔ {{phone}}"
   },
   "newPatient": {
     "title": "Ŋlɔ dɔnɔ ƒe ŋkɔ",
@@ -317,5 +318,16 @@
     "accepted": "Woxɔe",
     "declined": "Wogbee",
     "seen": "Wokpɔe"
+  },
+  "date": {
+    "choose": "Tia ŋkeke",
+    "chooseYear": "Tia ƒe la",
+    "prevMonth": "Ɣleti si va yi",
+    "nextMonth": "Ɣleti si gbɔna",
+    "time": "Ɣeyiɣi",
+    "hour": "Gaƒoƒo",
+    "minute": "Aɖabaƒoƒowo",
+    "now": "Fifia",
+    "done": "Wu enu"
   }
 }

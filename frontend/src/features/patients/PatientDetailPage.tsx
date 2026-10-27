@@ -2,8 +2,14 @@ import { useLiveQuery } from "dexie-react-hooks"
 import {
   CalendarPlus,
   HeartPulse,
+  MapPin,
+  Mars,
+  Phone,
+  ShieldCheck,
   Thermometer,
   TriangleAlert,
+  Venus,
+  VenusAndMars,
   Weight,
 } from "@/components/icons"
 import type { ReactNode } from "react"
@@ -13,7 +19,7 @@ import { BpTrend } from "@/components/BpTrend"
 import { Card, EmptyState, PageHeader } from "@/components/PageHeader"
 import { buttonVariants } from "@/components/ui/button"
 import { db } from "@/db/local"
-import type { Vitals } from "@/db/types"
+import type { Patient, Vitals } from "@/db/types"
 import { ReferralStatusChip } from "@/features/referrals/ReferralStatusChip"
 import { formatDateTime } from "@/lib/dates"
 import { cn } from "@/lib/utils"
@@ -54,24 +60,7 @@ export function Component() {
   return (
     <div className="space-y-6">
       <PageHeader title={fullName(patient)} back="/patients" />
-      <dl className="grid grid-cols-2 gap-3 rounded-xl bg-card shadow-card p-4 text-sm">
-        <Item label={t("patient.sex")} value={t(`sex.${patient.sex}`)} />
-        <Item
-          label={t("patient.age")}
-          value={
-            t("patients.age", { count: ageFrom(patient.dateOfBirth) }) +
-            (patient.birthDateEstimated ? ` (${t("patient.estimated")})` : "")
-          }
-        />
-        <Item label={t("patient.community")} value={patient.community} />
-        <Item label={t("patient.district")} value={patient.district} />
-        {patient.phone ? (
-          <Item label={t("patient.phone")} value={patient.phone} />
-        ) : null}
-        {patient.nationalId ? (
-          <Item label={t("patient.nationalId")} value={patient.nationalId} />
-        ) : null}
-      </dl>
+      <Summary patient={patient} />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Link
@@ -144,14 +133,88 @@ export function Component() {
   )
 }
 
-function Item({ label, value }: { label: string; value: string }) {
+const SEX_ICON = { female: Venus, male: Mars, other: VenusAndMars }
+
+/** "0246787657" → "024 678 7657", the way Ghanaian numbers are read out. */
+const groupPhone = (phone: string) =>
+  phone.replace(/\s/g, "").replace(/^(\d{3})(\d{3})(\d+)$/, "$1 $2 $3")
+
+/**
+ * Who the patient is at a glance: initials, sex and age as two chips, where they live on one
+ * line, and the phone as a tap-to-call button. The ID number is masked (last 4 only): it's
+ * rarely needed during a visit and shouldn't be read off the screen by people nearby.
+ */
+function Summary({ patient }: { patient: Patient }) {
+  const { t } = useTranslation()
+  const SexIcon = SEX_ICON[patient.sex]
+  const chip =
+    "inline-flex h-8 items-center gap-1.5 rounded-full bg-secondary px-3 text-sm font-medium text-heading"
   return (
-    <div>
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium text-foreground">{value}</dd>
-    </div>
+    <Card className="p-5">
+      <div className="flex items-center gap-4">
+        <span
+          aria-hidden
+          className="grid size-14 shrink-0 place-items-center rounded-full bg-primary text-lg font-semibold text-primary-foreground"
+        >
+          {initials(fullName(patient))}
+        </span>
+        <div className="min-w-0 space-y-2">
+          <div className="flex flex-wrap gap-2">
+            <span className={chip}>
+              <SexIcon className="size-4 text-primary" aria-hidden />
+              {t(`sex.${patient.sex}`)}
+            </span>
+            <span className={chip}>
+              {t("patients.age", { count: ageFrom(patient.dateOfBirth) })}
+              {patient.birthDateEstimated ? (
+                <span className="font-normal text-muted-foreground">
+                  ({t("patient.estimated")})
+                </span>
+              ) : null}
+            </span>
+          </div>
+          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
+            <span className="truncate">
+              {patient.community}, {patient.district}
+            </span>
+          </p>
+        </div>
+      </div>
+      {patient.phone || patient.nationalId ? (
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+          {patient.phone ? (
+            <a
+              href={`tel:${patient.phone.replace(/\s/g, "")}`}
+              aria-label={t("patient.call", { phone: patient.phone })}
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-primary/10 px-4 text-sm font-semibold text-primary tabular-nums"
+            >
+              <Phone className="size-5" aria-hidden />
+              {groupPhone(patient.phone)}
+            </a>
+          ) : null}
+          {patient.nationalId ? (
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <ShieldCheck className="size-4" aria-hidden />
+              <span className="sr-only">{t("patient.nationalId")}: </span>
+              <span className="tabular-nums">
+                •••• {patient.nationalId.replace(/\W/g, "").slice(-4)}
+              </span>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+    </Card>
   )
 }
+
+const initials = (name: string) =>
+  name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]!.toUpperCase())
+    .join("")
 
 function VitalsRow({ v }: { v: Vitals }) {
   const { t } = useTranslation()

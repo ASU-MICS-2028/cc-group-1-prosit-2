@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { z } from "zod"
 import { ChoiceTiles } from "@/components/form/ChoiceTiles"
+import { DatePicker } from "@/components/form/DatePicker"
 import { Dropdown } from "@/components/form/Dropdown"
 import { Segmented } from "@/components/form/Segmented"
 import { Field, Input } from "@/components/form/Field"
@@ -322,10 +323,22 @@ export function Component() {
                 label={t("patient.dateOfBirth")}
                 error={err("dateOfBirth")}
               >
-                <Input
-                  type="date"
-                  {...register("dateOfBirth")}
-                  {...describe("dateOfBirth", err("dateOfBirth"))}
+                <Controller
+                  control={control}
+                  name="dateOfBirth"
+                  render={({ field }) => (
+                    <DatePicker
+                      id="dateOfBirth"
+                      value={field.value}
+                      onChange={field.onChange}
+                      max={new Date()}
+                      startWithYear
+                      invalid={!!err("dateOfBirth")}
+                      describedBy={
+                        err("dateOfBirth") ? "dateOfBirth-error" : undefined
+                      }
+                    />
+                  )}
                 />
               </Field>
             ) : (
