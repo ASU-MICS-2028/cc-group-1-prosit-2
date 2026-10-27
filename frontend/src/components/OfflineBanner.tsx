@@ -1,4 +1,4 @@
-import { CloudOff } from "lucide-react"
+import { CloudOff } from "@/components/icons"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { useOnline } from "@/lib/useOnline"

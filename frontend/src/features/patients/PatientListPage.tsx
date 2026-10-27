@@ -1,4 +1,4 @@
-import { MapPin, Phone, Plus, Search } from "lucide-react"
+import { MapPin, Phone, Plus, Search } from "@/components/icons"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
@@ -15,7 +15,7 @@ export function Component() {
   return (
     <>
       <PageHeader title={t("patients.title")} />
-      <label className="mb-4 flex h-12 items-center gap-2 rounded-lg border border-input bg-card px-4 focus-within:border-2 focus-within:border-primary focus-within:px-[15px]">
+      <label className="mb-4 flex h-12 items-center gap-2 rounded-xl bg-card px-4 shadow-card focus-within:ring-2 focus-within:ring-primary">
         <Search className="size-6 text-foreground" aria-hidden />
         <input
           type="search"
@@ -27,7 +27,7 @@ export function Component() {
         />
       </label>
       {patients?.length === 0 ? (
-        <EmptyState>
+        <EmptyState illustration={search ? "no-data" : "empty-patients"}>
           {search ? t("patients.noMatch") : t("patients.empty")}
         </EmptyState>
       ) : (
@@ -38,7 +38,7 @@ export function Component() {
                 to={`/patients/${p.id}`}
                 className="block rounded-xl focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
-                <Card className="transition-colors hover:border-primary">
+                <Card className="transition-shadow hover:shadow-md">
                   <div className="flex items-center gap-4 px-4 py-4">
                     <Monogram name={fullName(p)} />
                     <div className="min-w-0 flex-1">

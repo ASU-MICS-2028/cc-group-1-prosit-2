@@ -50,7 +50,7 @@ export function BpTrend({ readings }: { readings: Vitals[] }) {
   ]
 
   return (
-    <figure className="rounded-xl border border-border bg-card p-4">
+    <figure className="rounded-xl bg-card shadow-card p-4">
       <figcaption className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
         <span className="text-base font-semibold text-heading">
           {t("chart.title")}

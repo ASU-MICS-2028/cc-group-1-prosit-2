@@ -78,7 +78,7 @@ function Prompt({
     <section
       role="status"
       aria-label={title}
-      className="fixed inset-x-4 bottom-24 z-30 mx-auto flex max-w-md gap-3 rounded-3xl bg-card p-4 shadow-floating ring-1 ring-border md:inset-x-auto md:right-6 md:bottom-6 md:w-96"
+      className="fixed inset-x-4 bottom-24 z-30 mx-auto flex max-w-md gap-3 rounded-3xl bg-card p-4 shadow-floating md:inset-x-auto md:right-6 md:bottom-6 md:w-96"
     >
       <img
         src="/pwa-64x64.png"

@@ -5,7 +5,7 @@ import {
   Thermometer,
   TriangleAlert,
   Weight,
-} from "lucide-react"
+} from "@/components/icons"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
@@ -54,7 +54,7 @@ export function Component() {
   return (
     <div className="space-y-6">
       <PageHeader title={fullName(patient)} back="/patients" />
-      <dl className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-card p-4 text-sm">
+      <dl className="grid grid-cols-2 gap-3 rounded-xl bg-card shadow-card p-4 text-sm">
         <Item label={t("patient.sex")} value={t(`sex.${patient.sex}`)} />
         <Item
           label={t("patient.age")}
@@ -122,7 +122,7 @@ export function Component() {
             {appointments?.map((a) => (
               <li
                 key={a.id}
-                className="rounded-xl border border-border bg-card p-4 text-sm"
+                className="rounded-xl bg-card shadow-card p-4 text-sm"
               >
                 <p className="flex items-start justify-between gap-2 font-medium text-foreground">
                   <span>
@@ -168,7 +168,7 @@ function VitalsRow({ v }: { v: Vitals }) {
     index ? `${t("vitals.bmi")} ${index}` : null,
   ].filter(Boolean)
   return (
-    <li className="rounded-xl border border-border bg-card p-4 text-sm">
+    <li className="rounded-xl bg-card shadow-card p-4 text-sm">
       <p className="text-muted-foreground">{formatDateTime(v.takenAt)}</p>
       <p className="font-medium text-foreground">{parts.join(" · ")}</p>
       {flags.length > 0 ? (

@@ -1,4 +1,4 @@
-import { Check } from "lucide-react"
+import { Check } from "@/components/icons"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -46,11 +46,9 @@ export function Component() {
               <label
                 key={l.code}
                 className={cn(
-                  "flex min-h-14 items-center gap-2 rounded-md border px-3 py-2 has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
+                  "flex min-h-14 items-center gap-2 rounded-xl bg-card px-3 py-2 shadow-card has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
                   !l.ready && "opacity-60",
-                  selected
-                    ? "border-2 border-primary bg-card px-[11px]"
-                    : "border-input bg-card",
+                  selected && "ring-2 ring-primary",
                   l.ready ? "cursor-pointer" : "cursor-not-allowed"
                 )}
               >

@@ -64,7 +64,7 @@ export function AppLayout() {
               {({ isActive }) => (
                 <>
                   <span className={pill(item, isActive)}>
-                    <item.icon className="size-5" aria-hidden />
+                    <item.icon className="size-6" filled={isActive} />
                   </span>
                   <span className={isActive ? "font-semibold" : undefined}>
                     {t(item.key)}
@@ -103,7 +103,7 @@ export function AppLayout() {
               {({ isActive }) => (
                 <>
                   <span className={pill(item, isActive)}>
-                    <item.icon className="size-5" aria-hidden />
+                    <item.icon className="size-6" filled={isActive} />
                   </span>
                   {t(item.key)}
                 </>

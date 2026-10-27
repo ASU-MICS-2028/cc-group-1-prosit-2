@@ -7,7 +7,7 @@ import {
   TriangleAlert,
   UserPlus,
   Users,
-} from "lucide-react"
+} from "@/components/icons"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"

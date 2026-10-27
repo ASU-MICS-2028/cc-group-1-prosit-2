@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft } from "@/components/icons"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom"

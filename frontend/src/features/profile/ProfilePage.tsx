@@ -1,4 +1,4 @@
-import { LogOut } from "lucide-react"
+import { LogOut } from "@/components/icons"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { clearSession, useSession } from "@/auth/session"
@@ -21,7 +21,7 @@ export function Component() {
     <>
       <PageHeader title={t("profile.title")} />
       <div className="space-y-5">
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl bg-card shadow-card p-4">
           <p className="font-medium text-foreground">{session?.user.name}</p>
           <p className="text-sm text-muted-foreground">
             {session ? t(`roles.${session.user.role}`) : null} ·{" "}

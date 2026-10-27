@@ -1,4 +1,4 @@
-import { HeartPulse } from "lucide-react"
+import { HeartPulse } from "@/components/icons"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
 import { buttonVariants } from "@/components/ui/button"

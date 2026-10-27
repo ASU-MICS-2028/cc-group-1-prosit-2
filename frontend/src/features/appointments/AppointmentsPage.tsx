@@ -24,14 +24,16 @@ export function Component() {
     <>
       <PageHeader title={t("appointments.title")} />
       {rows?.length === 0 ? (
-        <EmptyState>{t("appointments.empty")}</EmptyState>
+        <EmptyState illustration="empty-visits">
+          {t("appointments.empty")}
+        </EmptyState>
       ) : (
         <ul className="space-y-2">
           {rows?.map((a) => (
             <li key={a.id}>
               <Link
                 to={`/patients/${a.patientId}`}
-                className="block rounded-xl border border-border bg-card p-4 text-sm"
+                className="block rounded-xl bg-card shadow-card p-4 text-sm"
               >
                 <p className="flex items-center justify-between gap-2">
                   <span className="font-medium text-foreground">

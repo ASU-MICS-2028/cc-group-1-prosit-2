@@ -7,7 +7,7 @@ import {
   ShieldCheck,
   Venus,
   VenusAndMars,
-} from "lucide-react"
+} from "@/components/icons"
 import { useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -192,6 +192,11 @@ export function Component() {
       >
         {step === 0 ? (
           <>
+            <img
+              src="/illustrations/consent.svg"
+              alt=""
+              className="mx-auto h-36 w-auto"
+            />
             <Card className="flex gap-3 p-4">
               <ShieldCheck
                 className="size-6 shrink-0 text-primary"

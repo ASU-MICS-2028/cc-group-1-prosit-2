@@ -1,4 +1,3 @@
-import { CloudOff } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 
@@ -10,7 +9,7 @@ export function RouteError() {
   const { t } = useTranslation()
   return (
     <main className="mx-auto flex min-h-svh max-w-md flex-col items-center justify-center gap-4 p-6 text-center">
-      <CloudOff className="size-10 text-primary" aria-hidden />
+      <img src="/illustrations/load-error.svg" alt="" className="h-40 w-auto" />
       <h1 className="text-xl font-bold text-heading">
         {t("routeError.title")}
       </h1>

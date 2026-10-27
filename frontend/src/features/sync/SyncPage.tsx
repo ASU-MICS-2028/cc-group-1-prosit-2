@@ -1,4 +1,4 @@
-import { Cloud, CloudOff, RefreshCw } from "lucide-react"
+import { Cloud, CloudOff, RefreshCw } from "@/components/icons"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { EmptyState, PageHeader } from "@/components/PageHeader"
@@ -26,7 +26,7 @@ export function Component() {
   return (
     <>
       <PageHeader title={t("sync.title")} />
-      <div className="mb-5 flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+      <div className="mb-5 flex items-center gap-3 rounded-xl bg-card shadow-card p-4">
         {online ? (
           <Cloud className="size-6 text-primary" aria-hidden />
         ) : (
@@ -61,9 +61,9 @@ export function Component() {
         </p>
       ) : null}
       {outbox?.length === 0 ? (
-        <EmptyState>{t("sync.allSent")}</EmptyState>
+        <EmptyState illustration="synced">{t("sync.allSent")}</EmptyState>
       ) : (
-        <ul className="divide-y rounded-xl border border-border bg-card text-sm">
+        <ul className="divide-y rounded-xl bg-card shadow-card text-sm">
           {outbox?.map((item) => (
             <li key={item.seq} className="flex justify-between gap-3 p-3">
               <span className="text-foreground">
