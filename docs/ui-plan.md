@@ -22,6 +22,10 @@ Each row maps a Figma frame to a HealthConnect screen. The brief's four weeks ar
 | **Weight and height wheels** | Altura y Peso | Optional; spinbutton for keyboard and screen readers |
 | **Refer today** (after an urgent reading) | Ante una Emergencia | Books the referral with reason and priority filled in |
 | **Patient record cards + BP trend** | Metrics / Hearth Activity | Latest readings with flags in words; BP chart with 140/90 lines |
+| **Welcome + language** (first open) | Welcome | Language before anything else |
+| **Sign-in: phone + SMS code** | Completa tu Registro, Validar Registro | Demo mode until the API (ADR 0004) |
+| **Referral inbox** (nurse, doctor) | Día/Semana/Mes segmented control | requested → accepted / declined → seen |
+| **District summary** (officer) | Activity / Month | Week/Month, bar charts, fever early warning, small cells hidden |
 
 ## Next, by milestone
 
@@ -42,6 +46,9 @@ Each row maps a Figma frame to a HealthConnect screen. The brief's four weeks ar
 10. **Voice notes to text** on the vitals notes field (brief, week 1): the browser's speech API in English for now.
 11. **Welcome + language screen** on first open (Figma *Welcome*), then the install prompt.
 12. **Thumbprint consent** as a mock (brief: biometrics for patients who can't read).
+
+## Decided (ADR 0004)
+Sign-in, referral states and the summary's data were decided by the frontend to unblock the work; see ADR 0004.
 
 ## Open questions for the team
 - **Germain:** is a phone number + SMS code enough for health workers, or do nurses and doctors need a password too?

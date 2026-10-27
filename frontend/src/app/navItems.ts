@@ -3,6 +3,7 @@ import {
   ChartColumn,
   CircleUser,
   House,
+  Inbox,
   Plus,
   RefreshCw,
   Users,
@@ -12,7 +13,7 @@ import type { Role } from "@/auth/session"
 
 export interface NavItem {
   to: string
-  key: `nav.${"home" | "patients" | "add" | "appointments" | "summary" | "sync" | "profile"}`
+  key: `nav.${"home" | "patients" | "add" | "referrals" | "appointments" | "summary" | "sync" | "profile"}`
   icon: LucideIcon
   end: boolean
   /** The design's centre "Agregar" tab: orange when active */
@@ -32,6 +33,12 @@ const add: NavItem = {
   icon: Plus,
   end: true,
   add: true,
+}
+const referrals: NavItem = {
+  to: "/referrals",
+  key: "nav.referrals",
+  icon: Inbox,
+  end: false,
 }
 const appointments: NavItem = {
   to: "/appointments",
@@ -64,7 +71,10 @@ const profile: NavItem = {
  * summary for officers. Sync is reached from the offline banner, Home and Profile.
  */
 export function navFor(role: Role): readonly NavItem[] {
-  return role === "district_officer" || role === "admin"
-    ? [summary, sync, profile]
-    : [home, patients, add, appointments, profile]
+  if (role === "district_officer" || role === "admin")
+    return [summary, sync, profile]
+  // Nurses and doctors receive referrals; CHVs register patients.
+  if (role === "nurse" || role === "doctor")
+    return [home, patients, referrals, appointments, profile]
+  return [home, patients, add, appointments, profile]
 }

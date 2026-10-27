@@ -78,12 +78,14 @@ All under `/api`, JSON, `Authorization: Bearer <token>`. nginx serves the app an
 
 | Method | Path | Body / result | Used by |
 |---|---|---|---|
-| POST | `/auth/login` | → `{ token, expiresAt, user: { id, name, role, district } }` | sign-in |
+| POST | `/auth/code` | `{ phone }` (E.164, +233…) → 204; 404 if the number isn't a registered health worker; 429 if asked too often | sign-in step 1 (ADR 0004) |
+| POST | `/auth/verify` | `{ phone, code }` → `{ token, expiresAt, user: { id, name, role, district } }`; 401 wrong or expired code | sign-in step 2 |
 | PUT | `/patients/{id}` | Patient → 200/201 with the saved record | sync |
 | PUT | `/vitals/{id}` | Vitals → 200/201 | sync |
 | PUT | `/appointments/{id}` | Appointment → 200/201 | sync |
 | GET | `/patients?updatedSince=` | → Patient[] | pulling other workers' changes (stretch) |
-| GET | `/surveillance/summary?district=` | → counts by week: patients, vitals flags, referrals | district summary |
+| PUT | `/appointments/{id}` with `referralStatus` | `requested` → `accepted` / `declined` → `seen`, plus `handledBy`, `handledAt` | referral inbox (nurse, doctor) |
+| GET | `/surveillance/weekly` | → rows of `surveillance_weekly` (db/rbac.sql): `{ district, week, patients_seen, patients_high_bp, patients_fever, suppressed }`, cells under 5 null | district summary (officer) |
 | GET | `/health` | → 200 | load balancer / deploy check |
 
 **Why PUT by id:** on 2G a reply can be lost after the server saved the record. The phone then sends it again, and a PUT to the same id saves it once.
@@ -95,6 +97,6 @@ All under `/api`, JSON, `Authorization: Bearer <token>`. nginx serves the app an
 - **422** → validation errors, `{ errors: { field: message } }`.
 
 ## Asks
-- **Bernard:** confirm the paths and status codes; tell me when `/auth/login` exists so I can replace the demo sign-in.
+- **Bernard:** implement `/auth/code` and `/auth/verify` as above (ADR 0004). Until they exist the app runs in demo mode; set `VITE_AUTH_MODE=api` to switch.
 - **Liza:** confirm the field names against the ERD; give me the conflict policy and the summary's shape.
 - **Germain:** confirm the role names and whether a thumbprint is enough for consent in the demo (the biometric part is a mock).

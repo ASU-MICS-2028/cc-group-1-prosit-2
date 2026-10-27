@@ -66,6 +66,12 @@ export type AppointmentStatus =
 
 export type Priority = "routine" | "urgent" | "emergency"
 
+/**
+ * Where a referral or teleconsult request stands (maps to FHIR ServiceRequest.status:
+ * requested = active, accepted = active + accepted task, declined = revoked, seen = completed).
+ */
+export type ReferralStatus = "requested" | "accepted" | "declined" | "seen"
+
 export interface Appointment {
   id: string
   patientId: string
@@ -76,6 +82,11 @@ export interface Appointment {
   reason: string
   priority: Priority
   status: AppointmentStatus
+  /** Only for referrals and teleconsults: set by the receiving nurse or doctor */
+  referralStatus?: ReferralStatus
+  /** Who accepted or declined it, and when */
+  handledBy?: string
+  handledAt?: string
   createdAt: string
   updatedAt: string
   version: number

@@ -15,7 +15,8 @@
     "summary": "Summary",
     "sync": "Sync",
     "profile": "Profile",
-    "add": "Add"
+    "add": "Add",
+    "referrals": "Referrals"
   },
   "roles": {
     "chv": "Community Health Volunteer",
@@ -25,9 +26,16 @@
     "admin": "Administrator"
   },
   "login": {
-    "welcome": "Welcome",
-    "motto": "Good health starts in the community.",
-    "demoIntro": "Demo sign-in with synthetic data. Continue as:"
+    "title": "Sign in",
+    "text": "Enter your phone number. We'll send you a 6-digit code by SMS.",
+    "phone": "Phone number",
+    "phoneHint": "The number registered with your health service.",
+    "sendCode": "Send code",
+    "unknownNumber": "This number isn't registered as a health worker. Check it, or ask your district office.",
+    "network": "Couldn't reach the server. Check your connection and try again.",
+    "demoTitle": "Demo accounts (synthetic)",
+    "demoText": "Tap a number to fill it in. The code is {{code}}.",
+    "changeLanguage": "Change language"
   },
   "offline": {
     "banner_one": "Offline · {{count}} change waiting to sync",
@@ -181,8 +189,28 @@
   },
   "surveillance": {
     "title": "District summary",
-    "district": "{{district}} district · anonymised counts only",
-    "comingSoon": "The summary appears here once the analytics endpoint is connected."
+    "district": "{{district}} · anonymised counts only",
+    "demo": "Demo data until the surveillance API is live",
+    "offline": "The summary needs a connection. Try again when you're online.",
+    "week": "Week",
+    "month": "Month",
+    "weekOf": "Week of {{date}}",
+    "seen": "Patients seen",
+    "highBp": "High BP",
+    "fever": "Fever",
+    "vsLast": "{{diff}} on the period before",
+    "partial": "Some weeks had fewer than 5 patients and are not counted, to protect privacy.",
+    "seenChart": "Patients seen",
+    "feverChart": "Patients with fever",
+    "fewer": "<5",
+    "empty": "No data for your district yet.",
+    "allDistricts": "All districts this week",
+    "colDistrict": "District",
+    "privacy": "Counts under 5 are hidden so no patient can be identified (Act 843 s.24(3)).",
+    "signalTitle": "Fever rising in {{district}}",
+    "signalText": "{{now}} patients with fever last week, against an average of {{avg}} in the 4 weeks before. Check with the district team.",
+    "lastFullWeek": "Last full week: {{label}}",
+    "soFar": "{{label}} so far"
   },
   "profile": {
     "title": "Profile",
@@ -245,5 +273,39 @@
     "diastolic": "Diastolic",
     "aria_one": "Blood pressure over {{count}} visit, latest {{sys}}/{{dia}} mmHg",
     "aria_other": "Blood pressure over {{count}} visits, latest {{sys}}/{{dia}} mmHg"
+  },
+  "welcome": {
+    "language": "Choose your language",
+    "soon": "Coming soon",
+    "start": "Get started"
+  },
+  "code": {
+    "title": "Enter the code",
+    "text": "We sent a 6-digit code to {{phone}}.",
+    "label": "6-digit code",
+    "verify": "Verify code",
+    "wrong": "That code isn't right. Check the SMS and try again.",
+    "noCode": "No code yet?",
+    "resend": "Send again",
+    "resendIn_one": "Send again in {{count}} second",
+    "resendIn_other": "Send again in {{count}} seconds"
+  },
+  "referrals": {
+    "title": "Referrals",
+    "open_one": "To do ({{count}})",
+    "open_other": "To do ({{count}})",
+    "done_one": "Done ({{count}})",
+    "done_other": "Done ({{count}})",
+    "emptyOpen": "No referrals waiting.",
+    "emptyDone": "Nothing handled yet.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "markSeen": "Mark as seen"
+  },
+  "referralStatus": {
+    "requested": "Waiting",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "seen": "Seen"
   }
 }
