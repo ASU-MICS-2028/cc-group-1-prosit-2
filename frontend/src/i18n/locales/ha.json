@@ -150,8 +150,19 @@
     "pulseLow": "Bugun jijiya a hankali"
   },
   "appointments": {
-    "title": "Ziyara masu zuwa",
-    "empty": "Ba a tsara ziyara ba."
+    "title": "Ziyarori",
+    "upcoming": "Masu zuwa",
+    "overdue": "Lokaci ya wuce",
+    "past": "Da suka wuce",
+    "empty_upcoming": "Ba a tsara ziyara ba.",
+    "empty_overdue": "Babu abin da lokacinsa ya wuce. Madalla.",
+    "empty_past": "Babu ziyarar da aka kammala tukuna.",
+    "overdueTag": "lokaci ya wuce",
+    "markDone": "An gama",
+    "reschedule": "Canja lokaci",
+    "more": "Ƙarin zaɓuɓɓuka",
+    "markMissed": "Majiyyacin bai zo ba",
+    "cancel": "Soke ziyara"
   },
   "newAppointment": {
     "title": "Tsara ziyara ko turawa",
@@ -160,7 +171,9 @@
     "facility": "Asibiti",
     "priority": "Muhimmanci",
     "reason": "Dalili",
-    "save": "Tsara"
+    "save": "Tsara",
+    "editTitle": "Canja ziyarar",
+    "saveChanges": "Ajiye canje-canje"
   },
   "appointmentType": {
     "follow_up": "Ziyarar bibiya",

@@ -91,7 +91,7 @@ export function Component() {
           {t("patient.appointments")}
         </h2>
         {appointments?.length === 0 ? (
-          <EmptyState>{t("appointments.empty")}</EmptyState>
+          <EmptyState>{t("appointments.empty_upcoming")}</EmptyState>
         ) : (
           <ul className="space-y-2">
             {appointments?.map((a) => (

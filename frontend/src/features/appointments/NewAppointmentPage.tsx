@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useLiveQuery } from "dexie-react-hooks"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
@@ -10,7 +11,8 @@ import { Segmented } from "@/components/form/Segmented"
 import { describe } from "@/components/form/describe"
 import { PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
-import { newId, saveAndQueue } from "@/db/local"
+import { db, newId, saveAndQueue } from "@/db/local"
+import { toLocalInput } from "@/lib/dates"
 import { APPOINTMENT_TYPES, type Appointment } from "@/db/types"
 import { fullName, usePatient } from "@/features/patients/usePatients"
 
@@ -30,8 +32,22 @@ type Form = z.input<typeof schema>
 /**
  * Book a follow-up, or refer the patient (referral / teleconsult). The specialist side and the
  * referral queue are Bernard's mock flow for the demo; here the CHV only creates the request.
+ * With an appointment id in the address it changes that booking instead (reschedule).
  */
 export function Component() {
+  const { appointmentId } = useParams()
+  const existing = useLiveQuery(
+    async () =>
+      appointmentId
+        ? ((await db.appointments.get(appointmentId)) ?? null)
+        : null,
+    [appointmentId]
+  )
+  if (existing === undefined) return null
+  return <AppointmentForm existing={existing ?? undefined} />
+}
+
+function AppointmentForm({ existing }: { existing?: Appointment }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id = "" } = useParams()
@@ -53,16 +69,28 @@ export function Component() {
     formState: { errors, isSubmitting },
   } = useForm<Form>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      type: pick("type", APPOINTMENT_TYPES, "follow_up"),
-      priority: pick(
-        "priority",
-        ["routine", "urgent", "emergency"] as const,
-        "routine"
-      ),
-      facility: "",
-      reason: query.get("reason") ?? "",
-    },
+    defaultValues: existing
+      ? {
+          type: existing.type,
+          priority: existing.priority,
+          facility: existing.facility,
+          reason: existing.reason,
+          // an overdue visit must be moved to a new time, so start empty
+          scheduledAt:
+            existing.scheduledAt > new Date().toISOString()
+              ? toLocalInput(new Date(existing.scheduledAt))
+              : "",
+        }
+      : {
+          type: pick("type", APPOINTMENT_TYPES, "follow_up"),
+          priority: pick(
+            "priority",
+            ["routine", "urgent", "emergency"] as const,
+            "routine"
+          ),
+          facility: "",
+          reason: query.get("reason") ?? "",
+        },
   })
   const err = (key: keyof Form) => {
     const message = errors[key]?.message
@@ -71,6 +99,24 @@ export function Component() {
 
   async function onSubmit(f: Form) {
     const now = new Date().toISOString()
+    if (existing) {
+      await saveAndQueue(
+        "appointment",
+        {
+          ...existing,
+          type: f.type,
+          scheduledAt: new Date(f.scheduledAt).toISOString(),
+          facility: f.facility.trim(),
+          priority: f.priority,
+          reason: f.reason.trim(),
+          status: "scheduled",
+          updatedAt: now,
+        },
+        "update"
+      )
+      navigate("/appointments", { replace: true })
+      return
+    }
     const appointment: Appointment = {
       id: newId(),
       patientId: id,
@@ -94,7 +140,12 @@ export function Component() {
 
   return (
     <div className="mx-auto flex min-h-[calc(100svh-5rem)] flex-col max-w-lg">
-      <PageHeader title={t("newAppointment.title")} back={`/patients/${id}`} />
+      <PageHeader
+        title={
+          existing ? t("newAppointment.editTitle") : t("newAppointment.title")
+        }
+        back={existing ? "/appointments" : `/patients/${id}`}
+      />
       {patient ? (
         <p className="-mt-3 mb-5 text-sm text-muted-foreground">
           {fullName(patient)}
@@ -196,7 +247,9 @@ export function Component() {
           className="mt-auto w-full"
           disabled={isSubmitting}
         >
-          {t("newAppointment.save")}
+          {existing
+            ? t("newAppointment.saveChanges")
+            : t("newAppointment.save")}
         </Button>
       </form>
     </div>

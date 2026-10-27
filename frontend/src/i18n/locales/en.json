@@ -150,8 +150,19 @@
     "pulseLow": "Slow pulse"
   },
   "appointments": {
-    "title": "Upcoming visits",
-    "empty": "No visits booked."
+    "title": "Visits",
+    "upcoming": "Upcoming",
+    "overdue": "Overdue",
+    "past": "Past",
+    "empty_upcoming": "No visits booked.",
+    "empty_overdue": "Nothing overdue. Well done.",
+    "empty_past": "No finished visits yet.",
+    "overdueTag": "overdue",
+    "markDone": "Done",
+    "reschedule": "Reschedule",
+    "more": "More actions",
+    "markMissed": "Patient didn't come",
+    "cancel": "Cancel visit"
   },
   "newAppointment": {
     "title": "Book a visit or referral",
@@ -160,7 +171,9 @@
     "facility": "Health facility",
     "priority": "Priority",
     "reason": "Reason",
-    "save": "Book"
+    "save": "Book",
+    "editTitle": "Change the visit",
+    "saveChanges": "Save changes"
   },
   "appointmentType": {
     "follow_up": "Follow-up",

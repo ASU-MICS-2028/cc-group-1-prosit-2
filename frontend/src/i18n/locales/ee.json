@@ -150,8 +150,19 @@
     "pulseLow": "Dzi ƒoƒo blewu"
   },
   "appointments": {
-    "title": "Sraɖekpɔ siwo gbɔna",
-    "empty": "Womeɖo sraɖekpɔ aɖeke o."
+    "title": "Sasrãkpɔwo",
+    "upcoming": "Siwo gbɔna",
+    "overdue": "Ɣeyiɣi va yi",
+    "past": "Siwo va yi",
+    "empty_upcoming": "Womeɖo sasrãkpɔ aɖeke ɖi o.",
+    "empty_overdue": "Naneke ƒe ɣeyiɣi meva yi o. Ayekoo.",
+    "empty_past": "Sasrãkpɔ aɖeke mewu enu haɖe o.",
+    "overdueTag": "ɣeyiɣi va yi",
+    "markDone": "Wu enu",
+    "reschedule": "Trɔ ɣeyiɣi",
+    "more": "Nu bubuwo",
+    "markMissed": "Dɔnɔ la meva o",
+    "cancel": "Tutu sasrãkpɔ la"
   },
   "newAppointment": {
     "title": "Ɖo sraɖekpɔ alo ɖoɖo",
@@ -160,7 +171,9 @@
     "facility": "Dɔyɔƒe",
     "priority": "Vevienyenye",
     "reason": "Susu",
-    "save": "Ɖoe"
+    "save": "Ɖoe",
+    "editTitle": "Trɔ sasrãkpɔ la",
+    "saveChanges": "Dzra tɔtrɔwo ɖo"
   },
   "appointmentType": {
     "follow_up": "Gbugbɔgasra",

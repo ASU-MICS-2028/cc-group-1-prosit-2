@@ -150,8 +150,19 @@
     "pulseLow": "Koma bɔ brɛoo"
   },
   "appointments": {
-    "title": "Nsrahwɛ a ɛreba",
-    "empty": "Wɔnhyɛɛ nsrahwɛ biara da."
+    "title": "Nsrahwɛ",
+    "upcoming": "Deɛ ɛreba",
+    "overdue": "Bere atwam",
+    "past": "Deɛ atwam",
+    "empty_upcoming": "Wɔnhyehyɛɛ nsrahwɛ biara.",
+    "empty_overdue": "Biribiara nni hɔ a ne bere atwam. Ayekoo.",
+    "empty_past": "Nsrahwɛ biara nwieeɛ ɛ.",
+    "overdueTag": "bere atwam",
+    "markDone": "Awie",
+    "reschedule": "Sesa bere",
+    "more": "Nneɛma foforɔ",
+    "markMissed": "Ayarefoɔ no amma",
+    "cancel": "Twa nsrahwɛ no mu"
   },
   "newAppointment": {
     "title": "Hyɛ nsrahwɛ anaa nsoma da",
@@ -160,7 +171,9 @@
     "facility": "Ayaresabea",
     "priority": "Ɛhia sɛn",
     "reason": "Nea enti",
-    "save": "Hyɛ da"
+    "save": "Hyɛ da",
+    "editTitle": "Sesa nsrahwɛ no",
+    "saveChanges": "Kora nsakraeɛ no"
   },
   "appointmentType": {
     "follow_up": "Nsrahwɛ bio",
