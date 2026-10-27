@@ -67,7 +67,7 @@ export function Component() {
         action={
           <Link
             to={`/patients/${patient.id}/edit`}
-            className="mb-0.5 inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-secondary px-4 text-sm font-semibold text-primary"
+            className="mb-0.5 inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-secondary px-4 text-sm font-semibold text-secondary-foreground"
           >
             <PenLine className="size-4" aria-hidden />
             {t("editPatient.edit")}
@@ -157,7 +157,7 @@ function ConsentRecord({ patient }: { patient: Patient }) {
       </h2>
       <Card className="space-y-3 p-4 text-sm">
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-secondary text-primary">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
             <Icon className="size-5" aria-hidden />
           </span>
           <div className="min-w-0 flex-1">
@@ -181,7 +181,7 @@ function ConsentRecord({ patient }: { patient: Patient }) {
               className={cn(
                 "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold",
                 media.uploadedAt
-                  ? "bg-secondary text-primary"
+                  ? "bg-secondary text-secondary-foreground"
                   : "bg-warning/10 text-warning"
               )}
             >
@@ -324,7 +324,7 @@ function Summary({
         </Link>
         <Link
           to={`/patients/${patient.id}/appointments/new`}
-          className={cn(action, "bg-secondary text-primary")}
+          className={cn(action, "bg-secondary text-secondary-foreground")}
         >
           <span className="truncate">{t("patient.book")}</span>
         </Link>
@@ -332,7 +332,7 @@ function Summary({
           <a
             href={`tel:${patient.phone.replace(/\s/g, "")}`}
             aria-label={t("patient.call", { phone: patient.phone })}
-            className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-primary"
+            className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-secondary-foreground"
           >
             <Phone className="size-5" aria-hidden />
           </a>

@@ -4,11 +4,13 @@ import { useNavigate } from "react-router-dom"
 import { clearSession, useSession } from "@/auth/session"
 import { Dropdown } from "@/components/form/Dropdown"
 import { Field } from "@/components/form/Field"
+import { Segmented } from "@/components/form/Segmented"
 import { LogOut, PenLine, X } from "@/components/icons"
 import { PageHeader } from "@/components/PageHeader"
 import { ProfileCard } from "@/components/ProfileCard"
 import { Button } from "@/components/ui/button"
 import { LANGUAGES, setLanguage, type LanguageCode } from "@/i18n"
+import { setThemePref, useThemePref } from "@/lib/theme"
 import {
   removeProfilePhoto,
   saveProfilePhoto,
@@ -21,6 +23,7 @@ export function Component() {
   const navigate = useNavigate()
   const picker = useRef<HTMLInputElement>(null)
   const [photoError, setPhotoError] = useState(false)
+  const theme = useThemePref()
   const hasPhoto = useProfilePhoto(session?.user.id) !== null
 
   function signOut() {
@@ -99,6 +102,16 @@ export function Component() {
             }))}
           />
         </Field>
+        <Segmented
+          name="theme"
+          legend={t("profile.theme")}
+          value={theme}
+          onChange={setThemePref}
+          options={(["system", "light", "dark"] as const).map((v) => ({
+            value: v,
+            label: t(`profile.theme_${v}`),
+          }))}
+        />
         <Button
           size="xl"
           variant="destructive"

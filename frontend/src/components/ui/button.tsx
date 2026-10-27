@@ -7,14 +7,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Figma "BTN PRIMARY": #0066FF, darker when pressed
+        // Figma "BTN PRIMARY": #0066FF, slightly deeper when pressed
         default:
-          "bg-primary text-primary-foreground hover:bg-[#0050c8] active:bg-[#0050c8]",
+          "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/85",
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         // Figma "BTN SECONDARY": blue outline on white, light blue when pressed
         secondary:
-          "border-primary bg-card text-primary hover:bg-secondary active:bg-secondary aria-expanded:bg-secondary",
+          "border-primary bg-card text-primary hover:bg-secondary hover:text-secondary-foreground active:bg-secondary active:text-secondary-foreground aria-expanded:bg-secondary",
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:

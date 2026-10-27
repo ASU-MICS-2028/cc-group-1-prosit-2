@@ -250,7 +250,11 @@
     "removePhoto": "Cire hoto",
     "choosePhoto": "Zaɓi hoton bayananka",
     "photoHint": "Hotonka yana zama a wannan wayar kawai.",
-    "photoError": "Ba a iya amfani da wannan hoton ba. Gwada wani."
+    "photoError": "Ba a iya amfani da wannan hoton ba. Gwada wani.",
+    "theme": "Kamanni",
+    "theme_system": "Waya",
+    "theme_light": "Haske",
+    "theme_dark": "Duhu"
   },
   "pwa": {
     "updateTitle": "Sabon sigar ya shirya",

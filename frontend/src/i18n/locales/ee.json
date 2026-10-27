@@ -250,7 +250,11 @@
     "removePhoto": "Ɖe foto ɖa",
     "choosePhoto": "Tia wò foto",
     "photoHint": "Wò foto la nɔa telefon sia dzi ɖeɖeko.",
-    "photoError": "Míete ŋu zã foto ma o. Tia bubu."
+    "photoError": "Míete ŋu zã foto ma o. Tia bubu.",
+    "theme": "Ale si wòdze",
+    "theme_system": "Fon la",
+    "theme_light": "Kekeli",
+    "theme_dark": "Viviti"
   },
   "pwa": {
     "updateTitle": "Nɔnɔme yeye ɖe le klalo",

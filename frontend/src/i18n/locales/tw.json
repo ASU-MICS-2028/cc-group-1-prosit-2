@@ -250,7 +250,11 @@
     "removePhoto": "Yi mfonini",
     "choosePhoto": "Paw wo mfonini",
     "photoHint": "Wo mfonini no tena fon yi so nko ara.",
-    "photoError": "Yɛantumi amfa mfonini no anni dwuma. Paw foforɔ."
+    "photoError": "Yɛantumi amfa mfonini no anni dwuma. Paw foforɔ.",
+    "theme": "Sɛnea ɛte",
+    "theme_system": "Fon no",
+    "theme_light": "Hann",
+    "theme_dark": "Sum"
   },
   "pwa": {
     "updateTitle": "Nhyehyɛeɛ foforɔ aba",

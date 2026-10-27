@@ -41,7 +41,10 @@ Each row maps a Figma frame to a HealthConnect screen. The brief's four weeks ar
 7. **Referral status** for nurses and doctors: requested → accepted → seen (mock flow with Bernard).
 8. **District summary for officers** (Figma *Activity / Month*: Day / Week / Month tabs): counts of patients seen, urgent readings and referrals by week, anonymised, from Liza's endpoint.
 
-### Stretch (if time, otherwise documented)
+### Stretch: all done (27 Oct, feature/finish-frontend)
+9, 11 and 12 shipped. 10 shipped on-device only: cloud speech recognition would send health notes to Google. 12 is real, not a mock: a voice clip, signature or thumbprint photo, with no biometrics. Also added: visit actions (done / reschedule / missed / cancel), editing a patient, dark mode, and new icons in the brand blue.
+
+The list as originally planned:
 9. **Wound/skin photos** on the patient record (brief, week 1): camera, compressed on the phone, uploaded to the private S3 bucket with a presigned URL.
 10. **Voice notes to text** on the vitals notes field (brief, week 1): the browser's speech API in English for now.
 11. **Welcome + language screen** on first open (Figma *Welcome*), then the install prompt.

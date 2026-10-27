@@ -5,8 +5,8 @@ import react, { reactCompilerPreset } from "@vitejs/plugin-react"
 import { VitePWA } from "vite-plugin-pwa"
 import { defineConfig } from "vitest/config"
 
-// Placeholder brand colour until the Figma design sets it (docs/adr/0002)
-const BRAND = "#0b6e69"
+// HealthCheck kit "Azul Principal"; the splash screen uses the app's screen grey
+const BRAND = "#0066ff"
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -31,7 +31,7 @@ export default defineConfig({
         scope: "/",
         display: "standalone",
         theme_color: BRAND,
-        background_color: "#fdfdfd",
+        background_color: "#f2f3f5",
         icons: [
           { src: "pwa-64x64.png", sizes: "64x64", type: "image/png" },
           { src: "pwa-192x192.png", sizes: "192x192", type: "image/png" },

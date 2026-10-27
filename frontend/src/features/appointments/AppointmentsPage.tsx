@@ -88,7 +88,7 @@ function VisitCard({ a, overdue }: { a: Row; overdue: boolean }) {
               className={cn(
                 "rounded-full px-2.5 py-0.5 text-xs font-semibold",
                 a.status === "completed"
-                  ? "bg-secondary text-primary"
+                  ? "bg-secondary text-secondary-foreground"
                   : "bg-muted text-muted-foreground"
               )}
             >
@@ -137,7 +137,7 @@ function VisitCard({ a, overdue }: { a: Row; overdue: boolean }) {
           </button>
           <Link
             to={`/patients/${a.patientId}/appointments/${a.id}/edit`}
-            className="inline-flex h-11 flex-1 items-center justify-center rounded-lg bg-secondary px-3 text-sm font-semibold text-primary"
+            className="inline-flex h-11 flex-1 items-center justify-center rounded-lg bg-secondary px-3 text-sm font-semibold text-secondary-foreground"
           >
             {t("appointments.reschedule")}
           </Link>
@@ -157,7 +157,7 @@ function MoreMenu({ a }: { a: Appointment }) {
     <Menu.Root>
       <Menu.Trigger
         aria-label={t("appointments.more")}
-        className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-primary data-[popup-open]:bg-primary data-[popup-open]:text-primary-foreground"
+        className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-secondary-foreground data-[popup-open]:bg-primary data-[popup-open]:text-primary-foreground"
       >
         <svg
           viewBox="0 0 24 24"

@@ -98,7 +98,7 @@ function Thumb({
         type="button"
         onClick={onRemove}
         aria-label={t("capture.removePhoto", { label })}
-        className="absolute -top-2 -right-2 grid size-8 place-items-center rounded-full bg-heading text-white shadow-card"
+        className="absolute -top-2 -right-2 grid size-8 place-items-center rounded-full bg-foreground text-background shadow-card"
       >
         <X className="size-4" aria-hidden />
       </button>

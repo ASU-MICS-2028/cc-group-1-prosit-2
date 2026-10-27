@@ -52,8 +52,10 @@ export function Segmented<T extends string>({
                 selected &&
                   t === "primary" &&
                   "bg-primary text-primary-foreground",
-                selected && t === "warning" && "bg-warning text-white",
-                selected && t === "destructive" && "bg-destructive text-white"
+                selected && t === "warning" && "bg-warning text-background",
+                selected &&
+                  t === "destructive" &&
+                  "bg-destructive text-background"
               )}
             >
               <input

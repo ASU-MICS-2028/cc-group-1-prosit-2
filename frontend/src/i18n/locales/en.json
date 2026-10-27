@@ -250,7 +250,11 @@
     "removePhoto": "Remove photo",
     "choosePhoto": "Choose a profile photo",
     "photoHint": "Your photo stays on this phone.",
-    "photoError": "That picture couldn't be used. Try another one."
+    "photoError": "That picture couldn't be used. Try another one.",
+    "theme": "Appearance",
+    "theme_system": "Phone",
+    "theme_light": "Light",
+    "theme_dark": "Dark"
   },
   "pwa": {
     "updateTitle": "A new version is ready",

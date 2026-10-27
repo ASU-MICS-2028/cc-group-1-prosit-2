@@ -48,7 +48,9 @@ export function DictateButton({ onText }: { onText: (text: string) => void }) {
       aria-pressed={listening}
       className={cn(
         "inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold",
-        listening ? "bg-destructive text-white" : "bg-secondary text-primary"
+        listening
+          ? "bg-destructive text-background"
+          : "bg-secondary text-secondary-foreground"
       )}
     >
       <svg

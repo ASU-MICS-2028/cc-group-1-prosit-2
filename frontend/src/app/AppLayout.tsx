@@ -24,7 +24,7 @@ function useAutoSync(enabled: boolean) {
 /** The pill behind a tab's icon (Figma "Bottom Navigation"): blue when active, orange for Add. */
 function pill(item: NavItem, isActive: boolean) {
   return cn(
-    "grid h-8 w-16 place-items-center rounded-full transition-colors",
+    "grid h-8 w-14 max-w-full place-items-center rounded-full transition-colors",
     isActive
       ? item.add
         ? "bg-accent-orange text-white"
@@ -98,14 +98,18 @@ export function AppLayout() {
               key={item.to}
               to={item.to}
               end={item.end}
-              className="flex min-w-16 flex-col items-center gap-1 text-xs font-medium tracking-[0.03em] text-muted-foreground aria-[current=page]:font-semibold aria-[current=page]:text-foreground"
+              // Equal fifths of the bar, whatever the language: a long Ewe or Hausa label wraps
+              // onto a second line (centred, at most two) instead of pushing into its neighbour.
+              className="flex min-w-0 flex-1 basis-0 flex-col items-center gap-1 px-0.5 text-xs font-medium text-muted-foreground aria-[current=page]:font-semibold aria-[current=page]:text-foreground"
             >
               {({ isActive }) => (
                 <>
                   <span className={pill(item, isActive)}>
                     <item.icon className="size-6" filled={isActive} />
                   </span>
-                  {t(item.key)}
+                  <span className="line-clamp-2 w-full text-center leading-tight [overflow-wrap:anywhere] hyphens-auto">
+                    {t(item.key)}
+                  </span>
                 </>
               )}
             </NavLink>

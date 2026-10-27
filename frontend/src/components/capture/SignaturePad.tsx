@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+/** White, like the paper form, in light and dark mode, so the saved PNG reads anywhere. */
+function paper(ctx: CanvasRenderingContext2D, el: HTMLCanvasElement) {
+  ctx.save()
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.fillStyle = "#ffffff"
+  ctx.fillRect(0, 0, el.width, el.height)
+  ctx.restore()
+}
+
 /**
  * A box to sign in with a finger (or mouse), with a baseline like a paper form and Clear.
  * Each finished stroke saves the drawing as a small PNG (~5-15 KB). Pointer events, so touch,
@@ -31,6 +40,7 @@ export function SignaturePad({
     ctx.lineCap = "round"
     ctx.lineJoin = "round"
     ctx.strokeStyle = "#242731"
+    paper(ctx, el)
   }, [])
 
   const point = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -63,7 +73,8 @@ export function SignaturePad({
 
   function clear() {
     const el = canvas.current
-    el?.getContext("2d")?.clearRect(0, 0, el.width, el.height)
+    const ctx = el?.getContext("2d")
+    if (el && ctx) paper(ctx, el)
     setSigned(false)
     onChange(undefined)
   }
@@ -79,17 +90,17 @@ export function SignaturePad({
           onPointerMove={move}
           onPointerUp={up}
           onPointerCancel={up}
-          className="h-40 w-full touch-none rounded-lg bg-secondary/50"
+          className="h-40 w-full touch-none rounded-lg bg-white"
         />
         {/* the line to sign on, as on the paper form */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-4 bottom-8 border-b-2 border-dashed border-muted-foreground/40"
+          className="pointer-events-none absolute inset-x-4 bottom-8 border-b-2 border-dashed border-[#5c616c]/40"
         />
         {!signed ? (
           <span
             aria-hidden
-            className="pointer-events-none absolute bottom-10 left-4 text-sm text-muted-foreground"
+            className="pointer-events-none absolute bottom-10 left-4 text-sm text-[#5c616c]"
           >
             {t("capture.signHere")}
           </span>
