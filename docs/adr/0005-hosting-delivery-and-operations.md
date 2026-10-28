@@ -57,6 +57,12 @@ CI (`ci.yml`) also checks infrastructure on every PR that touches it:
 - shellcheck on the scripts;
 - a Trivy misconfiguration scan (fails on CRITICAL).
 
+Two critical findings are accepted on purpose and listed with their reasons in `.trivyignore`:
+- the app server may reach port 443 anywhere, since AWS service addresses change; everything else outbound is limited to PostgreSQL to the database;
+- the internal load balancer's HTTP listener, which is reached only privately through CloudFront.
+
+Downloaded third-party modules (`.terraform/`) aren't scanned.
+
 ### 4. Monitoring and self-healing (`monitoring.tf`)
 | Signal | Action |
 |---|---|

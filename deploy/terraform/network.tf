@@ -152,11 +152,24 @@ resource "aws_vpc_security_group_ingress_rule" "app_from_alb" {
   referenced_security_group_id = aws_security_group.alb.id
 }
 
-resource "aws_vpc_security_group_egress_rule" "app_all" {
+# Outbound from the app server: HTTPS only (images, OS updates, AWS APIs, through fck-nat or
+# the S3 endpoint), plus PostgreSQL to the database's security group and nothing else.
+resource "aws_vpc_security_group_egress_rule" "app_https" {
   security_group_id = aws_security_group.app.id
-  description       = "Outbound: images, updates, AWS APIs (through fck-nat or the S3 endpoint), the database"
-  ip_protocol       = "-1"
+  description       = "HTTPS: ECR, S3, Secrets Manager, SSM, CloudWatch, OS packages"
+  ip_protocol       = "tcp"
+  from_port         = 443
+  to_port           = 443
   cidr_ipv4         = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "app_to_db" {
+  security_group_id            = aws_security_group.app.id
+  description                  = "PostgreSQL to the database only"
+  ip_protocol                  = "tcp"
+  from_port                    = 5432
+  to_port                      = 5432
+  referenced_security_group_id = aws_security_group.database.id
 }
 
 resource "aws_security_group" "database" {

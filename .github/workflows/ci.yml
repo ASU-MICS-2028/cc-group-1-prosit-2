@@ -283,6 +283,8 @@ jobs:
           scan-ref: .
           severity: HIGH,CRITICAL
           exit-code: "0"
+          skip-dirs: deploy/terraform/.terraform
+          trivyignores: .trivyignore
       - name: Misconfiguration scan (fail on critical)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -291,6 +293,8 @@ jobs:
           severity: CRITICAL
           exit-code: "1"
           skip-setup-trivy: true
+          skip-dirs: deploy/terraform/.terraform
+          trivyignores: .trivyignore
 
   # ---------------------------------------------------------------------------
   # The single required status check for branch protection
