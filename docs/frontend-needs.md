@@ -100,6 +100,7 @@ All under `/api`, JSON, `Authorization: Bearer <token>`. nginx serves the app an
 | PUT | `/appointments/{id}` with `referralStatus` | `requested` → `accepted` / `declined` → `seen`, plus `handledBy`, `handledAt` | referral inbox (nurse, doctor) |
 | GET | `/surveillance/weekly` | → rows of `surveillance_weekly` (db/rbac.sql): `{ district, week, patients_seen, patients_high_bp, patients_fever, suppressed }`, cells under 5 null | district summary (officer) |
 | POST | `/media/{id}/upload-url` | `{ kind, mime, size, sha256, patientId, ownerEntity, ownerId }` → `{ url, headers? }`: a presigned S3 PUT (5 min, SSE-KMS, key `media/{patientId}/{id}`) | consent evidence and photos, after the record itself has synced |
+| POST | `/audit-events` | `{ events: AuditEvent[] }` → 204. Each event: `{ id, at, actorId, actorName, role, action: view\|create\|update\|denied, entity, entityId?, patientId?, outcome, purpose: TREAT\|HOPERAT, detail? }`. Append to `access_log`, ignore ids already stored, and **take the actor from the token**, not the body | the phone's audit trail, after each sync |
 | GET | `/health` | → 200 | load balancer / deploy check |
 
 **Why PUT by id:** on 2G a reply can be lost after the server saved the record. The phone then sends it again, and a PUT to the same id saves it once.
