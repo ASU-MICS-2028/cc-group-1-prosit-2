@@ -249,7 +249,7 @@ function Summary({
     { count: referrals, label: t("nav.referrals"), to: "#visits" },
   ]
   const action =
-    "inline-flex h-11 min-w-0 flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold whitespace-nowrap"
+    "inline-flex min-h-11 min-w-0 flex-1 items-center justify-center rounded-lg px-3 py-2 text-center text-sm leading-tight font-semibold"
   return (
     <Card className="p-5">
       <div className="flex items-center gap-4">
@@ -272,7 +272,7 @@ function Summary({
                 <span className="text-xl font-bold text-heading tabular-nums">
                   {s.count}
                 </span>
-                <span className="truncate text-xs text-muted-foreground">
+                <span className="text-xs leading-tight text-muted-foreground hyphens-auto [overflow-wrap:anywhere]">
                   {s.label}
                 </span>
               </a>
@@ -294,7 +294,7 @@ function Summary({
         </p>
         <p className="flex items-center gap-1.5 text-muted-foreground">
           <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
-          <span className="truncate">
+          <span>
             {patient.community}, {patient.district}
           </span>
         </p>
@@ -320,13 +320,13 @@ function Summary({
           to={`/patients/${patient.id}/vitals/new`}
           className={cn(action, "bg-primary text-primary-foreground")}
         >
-          <span className="truncate">{t("patient.recordVitals")}</span>
+          <span>{t("patient.recordVitals")}</span>
         </Link>
         <Link
           to={`/patients/${patient.id}/appointments/new`}
           className={cn(action, "bg-secondary text-secondary-foreground")}
         >
-          <span className="truncate">{t("patient.book")}</span>
+          <span>{t("patient.book")}</span>
         </Link>
         {patient.phone ? (
           <a

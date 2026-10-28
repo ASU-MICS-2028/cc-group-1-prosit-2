@@ -107,7 +107,7 @@ export function AppLayout() {
                   <span className={pill(item, isActive)}>
                     <item.icon className="size-6" filled={isActive} />
                   </span>
-                  <span className="line-clamp-2 w-full text-center leading-tight [overflow-wrap:anywhere] hyphens-auto">
+                  <span className="line-clamp-2 w-full text-center text-[11px] leading-tight hyphens-auto [overflow-wrap:anywhere]">
                     {t(item.key)}
                   </span>
                 </>

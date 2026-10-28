@@ -248,7 +248,7 @@ export function Component() {
           {t("surveillance.allDistricts")}
         </h2>
         <div className="overflow-x-auto rounded-xl bg-card shadow-card">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm [&_td]:px-2.5 [&_th]:px-2.5 [&_th]:align-bottom [&_th]:hyphens-auto [&_th]:[overflow-wrap:anywhere]">
             <thead className="text-left text-xs text-muted-foreground">
               <tr className="border-b border-border">
                 <th className="p-3 font-medium">

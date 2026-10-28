@@ -42,7 +42,7 @@ export function Component() {
                   <div className="flex items-center gap-4 px-4 py-4">
                     <Monogram name={fullName(p)} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-foreground">
+                      <p className="text-sm font-semibold break-words text-foreground">
                         {fullName(p)}
                       </p>
                       <p className="text-xs font-medium tracking-[0.04em] text-muted-foreground">
