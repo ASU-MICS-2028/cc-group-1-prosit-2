@@ -8,6 +8,7 @@ export interface Bar {
   label: string // axis label, e.g. "12 Oct"
   long: string // readout, e.g. "Week of 12 Oct 2026"
   value: number | null // null = suppressed (fewer than 5)
+  flagged?: number // optional: how many of them needed attention
 }
 
 /**
@@ -20,11 +21,14 @@ export function BarTrend({
   bars,
   color,
   suppressedLabel,
+  readout,
 }: {
   title: string
   bars: Bar[]
   color: string
   suppressedLabel: string
+  /** the line above the chart for the chosen bar; default "long · value" */
+  readout?: (bar: Bar) => string
 }) {
   const [active, setActive] = useState<number | null>(null)
   const max = Math.max(5, ...bars.map((b) => b.value ?? 0))
@@ -44,10 +48,16 @@ export function BarTrend({
         {title}
       </figcaption>
       <p className="mb-1 text-sm text-foreground" aria-live="polite">
-        {current.long} ·{" "}
-        <span className="font-semibold">
-          {current.value ?? suppressedLabel}
-        </span>
+        {readout ? (
+          readout(current)
+        ) : (
+          <>
+            {current.long} ·{" "}
+            <span className="font-semibold">
+              {current.value ?? suppressedLabel}
+            </span>
+          </>
+        )}
       </p>
       <svg
         viewBox={`0 0 ${W} ${H}`}
