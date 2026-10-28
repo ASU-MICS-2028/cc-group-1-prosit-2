@@ -317,17 +317,19 @@ function Ring({
         stroke="var(--secondary)"
         strokeWidth="10"
       />
-      <circle
-        cx="50"
-        cy="50"
-        r={r}
-        fill="none"
-        stroke="var(--primary)"
-        strokeWidth="10"
-        strokeLinecap="round"
-        strokeDasharray={`${c * part} ${c}`}
-        transform="rotate(-90 50 50)"
-      />
+      {part > 0 ? (
+        <circle
+          cx="50"
+          cy="50"
+          r={r}
+          fill="none"
+          stroke="var(--primary)"
+          strokeWidth="10"
+          strokeLinecap="round"
+          strokeDasharray={`${c * part} ${c}`}
+          transform="rotate(-90 50 50)"
+        />
+      ) : null}
       <text
         x="50"
         y="50"

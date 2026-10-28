@@ -22,15 +22,29 @@ export function formatDate(iso: string): string {
   }).format(new Date(iso))
 }
 
-/** "2 days ago", "in 3 hours", "yesterday", in the app's language. */
+/**
+ * "2 days ago", "in 3 hours", "yesterday", in the app's language. The words come from our own
+ * translations: browsers have no Twi or Hausa for this, and would fall back to English.
+ */
 export function formatRelative(iso: string, now = Date.now()): string {
-  const diff = new Date(iso).getTime() - now
-  const rtf = new Intl.RelativeTimeFormat(i18n.language, { numeric: "auto" })
-  const minutes = Math.round(diff / 60_000)
-  if (Math.abs(minutes) < 60) return rtf.format(minutes, "minute")
+  const t = i18n.t.bind(i18n)
+  const minutes = Math.round((new Date(iso).getTime() - now) / 60_000)
   const hours = Math.round(minutes / 60)
-  if (Math.abs(hours) < 24) return rtf.format(hours, "hour")
-  return rtf.format(Math.round(hours / 24), "day")
+  const days = Math.round(hours / 24)
+  if (Math.abs(minutes) < 1) return t("time.justNow")
+  if (Math.abs(minutes) < 60)
+    return minutes < 0
+      ? t("time.minutesAgo", { count: -minutes })
+      : t("time.inMinutes", { count: minutes })
+  if (Math.abs(hours) < 24)
+    return hours < 0
+      ? t("time.hoursAgo", { count: -hours })
+      : t("time.inHours", { count: hours })
+  if (days === -1) return t("time.yesterday")
+  if (days === 1) return t("time.tomorrow")
+  return days < 0
+    ? t("time.daysAgo", { count: -days })
+    : t("time.inDays", { count: days })
 }
 
 /** A time of day in the app's language, e.g. "14:30". */

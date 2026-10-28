@@ -17,14 +17,15 @@
     "sync": "Sync",
     "profile": "Profile",
     "add": "Add",
-    "referrals": "Referrals"
+    "referrals": "Referrals",
+    "audit": "Activity"
   },
   "roles": {
     "chv": "Community Health Volunteer",
     "nurse": "Nurse / Midwife",
     "doctor": "Doctor",
     "district_officer": "District Health Officer",
-    "admin": "Administrator"
+    "admin": "Administrator (auditor)"
   },
   "login": {
     "title": "Sign in",
@@ -424,5 +425,46 @@
     "title": "Edit details",
     "save": "Save changes",
     "edit": "Edit"
+  },
+  "audit": {
+    "title": "Activity log",
+    "subtitle": "Who opened, created or changed patient records, and every refused attempt.",
+    "todayViews": "Opened today",
+    "todayChanges": "Changed today",
+    "todayDenied": "Refused today",
+    "search": "Search by health worker or patient",
+    "filter_all": "Everything",
+    "filter_view": "Opened",
+    "filter_change": "Created or changed",
+    "filter_denied": "Refused",
+    "action_view": "opened",
+    "action_create": "created",
+    "action_update": "changed",
+    "action_denied": "was refused",
+    "what_patient": "a patient record",
+    "what_vitals": "a vitals reading",
+    "what_appointment": "a visit or referral",
+    "what_page": "the page {{path}}",
+    "onPhone": "on this phone, not uploaded yet",
+    "empty": "Nothing recorded yet.",
+    "recordTitle": "Who opened this record",
+    "serverNote": "This phone's record of access. The server keeps the full log in an append-only, hash-chained table, so entries can't be changed or removed without it showing."
+  },
+  "time": {
+    "justNow": "just now",
+    "minutesAgo_one": "{{count}} minute ago",
+    "minutesAgo_other": "{{count}} minutes ago",
+    "inMinutes_one": "in {{count}} minute",
+    "inMinutes_other": "in {{count}} minutes",
+    "hoursAgo_one": "{{count}} hour ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "inHours_one": "in {{count}} hour",
+    "inHours_other": "in {{count}} hours",
+    "yesterday": "yesterday",
+    "tomorrow": "tomorrow",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "inDays_one": "in {{count}} day",
+    "inDays_other": "in {{count}} days"
   }
 }

@@ -75,7 +75,7 @@ export function Component() {
       <div
         role="radiogroup"
         aria-label={t("patients.filterLabel")}
-        className="-mx-5 mb-4 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none]"
+        className="mb-4 flex flex-wrap gap-2"
       >
         {(Object.keys(FILTERS) as Filter[]).map((f) => {
           const count = matches?.filter(FILTERS[f]).length

@@ -17,14 +17,15 @@
     "sync": "Aikawa",
     "profile": "Bayanana",
     "add": "Ƙara",
-    "referrals": "Turawa"
+    "referrals": "Turawa",
+    "audit": "Ayyuka"
   },
   "roles": {
     "chv": "Mai Sa Kai na Lafiyar Al'umma",
     "nurse": "Ma'aikaciyar jinya / Ungozoma",
     "doctor": "Likita",
     "district_officer": "Jami'in Lafiya na Gunduma",
-    "admin": "Mai gudanarwa"
+    "admin": "Mai gudanarwa (mai bincike)"
   },
   "login": {
     "title": "Shiga",
@@ -424,5 +425,46 @@
     "title": "Gyara bayanai",
     "save": "Ajiye canje-canje",
     "edit": "Gyara"
+  },
+  "audit": {
+    "title": "Rajistar ayyuka",
+    "subtitle": "Wanda ya buɗe, ya ƙirƙira ko ya canza bayanan marasa lafiya, da kowane yunƙurin da aka hana.",
+    "todayViews": "An buɗe yau",
+    "todayChanges": "An canza yau",
+    "todayDenied": "An hana yau",
+    "search": "Nemo ma'aikacin lafiya ko majiyyaci",
+    "filter_all": "Duka",
+    "filter_view": "An buɗe",
+    "filter_change": "An ƙirƙira ko an canza",
+    "filter_denied": "An hana",
+    "action_view": "ya buɗe",
+    "action_create": "ya ƙirƙira",
+    "action_update": "ya canza",
+    "action_denied": "an hana shi",
+    "what_patient": "bayanan majiyyaci",
+    "what_vitals": "wani awo",
+    "what_appointment": "ziyara ko turawa",
+    "what_page": "shafin {{path}}",
+    "onPhone": "a wannan wayar, ba a aika ba tukuna",
+    "empty": "Ba a rubuta komai ba tukuna.",
+    "recordTitle": "Waɗanda suka buɗe wannan bayani",
+    "serverNote": "Rajistar wannan wayar ta waɗanda suka buɗe bayanai. Sabar tana ajiye cikakken rajista a teburin da ba za a iya canza ko goge komai ba sai ya bayyana."
+  },
+  "time": {
+    "justNow": "yanzun nan",
+    "minutesAgo_one": "minti {{count}} da ya wuce",
+    "minutesAgo_other": "mintuna {{count}} da suka wuce",
+    "inMinutes_one": "nan da minti {{count}}",
+    "inMinutes_other": "nan da mintuna {{count}}",
+    "hoursAgo_one": "awa {{count}} da ya wuce",
+    "hoursAgo_other": "awanni {{count}} da suka wuce",
+    "inHours_one": "nan da awa {{count}}",
+    "inHours_other": "nan da awanni {{count}}",
+    "yesterday": "jiya",
+    "tomorrow": "gobe",
+    "daysAgo_one": "kwana {{count}} da ya wuce",
+    "daysAgo_other": "kwanaki {{count}} da suka wuce",
+    "inDays_one": "nan da kwana {{count}}",
+    "inDays_other": "nan da kwanaki {{count}}"
   }
 }

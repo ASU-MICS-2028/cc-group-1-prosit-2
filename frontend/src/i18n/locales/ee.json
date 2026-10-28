@@ -17,14 +17,15 @@
     "sync": "Ɖo ɖa",
     "profile": "Nye akɔnta",
     "add": "Tsɔ kpe ɖe eŋu",
-    "referrals": "Ɖoɖowo"
+    "referrals": "Ɖoɖowo",
+    "audit": "Dɔwɔwɔwo"
   },
   "roles": {
     "chv": "Nutoa me Lãmesẽ Kpekpeɖeŋunala",
     "nurse": "Dɔyɔla / Vixɔla",
     "doctor": "Dɔkta",
     "district_officer": "Nutome Lãmesẽ Dɔdzikpɔla",
-    "admin": "Dɔdzikpɔla"
+    "admin": "Dzikpɔla (dzodzro)"
   },
   "login": {
     "title": "Ge ɖe eme",
@@ -424,5 +425,46 @@
     "title": "Trɔ nyatakakawo",
     "save": "Dzra tɔtrɔwo ɖo",
     "edit": "Trɔe"
+  },
+  "audit": {
+    "title": "Dɔwɔwɔwo ŋuti agbalẽ",
+    "subtitle": "Ame si ʋu, wɔ alo trɔ dɔnɔwo ƒe agbalẽwo, kple agbagbadzedze ɖe sia ɖe si womeɖe mɔ na o.",
+    "todayViews": "Woʋui egbe",
+    "todayChanges": "Wotrɔe egbe",
+    "todayDenied": "Womeɖe mɔ o egbe",
+    "search": "Di lãmesẽdɔwɔla alo dɔnɔ",
+    "filter_all": "Katã",
+    "filter_view": "Woʋui",
+    "filter_change": "Wowɔe alo wotrɔe",
+    "filter_denied": "Womeɖe mɔ o",
+    "action_view": "ʋu",
+    "action_create": "wɔ",
+    "action_update": "trɔ",
+    "action_denied": "womeɖe mɔ nɛ o",
+    "what_patient": "dɔnɔ ƒe agbalẽ aɖe",
+    "what_vitals": "dzidzeme aɖe",
+    "what_appointment": "sasrãkpɔ alo ɖoɖo aɖe",
+    "what_page": "axa {{path}}",
+    "onPhone": "le fon sia dzi, meyi haɖe o",
+    "empty": "Naneke womeŋlɔ haɖe o.",
+    "recordTitle": "Ame siwo ʋu agbalẽ sia",
+    "serverNote": "Fon sia ƒe ŋkuɖodzi le ame si ʋu agbalẽwo ŋu. Server la dzraa wo katã ɖo ɖe teƒe si womate ŋu atrɔ alo aɖe naneke ɖa le o ne mekpɔe o."
+  },
+  "time": {
+    "justNow": "fifia ke",
+    "minutesAgo_one": "aɖabaƒoƒo {{count}} va yi",
+    "minutesAgo_other": "aɖabaƒoƒo {{count}} va yi",
+    "inMinutes_one": "le aɖabaƒoƒo {{count}} me",
+    "inMinutes_other": "le aɖabaƒoƒo {{count}} me",
+    "hoursAgo_one": "gaƒoƒo {{count}} va yi",
+    "hoursAgo_other": "gaƒoƒo {{count}} va yi",
+    "inHours_one": "le gaƒoƒo {{count}} me",
+    "inHours_other": "le gaƒoƒo {{count}} me",
+    "yesterday": "etsɔ si va yi",
+    "tomorrow": "etsɔ",
+    "daysAgo_one": "ŋkeke {{count}} va yi",
+    "daysAgo_other": "ŋkeke {{count}} va yi",
+    "inDays_one": "le ŋkeke {{count}} me",
+    "inDays_other": "le ŋkeke {{count}} me"
   }
 }

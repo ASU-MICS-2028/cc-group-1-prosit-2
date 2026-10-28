@@ -117,6 +117,11 @@ export const routes: RouteObject[] = [
         lazy: () => import("@/features/surveillance/SurveillancePage"),
       },
       {
+        path: "audit",
+        loader: requireRole("admin"),
+        lazy: () => import("@/features/audit/AuditPage"),
+      },
+      {
         path: "sync",
         loader: everyone,
         lazy: () => import("@/features/sync/SyncPage"),
