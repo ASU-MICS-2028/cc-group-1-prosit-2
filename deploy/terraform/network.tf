@@ -1,11 +1,12 @@
 # HealthConnect's own network, the Week 5 pattern copied from AgroConnect, across two zones:
 #
-#   public subnets   load balancer and the fck-nat instance; the only things with public IPs
-#   app subnets      the app server; no public IP; outbound internet through fck-nat
+#   public subnets   the fck-nat instance only; the one thing with a public IP
+#   app subnets      the internal load balancer and the app server; outbound through fck-nat
 #   db subnets       RDS; no route to the internet at all
 #
-# The way in is CloudFront (HTTPS) -> load balancer -> app server. The load balancer
-# accepts only CloudFront's addresses, so nobody can skip HTTPS by calling it directly.
+# The way in is CloudFront (HTTPS) -> load balancer -> app server, and the load balancer is
+# internal: CloudFront reaches it through a VPC origin (cloudfront.tf), so it has no public
+# address at all and nobody can skip HTTPS by calling it directly.
 
 data "aws_availability_zones" "available" {
   state = "available"
@@ -124,12 +125,14 @@ resource "aws_vpc_security_group_ingress_rule" "alb_from_cloudfront" {
   prefix_list_id    = data.aws_ec2_managed_prefix_list.cloudfront.id
 }
 
+# Production on port 80, staging on 8081 (alb.tf): both live on the one app server.
 resource "aws_vpc_security_group_egress_rule" "alb_to_app" {
+  for_each                     = local.env_ports
   security_group_id            = aws_security_group.alb.id
-  description                  = "To the app server"
+  description                  = "To the app server (${each.key})"
   ip_protocol                  = "tcp"
-  from_port                    = 80
-  to_port                      = 80
+  from_port                    = each.value
+  to_port                      = each.value
   referenced_security_group_id = aws_security_group.app.id
 }
 
@@ -140,11 +143,12 @@ resource "aws_security_group" "app" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "app_from_alb" {
+  for_each                     = local.env_ports
   security_group_id            = aws_security_group.app.id
-  description                  = "From the load balancer"
+  description                  = "From the load balancer (${each.key})"
   ip_protocol                  = "tcp"
-  from_port                    = 80
-  to_port                      = 80
+  from_port                    = each.value
+  to_port                      = each.value
   referenced_security_group_id = aws_security_group.alb.id
 }
 
@@ -168,4 +172,15 @@ resource "aws_vpc_security_group_ingress_rule" "db_from_app" {
   from_port                    = 5432
   to_port                      = 5432
   referenced_security_group_id = aws_security_group.app.id
+}
+
+# The port-80 rules existed before staging; keep them as production's.
+moved {
+  from = aws_vpc_security_group_egress_rule.alb_to_app
+  to   = aws_vpc_security_group_egress_rule.alb_to_app["production"]
+}
+
+moved {
+  from = aws_vpc_security_group_ingress_rule.app_from_alb
+  to   = aws_vpc_security_group_ingress_rule.app_from_alb["production"]
 }

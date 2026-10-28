@@ -1,5 +1,6 @@
-# Stage 1: build the static app
-FROM node:24-alpine AS build
+# Stage 1: build the static app. It runs on the builder's own CPU ($BUILDPLATFORM) even when
+# the image is for another (arm64 for the Graviton server): the output is plain files.
+FROM --platform=$BUILDPLATFORM node:24-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 # The cache mount keeps downloaded packages between builds, so a retry after a

@@ -125,6 +125,7 @@ jobs:
     outputs:
       frontend: ${{ steps.filter.outputs.frontend == 'true' && steps.exists.outputs.frontend == 'true' }}
       docker: ${{ steps.filter.outputs.docker }}
+      infra: ${{ steps.filter.outputs.infra }}
     steps:
       - uses: actions/checkout@v7
       - id: exists
@@ -143,6 +144,9 @@ jobs:
               - 'backend/**'
               - 'frontend/**'
               - 'deploy/**'
+            infra:
+              - 'deploy/**'
+              - '.github/workflows/**'
 
   # ---------------------------------------------------------------------------
   # Backend: added once the API stack is chosen (Tue 27 Oct). It must run the
@@ -228,8 +232,65 @@ jobs:
         with:
           context: ${{ matrix.service }}
           push: false
+          load: true
+          tags: healthconnect/${{ matrix.service }}:ci
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+      # Run it the way the server does (read-only, no capabilities) and check what users get.
+      - name: Smoke test the frontend container
+        if: matrix.service == 'frontend' && steps.check.outputs.present == 'true'
+        run: |
+          docker run -d --name fe -p 8080:8080 --read-only --tmpfs /tmp --tmpfs /var/cache/nginx \
+            --cap-drop ALL --security-opt no-new-privileges:true healthconnect/frontend:ci
+          for _ in $(seq 1 20); do curl -fsS http://127.0.0.1:8080/health && break || sleep 1; done
+          curl -fsS http://127.0.0.1:8080/ | grep -q "<title>HealthConnect</title>"
+          curl -fsS http://127.0.0.1:8080/patients/123 | grep -q "<title>HealthConnect</title>"   # SPA routes
+          code=$(curl -s -o body.json -w "%{http_code}" http://127.0.0.1:8080/api/patients)
+          cat body.json; echo
+          [ "$code" = 503 ] && grep -q api_unavailable body.json
+          curl -sI http://127.0.0.1:8080/sw.js | grep -qi "cache-control: no-cache"
+          docker logs fe | tail -5
+
+  # ---------------------------------------------------------------------------
+  # Infrastructure: Terraform format + validate (no AWS credentials needed),
+  # shellcheck on the deploy scripts, and a misconfiguration scan (Trivy) that
+  # fails on CRITICAL findings and reports the rest.
+  # ---------------------------------------------------------------------------
+  infra:
+    name: Infrastructure (Terraform + scripts + scan)
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "~1.14"
+      - name: Terraform format
+        run: terraform fmt -check -recursive deploy/terraform
+      - name: Terraform validate
+        run: |
+          for dir in deploy/terraform deploy/terraform/bootstrap; do
+            terraform -chdir="$dir" init -backend=false -input=false >/dev/null
+            terraform -chdir="$dir" validate
+          done
+      - name: Shellcheck
+        run: shellcheck --severity=warning deploy/*.sh deploy/ops/*.sh deploy/verify/*.sh
+      - name: Misconfiguration scan (report)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "0"
+      - name: Misconfiguration scan (fail on critical)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: CRITICAL
+          exit-code: "1"
+          skip-setup-trivy: true
 
   # ---------------------------------------------------------------------------
   # The single required status check for branch protection
@@ -237,7 +298,7 @@ jobs:
   ci-passed:
     name: CI passed
     if: always()
-    needs: [branch-flow, pre-commit, secrets, changes, frontend, docker]
+    needs: [branch-flow, pre-commit, secrets, changes, frontend, docker, infra]
     runs-on: ubuntu-latest
     steps:
       - name: Verify every job passed or was skipped

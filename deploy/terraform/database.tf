@@ -17,8 +17,9 @@ resource "aws_db_parameter_group" "postgres" {
   family = "postgres17"
 
   parameter {
-    name  = "rds.force_ssl"
-    value = "1"
+    name         = "rds.force_ssl"
+    value        = "1"
+    apply_method = "pending-reboot" # how RDS records this static parameter
   }
 
   # Record every connection, so the database's own logs show who connected and when.
@@ -50,7 +51,12 @@ resource "aws_db_instance" "main" {
   publicly_accessible    = false
   multi_az               = false
 
+  # Backups: daily snapshot plus point-in-time restore to any second of the last 7 days
+  # (deploy/ops/restore-drill.sh rehearses it). Night-time windows, Ghana time = UTC.
   backup_retention_period         = 7
+  backup_window                   = "01:00-01:30"
+  maintenance_window              = "sun:02:00-sun:02:30"
+  copy_tags_to_snapshot           = true
   enabled_cloudwatch_logs_exports = ["postgresql"]
   # Synthetic data for a one-week course project: protected from accidents, but a final
   # snapshot is still taken if it is ever deleted.

@@ -114,11 +114,15 @@ data "aws_iam_policy_document" "github_assume" {
       variable = "token.actions.githubusercontent.com:aud"
       values   = ["sts.amazonaws.com"]
     }
-    # Only deploy jobs from main of this repository, in the production environment.
+    # Only this repository's deploy jobs, and only in its two GitHub environments (production
+    # needs a reviewer's approval in GitHub; staging deploys from development on its own).
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repo}:environment:production"]
+      values = [
+        "repo:${var.github_repo}:environment:production",
+        "repo:${var.github_repo}:environment:staging",
+      ]
     }
   }
 }
@@ -148,6 +152,18 @@ data "aws_iam_policy_document" "github_deploy" {
     sid       = "ReadCommandResults"
     actions   = ["ssm:GetCommandInvocation", "ssm:ListCommandInvocations"]
     resources = ["*"]
+  }
+  # Find the app server by its Name tag (its id changes if it is ever replaced). Describe
+  # calls can't be scoped to one instance.
+  statement {
+    sid       = "FindTheAppServer"
+    actions   = ["ec2:DescribeInstances"]
+    resources = ["*"]
+  }
+  statement {
+    sid       = "ReadImageScanResults"
+    actions   = ["ecr:DescribeImageScanFindings", "ecr:DescribeImages"]
+    resources = [for r in aws_ecr_repository.app : r.arn]
   }
 }
 

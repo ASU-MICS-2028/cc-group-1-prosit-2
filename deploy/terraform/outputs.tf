@@ -1,11 +1,28 @@
 output "app_url" {
-  description = "The HTTPS address of the app (no domain needed)."
-  value       = "https://${aws_cloudfront_distribution.app.domain_name}"
+  description = "Production: the demo URL (no domain needed)."
+  value       = "https://${aws_cloudfront_distribution.app["production"].domain_name}"
+}
+
+output "staging_url" {
+  description = "Staging: the team's shared test URL, deployed from development."
+  value       = "https://${aws_cloudfront_distribution.app["staging"].domain_name}"
+}
+
+output "distribution_ids" {
+  value = { for k, d in aws_cloudfront_distribution.app : k => d.id }
 }
 
 output "load_balancer_dns" {
-  description = "Direct load balancer address: should refuse everyone except CloudFront."
+  description = "Internal load balancer: resolves to private addresses only."
   value       = aws_lb.main.dns_name
+}
+
+output "dashboard_url" {
+  value = "https://${var.region}.console.aws.amazon.com/cloudwatch/home?region=${var.region}#dashboards/dashboard/${aws_cloudwatch_dashboard.main.dashboard_name}"
+}
+
+output "alerts_topic_arn" {
+  value = aws_sns_topic.alerts.arn
 }
 
 output "app_instance_id" {

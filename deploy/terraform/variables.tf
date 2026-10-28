@@ -11,9 +11,9 @@ variable "vpc_cidr" {
 }
 
 variable "app_instance_type" {
-  description = "The app server (x86, to match the images CI builds)."
+  description = "The app server. Graviton (t4g) by default; CI builds arm64 images to match."
   type        = string
-  default     = "t3.small"
+  default     = "t4g.small"
 }
 
 variable "app_running" {
@@ -29,8 +29,27 @@ variable "nat_instance_type" {
 }
 
 variable "rds_instance_class" {
-  type    = string
-  default = "db.t3.micro"
+  description = "Graviton db.t4g.micro: 12% cheaper than db.t3.micro in af-south-1."
+  type        = string
+  default     = "db.t4g.micro"
+}
+
+variable "alert_emails" {
+  description = "Who receives alarms (site down, errors, database full). Defaults to budget_emails."
+  type        = list(string)
+  default     = []
+}
+
+variable "nightly_stop" {
+  description = "Stop the app server, NAT and database every night (save ~35%). Off by default: turn on once the demo is recorded."
+  type        = bool
+  default     = false
+}
+
+variable "nightly_stop_hours" {
+  description = "When the nightly stop runs, Ghana time (GMT): stop at the first hour, start at the second."
+  type        = object({ stop = number, start = number })
+  default     = { stop = 23, start = 7 }
 }
 
 variable "budget_limit_usd" {

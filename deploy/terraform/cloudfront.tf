@@ -1,11 +1,15 @@
-# Lab 6 Part B, encryption in transit. HTTPS without buying a domain: CloudFront gives
-# https://<id>.cloudfront.net with AWS's certificate, and http:// is answered with a
-# 301 redirect to https:// (the API refuses plain HTTP outright with 403).
+# HTTPS without buying a domain: CloudFront gives https://<id>.cloudfront.net with AWS's
+# certificate, and http:// is answered with a 301 redirect to https:// (the API refuses plain
+# HTTP outright with 403).
 #
-#   phone --HTTPS--> CloudFront --HTTP + secret header--> load balancer --> app server
+#   phone --HTTPS--> CloudFront --VPC origin (private)--> internal load balancer --> app server
 #
-# The CloudFront -> load balancer leg stays on AWS's network but is not TLS: that needs a
-# certificate on the load balancer, which needs a domain. Documented as a known gap.
+# The VPC origin is a CloudFront-managed network interface inside our VPC, so the load
+# balancer needs no public address. The CloudFront -> load balancer leg is HTTP on AWS's
+# private network; TLS on that leg needs a certificate, which needs a domain (known gap).
+#
+# Two distributions, one per environment (alb.tf): production and staging. Staging adds a
+# header that the load balancer routes on, and tells search engines not to index it.
 #
 # Caching: nginx sends Cache-Control (hashed /assets/ for a year, index.html and sw.js
 # no-cache), so CloudFront follows it. /api/* is never cached and passes every header.
@@ -17,9 +21,64 @@ locals {
   security_headers          = "67f7725c-6f97-4210-82d7-5512b31e9d03" # Managed-SecurityHeadersPolicy (HSTS etc.)
 }
 
+resource "aws_cloudfront_vpc_origin" "alb" {
+  vpc_origin_endpoint_config {
+    name                   = "healthconnect-alb"
+    arn                    = aws_lb.main.arn
+    http_port              = 80
+    https_port             = 443
+    origin_protocol_policy = "http-only"
+
+    origin_ssl_protocols {
+      items    = ["TLSv1.2"]
+      quantity = 1
+    }
+  }
+}
+
+# Staging only: keep it out of search results.
+resource "aws_cloudfront_response_headers_policy" "staging" {
+  name    = "healthconnect-staging"
+  comment = "Security headers plus noindex for the staging site"
+
+  security_headers_config {
+    strict_transport_security {
+      access_control_max_age_sec = 31536000
+      include_subdomains         = false
+      override                   = true
+    }
+    content_type_options {
+      override = true
+    }
+    frame_options {
+      frame_option = "SAMEORIGIN"
+      override     = true
+    }
+    referrer_policy {
+      referrer_policy = "strict-origin-when-cross-origin"
+      override        = true
+    }
+    xss_protection {
+      protection = true
+      mode_block = true
+      override   = true
+    }
+  }
+
+  custom_headers_config {
+    items {
+      header   = "X-Robots-Tag"
+      value    = "noindex, nofollow"
+      override = true
+    }
+  }
+}
+
 resource "aws_cloudfront_distribution" "app" {
+  for_each = local.env_ports
+
   enabled         = true
-  comment         = "HealthConnect: HTTPS in front of the load balancer"
+  comment         = "HealthConnect ${each.key}"
   is_ipv6_enabled = true
   http_version    = "http2and3"
   # PriceClass_200 includes the edge locations in Africa (Lagos, Johannesburg, Nairobi...).
@@ -29,17 +88,18 @@ resource "aws_cloudfront_distribution" "app" {
     origin_id   = "alb"
     domain_name = aws_lb.main.dns_name
 
-    custom_header {
-      name  = "X-Origin-Verify"
-      value = random_password.origin_header.result
+    vpc_origin_config {
+      vpc_origin_id            = aws_cloudfront_vpc_origin.alb.id
+      origin_keepalive_timeout = 5
+      origin_read_timeout      = 60
     }
 
-    custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols   = ["TLSv1.2"]
-      origin_read_timeout    = 60
+    dynamic "custom_header" {
+      for_each = each.key == "staging" ? [1] : []
+      content {
+        name  = "X-HC-Env"
+        value = "staging"
+      }
     }
   }
 
@@ -52,7 +112,7 @@ resource "aws_cloudfront_distribution" "app" {
     compress                   = true
     cache_policy_id            = local.cache_use_origin_headers
     origin_request_policy_id   = local.origin_all_viewer_no_host
-    response_headers_policy_id = local.security_headers
+    response_headers_policy_id = each.key == "staging" ? aws_cloudfront_response_headers_policy.staging.id : local.security_headers
   }
 
   # The API: never cached, never over plain HTTP (403 instead of a redirect, so a client that
@@ -66,7 +126,7 @@ resource "aws_cloudfront_distribution" "app" {
     compress                   = true
     cache_policy_id            = local.cache_disabled
     origin_request_policy_id   = local.origin_all_viewer_no_host
-    response_headers_policy_id = local.security_headers
+    response_headers_policy_id = each.key == "staging" ? aws_cloudfront_response_headers_policy.staging.id : local.security_headers
   }
 
   ordered_cache_behavior {
@@ -88,4 +148,13 @@ resource "aws_cloudfront_distribution" "app" {
   viewer_certificate {
     cloudfront_default_certificate = true
   }
+
+  tags = { Environment = each.key }
+}
+
+# The production distribution existed before staging: keep it (and its URL, which the Lab 6
+# report quotes) instead of replacing it.
+moved {
+  from = aws_cloudfront_distribution.app
+  to   = aws_cloudfront_distribution.app["production"]
 }
