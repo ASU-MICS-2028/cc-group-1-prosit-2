@@ -3,6 +3,7 @@ import { CLINICAL_ROLES, type Role } from "@/auth/session"
 import { AppLayout } from "./AppLayout"
 import { requireRole, signedOutOnly } from "./guards"
 import { Loading } from "./Loading"
+import { RouteError } from "./RouteError"
 
 const clinical = requireRole(...CLINICAL_ROLES)
 const everyone = requireRole(
@@ -17,12 +18,14 @@ export const routes: RouteObject[] = [
   {
     path: "/login",
     loader: signedOutOnly,
+    errorElement: <RouteError />,
     HydrateFallback: Loading,
     lazy: () => import("@/features/auth/LoginPage"),
   },
   {
     path: "/",
     element: <AppLayout />,
+    errorElement: <RouteError />,
     HydrateFallback: Loading,
     children: [
       {

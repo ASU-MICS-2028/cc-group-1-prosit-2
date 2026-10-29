@@ -21,7 +21,7 @@ export function Component() {
     <>
       <PageHeader title={t("profile.title")} />
       <div className="space-y-5">
-        <div className="rounded-2xl bg-card p-4 ring-1 ring-border">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="font-medium text-foreground">{session?.user.name}</p>
           <p className="text-sm text-muted-foreground">
             {session ? t(`roles.${session.user.role}`) : null} ·{" "}

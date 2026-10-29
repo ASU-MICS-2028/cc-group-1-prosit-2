@@ -7,7 +7,7 @@
 CHVs work in rural Ghana on cheap Android phones and paid 2G/3G data, often for days without signal. The app must install from a web address, open offline and keep every record until it reaches the server. We have one week. The team built the same kind of app for Prosit 1 (AgroConnect).
 
 ## Decision
-- **Reuse the AgroConnect frontend stack:** React 19, TypeScript, Vite, vite-plugin-pwa (Workbox), Dexie (IndexedDB), i18next, react-hook-form + zod, shadcn/ui on Base UI, Tailwind v4, system font. It has already been tested on slow networks and the team knows it.
+- **Reuse the AgroConnect frontend stack:** React 19, TypeScript, Vite, vite-plugin-pwa (Workbox), Dexie (IndexedDB), i18next, react-hook-form + zod, shadcn/ui on Base UI, Tailwind v4 (Poppins replaces the system font, ADR 0002). It has already been tested on slow networks and the team knows it.
 - **Offline first:** every save goes to the phone's database and the outbox in one transaction. Sync sends the outbox oldest first as `PUT /api/<entity>/<id>`, so a retry after a lost reply does no harm. A 409 is kept for review instead of overwritten.
 - **Patient data never goes in the service worker cache.** The service worker caches only the app's code and icons, and `/api` always goes to the network.
 - **Five languages from the brief** (English, Twi, Ewe, Dagbani, Hausa). Only English is enabled until native speakers translate.

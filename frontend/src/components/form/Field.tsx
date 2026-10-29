@@ -1,8 +1,10 @@
 import type { ComponentProps, ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
+// Figma "Text Fields" (Material 3 outlined): 56 px, 4 px corners, grey outline; 2 px outline in
+// the brand blue when focused and in red with an error.
 const control =
-  "h-12 w-full rounded-xl border bg-card px-3 text-base text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive"
+  "h-14 w-full rounded-sm border border-input bg-transparent px-4 text-base text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-2 focus-visible:border-primary focus-visible:px-[15px] aria-invalid:border-2 aria-invalid:border-destructive aria-invalid:px-[15px]"
 
 /** A labelled control with its error under it; the label and error are tied to the control for screen readers. */
 export function Field({
@@ -20,7 +22,10 @@ export function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="block text-sm font-medium text-foreground">
+      <label
+        htmlFor={id}
+        className="block text-sm font-medium tracking-[0.01em] text-foreground"
+      >
         {label}
       </label>
       {children}
@@ -30,7 +35,11 @@ export function Field({
         </p>
       ) : null}
       {error ? (
-        <p id={`${id}-error`} role="alert" className="text-sm text-destructive">
+        <p
+          id={`${id}-error`}
+          role="alert"
+          className="text-xs font-medium text-destructive"
+        >
           {error}
         </p>
       ) : null}
@@ -49,7 +58,7 @@ export function Select({ className, ...props }: ComponentProps<"select">) {
 export function Textarea({ className, ...props }: ComponentProps<"textarea">) {
   return (
     <textarea
-      className={cn(control, "h-auto min-h-24 py-2", className)}
+      className={cn(control, "h-auto min-h-24 py-3", className)}
       {...props}
     />
   )

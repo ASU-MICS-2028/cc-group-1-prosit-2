@@ -5,20 +5,37 @@ import { db } from "@/db/local"
 import { renderRoute } from "@/test/renderRoute"
 
 describe("register a patient, record vitals, book a visit", () => {
-  it("needs consent before saving", async () => {
+  it("needs consent before going on", async () => {
     renderRoute("/patients/new")
-    await userEvent.click(
-      await screen.findByRole("button", { name: "Save patient" })
-    )
+    await userEvent.click(await screen.findByRole("button", { name: "Next" }))
     expect(await screen.findByText(/must agree/)).toBeInTheDocument()
-    expect(await db.patients.count()).toBe(0)
+    expect(
+      screen.getByRole("heading", { name: "Ask for consent" })
+    ).toBeInTheDocument()
+  })
+
+  it("checks each step before the next, and Back keeps what was typed", async () => {
+    const user = userEvent.setup()
+    renderRoute("/patients/new")
+    await user.click(await screen.findByRole("checkbox"))
+    await user.click(screen.getByRole("button", { name: "Next" }))
+    await user.type(await screen.findByLabelText("First name"), "Kofi")
+    await user.click(screen.getByRole("button", { name: "Next" }))
+    expect(await screen.findAllByText("Fill this in.")).toHaveLength(2)
+    // reported together with the missing names, not only once they are filled
+    expect(screen.getByText("Enter a date in the past.")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Back" }))
+    expect(await screen.findByRole("checkbox")).toBeChecked()
+    await user.click(screen.getByRole("button", { name: "Next" }))
+    expect(await screen.findByLabelText("First name")).toHaveValue("Kofi")
   })
 
   it("works end to end on the phone and queues everything for sync", async () => {
     const user = userEvent.setup()
     const { router } = renderRoute("/patients/new")
     await user.click(await screen.findByRole("checkbox"))
-    await user.type(screen.getByLabelText("First name"), "Ama")
+    await user.click(screen.getByRole("button", { name: "Next" }))
+    await user.type(await screen.findByLabelText("First name"), "Ama")
     await user.type(screen.getByLabelText("Surname"), "Owusu")
     await user.selectOptions(screen.getByLabelText("Sex"), "female")
     await user.selectOptions(
@@ -26,7 +43,8 @@ describe("register a patient, record vitals, book a visit", () => {
       "no"
     )
     await user.type(await screen.findByLabelText("Age in years"), "34")
-    await user.type(screen.getByLabelText("Community"), "Dodowa")
+    await user.click(screen.getByRole("button", { name: "Next" }))
+    await user.type(await screen.findByLabelText("Community"), "Dodowa")
     await user.type(screen.getByLabelText("District"), "Shai-Osudoku")
     await user.click(screen.getByRole("button", { name: "Save patient" }))
 

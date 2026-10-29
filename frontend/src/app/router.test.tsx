@@ -40,3 +40,15 @@ describe("routes and roles", () => {
     expect(router.state.location.pathname).toBe("/login")
   })
 })
+
+describe("when a screen fails to load", () => {
+  it("shows a friendly message instead of the developer error page", async () => {
+    const { RouteError } = await import("./RouteError")
+    const { render } = await import("@testing-library/react")
+    render(<RouteError />)
+    expect(screen.getByText("This screen didn't load")).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Try again" })
+    ).toBeInTheDocument()
+  })
+})
