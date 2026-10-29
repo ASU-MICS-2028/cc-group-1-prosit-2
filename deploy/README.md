@@ -26,6 +26,7 @@ encrypted, PITR 7 days)                     TLS only)
 | Pipeline | `.github/workflows/deploy.yml` (release), `.github/workflows/ci.yml` (checks) |
 | Dashboard and alarms | CloudWatch dashboard **healthconnect**; alerts go to the emails in `terraform.tfvars` |
 | Logs | CloudWatch Logs `/healthconnect/app`, one stream per container |
+| Architecture diagram | `deploy/architecture.drawio`: open in [diagrams.net](https://app.diagrams.net) (File → Open), edit, export PNG/PDF. Regenerate with `python3 deploy/diagram/generate.py deploy/architecture.drawio` |
 
 ## Day to day: deploying
 
