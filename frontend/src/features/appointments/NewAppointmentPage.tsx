@@ -76,6 +76,10 @@ export function Component() {
       priority: f.priority,
       reason: f.reason.trim(),
       status: "scheduled",
+      referralStatus:
+        f.type === "referral" || f.type === "teleconsult"
+          ? "requested"
+          : undefined,
       createdAt: now,
       updatedAt: now,
       version: 0,

@@ -1,73 +1,122 @@
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
-import { homeFor, saveSession, type Role, type Session } from "@/auth/session"
+import { Link, useNavigate } from "react-router-dom"
+import {
+  AuthError,
+  DEMO_CODE,
+  DEMO_MODE,
+  DEMO_USERS,
+  normalisePhone,
+  requestCode,
+} from "@/api/auth"
+import { Field, Input } from "@/components/form/Field"
+import { describe } from "@/components/form/describe"
 import { Button } from "@/components/ui/button"
 
-const DEMO_ROLES: Role[] = ["chv", "nurse", "doctor", "district_officer"]
-
-/** Synthetic demo people, one per role (not real health workers). */
-const DEMO_NAMES: Record<Role, string> = {
-  chv: "Akosua Mensah",
-  nurse: "Efua Asante",
-  doctor: "Kwesi Eshun",
-  district_officer: "Yaw Darko",
-  admin: "Admin",
-}
-
-function demoSession(role: Role): Session {
-  return {
-    token: "demo",
-    expiresAt: new Date(Date.now() + 7 * 24 * 3600_000).toISOString(),
-    user: {
-      id: `demo-${role}`,
-      name: DEMO_NAMES[role],
-      role,
-      district: "Shai-Osudoku",
-    },
-  }
-}
-
 /**
- * Demo sign-in, laid out like the Figma "Login" screen: pick a role and get a local session, so
- * the screens can be shown before Bernard's auth endpoint exists. Replaced by the real sign-in
- * (POST /api/auth/login) once it does.
+ * Sign-in step 1 (Figma "Completa tu Registro"): the health worker's phone number. An SMS code
+ * follows (step 2). No password to forget, and it works on any phone with SMS.
  */
 export function Component() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [phone, setPhone] = useState("")
+  const [error, setError] = useState<string>()
+  const [busy, setBusy] = useState(false)
 
-  function signInAs(role: Role) {
-    saveSession(demoSession(role))
-    navigate(homeFor(role), { replace: true })
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    const normalised = normalisePhone(phone)
+    if (!normalised) return setError(t("errors.phone"))
+    setBusy(true)
+    setError(undefined)
+    try {
+      await requestCode(normalised)
+      navigate("/login/code", { state: { phone: normalised } })
+    } catch (err) {
+      setError(
+        err instanceof AuthError && err.reason === "unknown-number"
+          ? t("login.unknownNumber")
+          : t("login.network")
+      )
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-md flex-col justify-center gap-8 bg-background px-6 py-10">
-      <div className="space-y-4 text-center">
-        <p className="text-[2rem] leading-9 font-semibold text-primary">
-          HealthConnect
-        </p>
+    <main className="mx-auto flex min-h-svh max-w-md flex-col gap-6 bg-background px-6 py-10">
+      <p className="text-[1.75rem] leading-9 font-semibold text-primary">
+        HealthConnect
+      </p>
+      <div className="space-y-3">
         <h1 className="text-[1.75rem] leading-9 font-bold text-heading">
-          {t("login.welcome")}
+          {t("login.title")}
         </h1>
-        <p className="text-base text-primary">“{t("login.motto")}”</p>
+        <p className="text-base text-foreground">{t("login.text")}</p>
       </div>
-      <div className="space-y-4">
-        <p className="text-sm text-foreground">{t("login.demoIntro")}</p>
-        <div className="space-y-3">
-          {DEMO_ROLES.map((role, i) => (
-            <Button
-              key={role}
-              size="xl"
-              variant={i === 0 ? "default" : "secondary"}
-              className="w-full"
-              onClick={() => signInAs(role)}
-            >
-              {t(`roles.${role}`)}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <form noValidate onSubmit={submit} className="space-y-5">
+        <Field
+          id="phone"
+          label={t("login.phone")}
+          hint={t("login.phoneHint")}
+          error={error}
+        >
+          <div className="flex gap-2">
+            <span className="flex h-14 items-center gap-1.5 rounded-sm border border-input bg-card px-3 text-base text-foreground">
+              <span aria-hidden>🇬🇭</span> +233
+            </span>
+            <Input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel-national"
+              placeholder="024 000 0000"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              {...describe("phone", error)}
+            />
+          </div>
+        </Field>
+        <Button type="submit" size="xl" className="w-full" disabled={busy}>
+          {t("login.sendCode")}
+        </Button>
+      </form>
+
+      {DEMO_MODE ? (
+        <section className="space-y-2 rounded-xl border border-dashed border-border p-4 text-sm">
+          <p className="font-semibold text-foreground">
+            {t("login.demoTitle")}
+          </p>
+          <p className="text-muted-foreground">
+            {t("login.demoText", { code: DEMO_CODE })}
+          </p>
+          <ul className="space-y-1">
+            {Object.entries(DEMO_USERS).map(([number, user]) => (
+              <li key={number}>
+                <button
+                  type="button"
+                  onClick={() => setPhone(number.replace("+233", "0"))}
+                  className="flex min-h-11 w-full items-center justify-between gap-2 rounded-md px-2 text-left hover:bg-muted"
+                >
+                  <span className="text-foreground">
+                    {t(`roles.${user.role}`)}
+                  </span>
+                  <span className="font-medium text-primary tabular-nums">
+                    {number.replace("+233", "0")}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <Link
+        to="/welcome"
+        className="mt-auto text-center text-sm font-semibold text-primary"
+      >
+        {t("login.changeLanguage")}
+      </Link>
     </main>
   )
 }

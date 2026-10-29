@@ -1,7 +1,7 @@
 import { createBrowserRouter, type RouteObject } from "react-router-dom"
 import { CLINICAL_ROLES, type Role } from "@/auth/session"
 import { AppLayout } from "./AppLayout"
-import { requireRole, signedOutOnly } from "./guards"
+import { needsLanguage, requireRole, signedOutOnly } from "./guards"
 import { Loading } from "./Loading"
 import { RouteError } from "./RouteError"
 
@@ -16,11 +16,26 @@ const everyone = requireRole(
 // form is not lost by tapping a tab by mistake.
 export const routes: RouteObject[] = [
   {
-    path: "/login",
-    loader: signedOutOnly,
+    // Start: welcome + language on a new phone, then phone number and SMS code (ADR 0004).
     errorElement: <RouteError />,
     HydrateFallback: Loading,
-    lazy: () => import("@/features/auth/LoginPage"),
+    children: [
+      {
+        path: "/welcome",
+        loader: signedOutOnly,
+        lazy: () => import("@/features/start/WelcomePage"),
+      },
+      {
+        path: "/login",
+        loader: needsLanguage,
+        lazy: () => import("@/features/auth/LoginPage"),
+      },
+      {
+        path: "/login/code",
+        loader: needsLanguage,
+        lazy: () => import("@/features/auth/CodePage"),
+      },
+    ],
   },
   {
     path: "/",
@@ -73,6 +88,11 @@ export const routes: RouteObject[] = [
         loader: clinical,
         handle: { hideBottomNav: true },
         lazy: () => import("@/features/appointments/NewAppointmentPage"),
+      },
+      {
+        path: "referrals",
+        loader: requireRole("nurse", "doctor"),
+        lazy: () => import("@/features/referrals/ReferralsPage"),
       },
       {
         path: "appointments",

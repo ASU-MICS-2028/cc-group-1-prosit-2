@@ -18,8 +18,15 @@ export function signIn(role: Role = "chv") {
   })
 }
 
-/** Renders the app at a path; a CHV is signed in unless `as: null`. */
-export function renderRoute(path: string, { as = "chv" as Role | null } = {}) {
+/**
+ * Renders the app at a path; a CHV is signed in unless `as: null`. The language is chosen unless
+ * `firstRun: true` (a brand-new phone).
+ */
+export function renderRoute(
+  path: string,
+  { as = "chv" as Role | null, firstRun = false } = {}
+) {
+  if (!firstRun) localStorage.setItem("healthconnect.lang", "en")
   if (as) signIn(as)
   const router = createMemoryRouter(routes, { initialEntries: [path] })
   return { router, ...render(<RouterProvider router={router} />) }

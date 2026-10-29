@@ -48,6 +48,15 @@ function readSavedLanguage(): LanguageCode {
   return "en"
 }
 
+/** True once a language has been chosen on this phone (the welcome screen is shown until then). */
+export function hasChosenLanguage(): boolean {
+  try {
+    return isLanguage(localStorage.getItem(STORAGE_KEY))
+  } catch {
+    return true // storage blocked: don't trap the person on the welcome screen
+  }
+}
+
 /** Switches the app language and remembers it on this phone. */
 export async function setLanguage(code: LanguageCode) {
   if (code !== "en" && !i18n.hasResourceBundle(code, "translation")) {

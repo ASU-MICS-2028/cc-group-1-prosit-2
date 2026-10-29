@@ -14,6 +14,7 @@ import { Card, EmptyState, PageHeader } from "@/components/PageHeader"
 import { buttonVariants } from "@/components/ui/button"
 import { db } from "@/db/local"
 import type { Vitals } from "@/db/types"
+import { ReferralStatusChip } from "@/features/referrals/ReferralStatusChip"
 import { formatDateTime } from "@/lib/dates"
 import { cn } from "@/lib/utils"
 import {
@@ -123,8 +124,13 @@ export function Component() {
                 key={a.id}
                 className="rounded-xl border border-border bg-card p-4 text-sm"
               >
-                <p className="font-medium text-foreground">
-                  {t(`appointmentType.${a.type}`)} · {a.facility}
+                <p className="flex items-start justify-between gap-2 font-medium text-foreground">
+                  <span>
+                    {t(`appointmentType.${a.type}`)} · {a.facility}
+                  </span>
+                  {a.referralStatus ? (
+                    <ReferralStatusChip status={a.referralStatus} />
+                  ) : null}
                 </p>
                 <p className="text-muted-foreground">
                   {formatDateTime(a.scheduledAt)} · {t(`status.${a.status}`)}
