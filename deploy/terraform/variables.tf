@@ -68,3 +68,9 @@ variable "github_repo" {
   type        = string
   default     = "ASU-MICS-2028/cc-group-1-prosit-2"
 }
+
+variable "github_repo_immutable" {
+  description = "The same repository as GitHub's immutable OIDC subject names it (owner@id/repo@id); see `gh api repos/<repo>/actions/oidc/customization/sub`."
+  type        = string
+  default     = "ASU-MICS-2028@326597623/cc-group-1-prosit-2@1422335284"
+}

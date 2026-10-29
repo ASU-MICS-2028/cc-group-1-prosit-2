@@ -122,6 +122,10 @@ data "aws_iam_policy_document" "github_assume" {
       values = [
         "repo:${var.github_repo}:environment:production",
         "repo:${var.github_repo}:environment:staging",
+        # This repository uses GitHub's immutable subject format (owner and repo ids in the
+        # claim), so that is what the token actually carries.
+        "repo:${var.github_repo_immutable}:environment:production",
+        "repo:${var.github_repo_immutable}:environment:staging",
       ]
     }
   }
