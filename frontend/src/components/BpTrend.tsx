@@ -160,7 +160,9 @@ export function BpTrend({ readings }: { readings: Vitals[] }) {
             >
               {points[last][s.key]}{" "}
               <tspan fill="var(--muted-foreground)">
-                {s.key === "systolic" ? "sys" : "dia"}
+                {s.key === "systolic"
+                  ? t("chart.sysShort")
+                  : t("chart.diaShort")}
               </tspan>
             </text>
           </g>

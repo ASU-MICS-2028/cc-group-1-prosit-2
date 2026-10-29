@@ -3,7 +3,6 @@ import {
   CalendarDays,
   ChevronRight,
   CloudUpload,
-  MapPin,
   TriangleAlert,
   UserPlus,
   Users,
@@ -12,7 +11,8 @@ import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { useSession } from "@/auth/session"
-import { Card, Monogram } from "@/components/PageHeader"
+import { Card } from "@/components/PageHeader"
+import { ProfileCard } from "@/components/ProfileCard"
 import { buttonVariants } from "@/components/ui/button"
 import { db } from "@/db/local"
 import { cn } from "@/lib/utils"
@@ -55,21 +55,7 @@ export function Component() {
         {t("home.greeting", { name: user.name.split(" ")[0] })}
       </h1>
 
-      <Card className="flex items-center gap-4 p-4">
-        <Monogram name={user.name} />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-base font-semibold text-foreground">
-            {user.name}
-          </p>
-          <p className="text-xs font-medium text-muted-foreground">
-            {t(`roles.${user.role}`)}
-          </p>
-          <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="size-4 text-primary" aria-hidden />
-            {user.district}
-          </p>
-        </div>
-      </Card>
+      <ProfileCard user={user} />
 
       <Link
         to="/patients/new"

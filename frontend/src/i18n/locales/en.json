@@ -5,7 +5,8 @@
     "optional": "Optional",
     "choose": "Choose…",
     "next": "Next",
-    "stepOf": "Step {{step}} of {{total}}"
+    "stepOf": "Step {{step}} of {{total}}",
+    "draft": "Draft translation"
   },
   "nav": {
     "label": "Main menu",
@@ -216,7 +217,13 @@
     "title": "Profile",
     "language": "Language",
     "comingSoon": "coming soon",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "addPhoto": "Add photo",
+    "changePhoto": "Change photo",
+    "removePhoto": "Remove photo",
+    "choosePhoto": "Choose a profile photo",
+    "photoHint": "Your photo stays on this phone.",
+    "photoError": "That picture couldn't be used. Try another one."
   },
   "pwa": {
     "updateTitle": "A new version is ready",
@@ -272,12 +279,15 @@
     "systolic": "Systolic",
     "diastolic": "Diastolic",
     "aria_one": "Blood pressure over {{count}} visit, latest {{sys}}/{{dia}} mmHg",
-    "aria_other": "Blood pressure over {{count}} visits, latest {{sys}}/{{dia}} mmHg"
+    "aria_other": "Blood pressure over {{count}} visits, latest {{sys}}/{{dia}} mmHg",
+    "sysShort": "sys",
+    "diaShort": "dia"
   },
   "welcome": {
     "language": "Choose your language",
     "soon": "Coming soon",
-    "start": "Get started"
+    "start": "Get started",
+    "draftNote": "Twi, Ewe and Hausa are first drafts that native speakers are still checking."
   },
   "code": {
     "title": "Enter the code",

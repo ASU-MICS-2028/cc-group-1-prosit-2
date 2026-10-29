@@ -7,6 +7,12 @@
 @import "@fontsource/poppins/latin-500.css";
 @import "@fontsource/poppins/latin-600.css";
 @import "@fontsource/poppins/latin-700.css";
+/* Ghanaian letters (Twi ɔ ɛ, Ewe ʋ ƒ ɖ, Hausa ɓ ɗ ƙ): the extended subset, downloaded only when a
+   page uses one of them (unicode-range). */
+@import "@fontsource/poppins/latin-ext-400.css";
+@import "@fontsource/poppins/latin-ext-500.css";
+@import "@fontsource/poppins/latin-ext-600.css";
+@import "@fontsource/poppins/latin-ext-700.css";
 
 @custom-variant dark (&:is(.dark *));
 

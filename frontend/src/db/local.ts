@@ -1,5 +1,12 @@
 import Dexie, { type EntityTable } from "dexie"
-import type { Appointment, Entity, OutboxItem, Patient, Vitals } from "./types"
+import type {
+  Appointment,
+  Entity,
+  OutboxItem,
+  Patient,
+  ProfilePhoto,
+  Vitals,
+} from "./types"
 
 /**
  * The phone's own database (IndexedDB). Every save lands here first and is queued in the outbox,
@@ -10,6 +17,7 @@ export const db = new Dexie("healthconnect") as Dexie & {
   vitals: EntityTable<Vitals, "id">
   appointments: EntityTable<Appointment, "id">
   outbox: EntityTable<OutboxItem, "seq">
+  profilePhotos: EntityTable<ProfilePhoto, "userId">
 }
 
 db.version(1).stores({
@@ -18,6 +26,8 @@ db.version(1).stores({
   appointments: "id, patientId, scheduledAt, status",
   outbox: "++seq, entity, entityId",
 })
+// v2: the signed-in health worker's profile photo, kept on this phone only.
+db.version(2).stores({ profilePhotos: "userId" })
 
 const table = {
   patient: db.patients,
