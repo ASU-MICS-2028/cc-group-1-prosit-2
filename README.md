@@ -31,6 +31,7 @@ To try it, sign in with a demo role. Records save on the device. Turn the networ
 
 ## Docs
 
+- **[Team handbook](docs/TEAM_HANDBOOK.md)** ([PDF](docs/TEAM_HANDBOOK.pdf)): who does what next, URLs, demo accounts, API contract, how we work
 - [What the frontend needs (API and data contract proposal)](docs/frontend-needs.md)
 - [Deploy and Lab 6 security evidence](deploy/README.md)
 - [Decisions](docs/adr/)
