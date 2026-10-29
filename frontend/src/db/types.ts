@@ -3,14 +3,30 @@
 
 export type Sex = "female" | "male" | "other"
 
-export type ConsentMethod = "verbal" | "thumbprint" | "signature"
+export type ConsentMethod = "spoken" | "thumbprint" | "signature"
 
-/** Recorded before any health data is saved (Ghana Data Protection Act; Germain's consent flow). */
+/** The wording read to the patient; the evidence proves agreement to this exact version. */
+export const CONSENT_STATEMENT_VERSION = "v1"
+
+/**
+ * Recorded before any health data is saved (Act 843 s.20 and s.37(2)(b): health data needs the
+ * patient's consent, since CHVs are not health professionals). The evidence is a voice clip, a
+ * signature, or a photo of the inked thumbprint on the paper form; its SHA-256 is kept with the
+ * record so anyone can check later that the file was not changed.
+ */
 export interface Consent {
   given: boolean
   method: ConsentMethod
   /** ISO time */
   at: string
+  statementVersion?: string
+  /** language the statement was read in */
+  language?: string
+  /** the health worker who asked (user id) */
+  obtainedBy?: string
+  /** someone else who heard the patient agree; required when there is no recording */
+  witness?: string
+  evidence?: { mediaId: string; sha256: string; mime: string }
 }
 
 export interface Patient {
@@ -102,6 +118,31 @@ export interface OutboxItem {
   op: "create" | "update"
   payload: Patient | Vitals | Appointment
   queuedAt: string
+  attempts: number
+  lastError?: string
+}
+
+export type MediaKind =
+  "consent-audio" | "consent-signature" | "consent-photo" | "wound-photo"
+
+/**
+ * A file that belongs to a record (consent evidence, a wound photo). Kept on the phone and
+ * uploaded to the private S3 bucket through a short-lived upload link when there's signal.
+ */
+export interface Media {
+  id: string
+  patientId: string
+  /** the record it belongs to */
+  ownerEntity: Entity
+  ownerId: string
+  kind: MediaKind
+  blob: Blob
+  mime: string
+  size: number
+  sha256: string
+  createdAt: string
+  /** set once the upload succeeded */
+  uploadedAt?: string
   attempts: number
   lastError?: string
 }

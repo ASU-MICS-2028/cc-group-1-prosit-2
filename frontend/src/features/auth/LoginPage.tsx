@@ -113,7 +113,7 @@ export function Component() {
 
       <Link
         to="/welcome"
-        className="mt-auto text-center text-sm font-semibold text-primary"
+        className="mt-auto text-center text-sm font-semibold text-secondary-foreground"
       >
         {t("login.changeLanguage")}
       </Link>

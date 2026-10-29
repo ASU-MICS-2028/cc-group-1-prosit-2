@@ -121,7 +121,7 @@ export function Component() {
                   <div className="min-w-0 flex-1">
                     <Link
                       to={`/patients/${a.patientId}`}
-                      className="block truncate text-sm font-semibold text-foreground underline-offset-2 hover:underline"
+                      className="block text-sm font-semibold break-words text-foreground underline-offset-2 hover:underline"
                     >
                       {a.patient ? fullName(a.patient) : "—"}
                     </Link>
@@ -130,7 +130,9 @@ export function Component() {
                       {formatDateTime(a.scheduledAt)}
                     </p>
                   </div>
-                  <ReferralStatusChip status={a.referralStatus!} />
+                  <span className="shrink-0">
+                    <ReferralStatusChip status={a.referralStatus!} />
+                  </span>
                 </div>
                 {a.priority !== "routine" ? (
                   <p

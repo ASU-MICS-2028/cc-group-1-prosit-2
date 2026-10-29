@@ -4,13 +4,19 @@ import { useTranslation } from "react-i18next"
 import { EmptyState, PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
 import { useOnline } from "@/lib/useOnline"
-import { syncNow, useOutbox, type SyncResult } from "@/sync/sync"
+import {
+  syncNow,
+  useOutbox,
+  usePendingMedia,
+  type SyncResult,
+} from "@/sync/sync"
 
 /** What is waiting on this phone, and a button to send it now. */
 export function Component() {
   const { t } = useTranslation()
   const online = useOnline()
   const outbox = useOutbox()
+  const files = usePendingMedia() ?? 0
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState<SyncResult | null>(null)
 
@@ -39,11 +45,16 @@ export function Component() {
           <p className="text-sm text-muted-foreground">
             {t("sync.waiting", { count: outbox?.length ?? 0 })}
           </p>
+          {files ? (
+            <p className="text-sm text-muted-foreground">
+              {t("sync.files", { count: files })}
+            </p>
+          ) : null}
         </div>
         <Button
           size="lg"
           onClick={() => void send()}
-          disabled={!online || busy || !outbox?.length}
+          disabled={!online || busy || (!outbox?.length && !files)}
         >
           <RefreshCw
             className={busy ? "animate-spin" : undefined}
@@ -60,9 +71,9 @@ export function Component() {
           })}
         </p>
       ) : null}
-      {outbox?.length === 0 ? (
+      {outbox?.length === 0 && !files ? (
         <EmptyState illustration="synced">{t("sync.allSent")}</EmptyState>
-      ) : (
+      ) : outbox?.length === 0 ? null : (
         <ul className="divide-y rounded-xl bg-card shadow-card text-sm">
           {outbox?.map((item) => (
             <li key={item.seq} className="flex justify-between gap-3 p-3">

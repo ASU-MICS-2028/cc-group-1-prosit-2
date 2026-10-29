@@ -14,9 +14,28 @@ describe("register a patient, record vitals, book a visit", () => {
     ).toBeInTheDocument()
   })
 
+  it("asks for a witness when the phone can't record, and for proof for the other methods", async () => {
+    const user = userEvent.setup()
+    renderRoute("/patients/new")
+    await user.click(await screen.findByRole("checkbox"))
+    await user.click(screen.getByRole("button", { name: "Next" }))
+    expect(
+      await screen.findAllByText("Needed when there is no recording.")
+    ).not.toHaveLength(0)
+    await user.click(screen.getByRole("radio", { name: "Thumbprint" }))
+    await user.click(screen.getByRole("button", { name: "Next" }))
+    expect(
+      await screen.findByText(
+        "Record, sign or photograph the patient's consent first."
+      )
+    ).toBeInTheDocument()
+  })
+
   it("checks each step before the next, and Back keeps what was typed", async () => {
     const user = userEvent.setup()
     renderRoute("/patients/new")
+    // jsdom can't record sound, so spoken consent falls back to a witness
+    await user.type(await screen.findByLabelText("Witness name"), "Esi Boateng")
     await user.click(await screen.findByRole("checkbox"))
     await user.click(screen.getByRole("button", { name: "Next" }))
     await user.type(await screen.findByLabelText("First name"), "Kofi")
@@ -33,6 +52,7 @@ describe("register a patient, record vitals, book a visit", () => {
   it("works end to end on the phone and queues everything for sync", async () => {
     const user = userEvent.setup()
     const { router } = renderRoute("/patients/new")
+    await user.type(await screen.findByLabelText("Witness name"), "Esi Boateng")
     await user.click(await screen.findByRole("checkbox"))
     await user.click(screen.getByRole("button", { name: "Next" }))
     await user.type(await screen.findByLabelText("First name"), "Ama")
@@ -56,7 +76,13 @@ describe("register a patient, record vitals, book a visit", () => {
     expect(patient).toMatchObject({
       sex: "female",
       birthDateEstimated: true,
-      consent: { given: true, method: "verbal" },
+      consent: {
+        given: true,
+        method: "spoken",
+        statementVersion: "v1",
+        language: "en",
+        witness: "Esi Boateng",
+      },
     })
 
     await user.click(screen.getByRole("link", { name: /Record vitals now/ }))
@@ -128,7 +154,7 @@ describe("register a patient, record vitals, book a visit", () => {
       community: "Dodowa",
       district: "Shai-Osudoku",
       preferredLanguage: "en",
-      consent: { given: true, method: "verbal", at: new Date().toISOString() },
+      consent: { given: true, method: "spoken", at: new Date().toISOString() },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       version: 0,
@@ -162,5 +188,48 @@ describe("register a patient, record vitals, book a visit", () => {
   it("finds patients by community", async () => {
     renderRoute("/patients")
     expect(await screen.findByText(/No patients yet/)).toBeInTheDocument()
+  })
+})
+
+describe("edit a patient", () => {
+  it("fixes a name and phone, keeps consent, and queues an update", async () => {
+    const user = userEvent.setup()
+    const now = new Date().toISOString()
+    await db.patients.add({
+      id: "p9",
+      givenName: "Yaa",
+      familyName: "Asantewa",
+      sex: "female",
+      dateOfBirth: "1970-07-01",
+      birthDateEstimated: true,
+      community: "Dodowa",
+      district: "Shai-Osudoku",
+      preferredLanguage: "tw",
+      consent: { given: true, method: "signature", at: now },
+      createdAt: now,
+      updatedAt: now,
+      version: 3,
+    })
+    const { router } = renderRoute("/patients/p9")
+    await user.click(await screen.findByRole("link", { name: "Edit" }))
+    const given = await screen.findByLabelText("First name")
+    await user.clear(given)
+    await user.type(given, "Yaa Kumiwaa")
+    await user.type(screen.getByLabelText("Phone number"), "0241234567")
+    await user.click(screen.getByRole("button", { name: "Save changes" }))
+    await waitFor(() =>
+      expect(router.state.location.pathname).toBe("/patients/p9")
+    )
+    const saved = await db.patients.get("p9")
+    expect(saved).toMatchObject({
+      givenName: "Yaa Kumiwaa",
+      phone: "0241234567",
+      dateOfBirth: "1970-07-01", // the estimate didn't drift
+      consent: { method: "signature" },
+      version: 3,
+    })
+    expect(await db.outbox.toArray()).toMatchObject([
+      { entity: "patient", entityId: "p9", op: "update" },
+    ])
   })
 })

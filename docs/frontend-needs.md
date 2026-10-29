@@ -42,9 +42,22 @@ Ids are **UUIDs made on the phone** (`crypto.randomUUID()`), so a record has its
 | nationalId | string? | Ghana Card or NHIS number |
 | community, district | string | required |
 | preferredLanguage | `en` \| `tw` \| `ee` \| `dag` \| `ha` | |
-| consent | `{ given: true, method: "verbal" \| "thumbprint" \| "signature", at }` | nothing is saved without it |
+| consent | `{ given: true, method: "spoken" \| "thumbprint" \| "signature", at, statementVersion, language, obtainedBy, witness?, evidence?: { mediaId, sha256, mime } }` | nothing is saved without it; see Consent evidence below |
 | createdAt, updatedAt | ISO time | |
 | version | int | |
+
+### Consent evidence
+Each method needs proof:
+- **Spoken:** a voice clip of up to 30 s (WebM/Opus, or MP4/AAC on iPhone; about 60 KB).
+- **Signature:** a finger-drawn PNG.
+- **Thumbprint:** a photo of the inked thumbprint on the paper form (JPEG, about 150 KB).
+
+The phone's fingerprint sensor isn't used, because it never gives an app the print, and storing biometrics would add special-personal-data risk (Act 843 s.37).
+
+If a phone can't record sound, spoken consent needs a named witness instead. The file is uploaded separately from the patient record (see `/media` below). The record keeps the file's id and SHA-256, so a changed file can be detected.
+
+**Liza:** add `statement_version`, `language`, `witness`, `evidence_key` and `evidence_sha256` to `consents`, and use `spoken` (the app now sends `spoken`, not `verbal`).
+**Germain:** own the consent statement text; v1 is in `frontend/src/i18n/locales/en.json` (`newPatient.statement`).
 
 ### Vitals
 | Field | Type | Notes |
@@ -86,6 +99,7 @@ All under `/api`, JSON, `Authorization: Bearer <token>`. nginx serves the app an
 | GET | `/patients?updatedSince=` | → Patient[] | pulling other workers' changes (stretch) |
 | PUT | `/appointments/{id}` with `referralStatus` | `requested` → `accepted` / `declined` → `seen`, plus `handledBy`, `handledAt` | referral inbox (nurse, doctor) |
 | GET | `/surveillance/weekly` | → rows of `surveillance_weekly` (db/rbac.sql): `{ district, week, patients_seen, patients_high_bp, patients_fever, suppressed }`, cells under 5 null | district summary (officer) |
+| POST | `/media/{id}/upload-url` | `{ kind, mime, size, sha256, patientId, ownerEntity, ownerId }` → `{ url, headers? }`: a presigned S3 PUT (5 min, SSE-KMS, key `media/{patientId}/{id}`) | consent evidence and photos, after the record itself has synced |
 | GET | `/health` | → 200 | load balancer / deploy check |
 
 **Why PUT by id:** on 2G a reply can be lost after the server saved the record. The phone then sends it again, and a PUT to the same id saves it once.
@@ -99,4 +113,5 @@ All under `/api`, JSON, `Authorization: Bearer <token>`. nginx serves the app an
 ## Asks
 - **Bernard:** implement `/auth/code` and `/auth/verify` as above (ADR 0004). Until they exist the app runs in demo mode; set `VITE_AUTH_MODE=api` to switch.
 - **Liza:** confirm the field names against the ERD; give me the conflict policy and the summary's shape.
-- **Germain:** confirm the role names and whether a thumbprint is enough for consent in the demo (the biometric part is a mock).
+- **Bernard:** `/media/{id}/upload-url`. Check that the caller may write to that patient, cap the size (2 MB), and allow only `audio/*`, `image/png` and `image/jpeg`.
+- **Germain:** confirm the role names, and sign off the consent statement v1 and its translations.

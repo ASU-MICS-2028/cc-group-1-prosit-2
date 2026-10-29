@@ -85,7 +85,13 @@
     "noVitals": "No vitals recorded yet.",
     "appointments": "Visits and referrals",
     "latest": "Latest readings",
-    "call": "Call {{phone}}"
+    "call": "Call {{phone}}",
+    "consentTitle": "Consent",
+    "consentOn": "Given {{date}} · statement {{version}}",
+    "witness": "Witness: {{name}}",
+    "fileWaiting": "Waiting to upload",
+    "fileSent": "Uploaded",
+    "noEvidence": "No recording: a witness confirmed it."
   },
   "newPatient": {
     "title": "Register a patient",
@@ -103,10 +109,13 @@
     "placeTitle": "Where they live",
     "placeText": "So the right health worker and facility can follow up.",
     "phoneWhy": "Optional. Only for visit reminders.",
-    "nationalIdWhy": "Optional. Only for NHIS checks."
+    "nationalIdWhy": "Optional. Only for NHIS checks.",
+    "statementTitle": "Read this to the patient",
+    "statement": "We would like to keep your health record on this phone and send it securely to the Ghana Health Service, so your health workers can follow up on your care. Only your health workers can see it. You can say no, and you can ask us to stop at any time. Do you agree?",
+    "statementVersion": "Consent statement {{version}}"
   },
   "consent": {
-    "verbal": "Spoken",
+    "spoken": "Spoken",
     "thumbprint": "Thumbprint",
     "signature": "Signature"
   },
@@ -128,7 +137,9 @@
     "save": "Save vitals",
     "bodyTitle": "Weight and height",
     "bodyAdd": "Add weight and height",
-    "bodyRemove": "Remove"
+    "bodyRemove": "Remove",
+    "photos": "Photos of a wound or rash",
+    "photosHint": "Optional. Up to 3. Only for the patient's care; ask before taking them."
   },
   "flags": {
     "bpCrisis": "Very high blood pressure",
@@ -141,8 +152,19 @@
     "pulseLow": "Slow pulse"
   },
   "appointments": {
-    "title": "Upcoming visits",
-    "empty": "No visits booked."
+    "title": "Visits",
+    "upcoming": "Upcoming",
+    "overdue": "Overdue",
+    "past": "Past",
+    "empty_upcoming": "No visits booked.",
+    "empty_overdue": "Nothing overdue. Well done.",
+    "empty_past": "No finished visits yet.",
+    "overdueTag": "overdue",
+    "markDone": "Done",
+    "reschedule": "Reschedule",
+    "more": "More actions",
+    "markMissed": "Patient didn't come",
+    "cancel": "Cancel visit"
   },
   "newAppointment": {
     "title": "Book a visit or referral",
@@ -151,7 +173,9 @@
     "facility": "Health facility",
     "priority": "Priority",
     "reason": "Reason",
-    "save": "Book"
+    "save": "Book",
+    "editTitle": "Change the visit",
+    "saveChanges": "Save changes"
   },
   "appointmentType": {
     "follow_up": "Follow-up",
@@ -187,7 +211,9 @@
     "allSent": "Everything on this phone has been sent.",
     "queued": "Waiting",
     "failed": "Will retry",
-    "conflict": "Needs review"
+    "conflict": "Needs review",
+    "files_one": "{{count}} file waiting",
+    "files_other": "{{count}} files waiting"
   },
   "surveillance": {
     "title": "District summary",
@@ -224,7 +250,11 @@
     "removePhoto": "Remove photo",
     "choosePhoto": "Choose a profile photo",
     "photoHint": "Your photo stays on this phone.",
-    "photoError": "That picture couldn't be used. Try another one."
+    "photoError": "That picture couldn't be used. Try another one.",
+    "theme": "Appearance",
+    "theme_system": "Phone",
+    "theme_light": "Light",
+    "theme_dark": "Dark"
   },
   "pwa": {
     "updateTitle": "A new version is ready",
@@ -248,7 +278,8 @@
     "range": "This value looks wrong. Check the measurement.",
     "bothBp": "Enter both blood pressure numbers.",
     "oneVital": "Enter at least one measurement.",
-    "future": "Choose a time in the future."
+    "future": "Choose a time in the future.",
+    "evidence": "Record, sign or photograph the patient's consent first."
   },
   "notFound": {
     "text": "This page does not exist.",
@@ -329,5 +360,35 @@
     "minute": "Minutes",
     "now": "Now",
     "done": "Done"
+  },
+  "capture": {
+    "record": "Record consent",
+    "stop": "Stop recording",
+    "again": "Record again",
+    "recording": "Recording… {{seconds}} s left",
+    "spokenHint": "Read the statement, then record the patient saying yes. Up to 30 seconds.",
+    "noMic": "This phone can't record sound. Ask someone else who heard the patient agree to give their name below.",
+    "signHere": "Sign here",
+    "signHint": "The patient signs with a finger.",
+    "clear": "Clear",
+    "signatureLabel": "Patient's signature",
+    "takePhoto": "Photograph thumbprint",
+    "thumbHint": "Press the patient's inked thumb on the paper consent form, then photograph it.",
+    "photoAlt": "Photo of the patient's thumbprint",
+    "retake": "Take again",
+    "witness": "Witness name",
+    "witnessHint": "Optional. Someone else who heard the patient agree.",
+    "witnessNeeded": "Needed when there is no recording.",
+    "recorded": "Recorded · {{seconds}} s",
+    "addPhoto": "Add photo",
+    "photoN": "Photo {{n}}",
+    "removePhoto": "Remove {{label}}",
+    "dictate": "Speak notes",
+    "listening": "Listening… tap to stop"
+  },
+  "editPatient": {
+    "title": "Edit details",
+    "save": "Save changes",
+    "edit": "Edit"
   }
 }

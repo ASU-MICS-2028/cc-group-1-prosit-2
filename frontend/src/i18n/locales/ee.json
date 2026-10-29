@@ -12,10 +12,10 @@
     "label": "Menu vevitɔ",
     "home": "Aƒeme",
     "patients": "Dɔnɔwo",
-    "appointments": "Sraɖekpɔwo",
+    "appointments": "Sasrãkpɔ",
     "summary": "Kpuie",
     "sync": "Ɖo ɖa",
-    "profile": "Nye nyatakakawo",
+    "profile": "Nye akɔnta",
     "add": "Tsɔ kpe ɖe eŋu",
     "referrals": "Ɖoɖowo"
   },
@@ -85,7 +85,13 @@
     "noVitals": "Womeŋlɔ dzidzeme aɖeke haɖe o.",
     "appointments": "Sraɖekpɔwo kple ɖoɖowo",
     "latest": "Dzidzeme mamlɛtɔwo",
-    "call": "Yɔ {{phone}}"
+    "call": "Yɔ {{phone}}",
+    "consentTitle": "Lɔlɔ̃",
+    "consentOn": "Elɔ̃ {{date}} · nyawo {{version}}",
+    "witness": "Ɖaseɖila: {{name}}",
+    "fileWaiting": "Ele lalam be woaɖoe ɖa",
+    "fileSent": "Woɖoe ɖa",
+    "noEvidence": "Womexɔe ɖe gbe me o: ɖaseɖila aɖe ɖi ɖase."
   },
   "newPatient": {
     "title": "Ŋlɔ dɔnɔ ƒe ŋkɔ",
@@ -103,10 +109,13 @@
     "placeTitle": "Afi si wònɔna",
     "placeText": "Ale be lãmesẽ dɔwɔla kple dɔyɔƒe si dze nalé ŋku ɖe eŋu.",
     "phoneWhy": "Mehiã o. Ɖeko na sraɖekpɔ ŋkuɖodzi.",
-    "nationalIdWhy": "Mehiã o. Ɖeko na NHIS dodokpɔ."
+    "nationalIdWhy": "Mehiã o. Ɖeko na NHIS dodokpɔ.",
+    "statementTitle": "Xlẽ esia na dɔnɔ la",
+    "statement": "Míedi be míadzra wò lãmesẽ ŋuti nuŋlɔɖiwo ɖo fon sia dzi, eye míaɖo wo ɖe Ghana Health Service le mɔ dedie dzi, ale be wò lãmesẽdɔwɔlawo nate ŋu akpɔ wò ɖe ŋu. Wò lãmesẽdɔwɔlawo ɖeɖe koe akpɔe. Àte ŋu agblɔ be ao, eye àte ŋu agblɔ na mí be míadzudzɔ ɣesiaɣi. Èlɔ̃a?",
+    "statementVersion": "Lɔlɔ̃ ŋuti nyawo {{version}}"
   },
   "consent": {
-    "verbal": "Kple nu",
+    "spoken": "Kple nu",
     "thumbprint": "Asibidɛ dzesi",
     "signature": "Asidede"
   },
@@ -128,7 +137,9 @@
     "save": "Dzra dzidzemewo ɖo",
     "bodyTitle": "Kpekpeme kple kɔkɔme",
     "bodyAdd": "Tsɔ kpekpeme kple kɔkɔme kpe ɖe eŋu",
-    "bodyRemove": "Ɖe ɖa"
+    "bodyRemove": "Ɖe ɖa",
+    "photos": "Abi alo ŋutigbalẽdɔ ƒe fotowo",
+    "photosHint": "Mehiã o. Va se ɖe 3. Dɔnɔ la ƒe dɔyɔyɔ ko ŋuti; bia hafi nàɖee."
   },
   "flags": {
     "bpCrisis": "Ʋuƒoƒo kɔkɔ ŋutɔ",
@@ -141,8 +152,19 @@
     "pulseLow": "Dzi ƒoƒo blewu"
   },
   "appointments": {
-    "title": "Sraɖekpɔ siwo gbɔna",
-    "empty": "Womeɖo sraɖekpɔ aɖeke o."
+    "title": "Sasrãkpɔwo",
+    "upcoming": "Siwo gbɔna",
+    "overdue": "Ɣeyiɣi va yi",
+    "past": "Siwo va yi",
+    "empty_upcoming": "Womeɖo sasrãkpɔ aɖeke ɖi o.",
+    "empty_overdue": "Naneke ƒe ɣeyiɣi meva yi o. Ayekoo.",
+    "empty_past": "Sasrãkpɔ aɖeke mewu enu haɖe o.",
+    "overdueTag": "ɣeyiɣi va yi",
+    "markDone": "Wu enu",
+    "reschedule": "Trɔ ɣeyiɣi",
+    "more": "Nu bubuwo",
+    "markMissed": "Dɔnɔ la meva o",
+    "cancel": "Tutu sasrãkpɔ la"
   },
   "newAppointment": {
     "title": "Ɖo sraɖekpɔ alo ɖoɖo",
@@ -151,7 +173,9 @@
     "facility": "Dɔyɔƒe",
     "priority": "Vevienyenye",
     "reason": "Susu",
-    "save": "Ɖoe"
+    "save": "Ɖoe",
+    "editTitle": "Trɔ sasrãkpɔ la",
+    "saveChanges": "Dzra tɔtrɔwo ɖo"
   },
   "appointmentType": {
     "follow_up": "Gbugbɔgasra",
@@ -187,7 +211,9 @@
     "allSent": "Woɖo nu sia nu si le telefon sia dzi ɖa.",
     "queued": "Le lalam",
     "failed": "Agagbugbɔ adze agbagba",
-    "conflict": "Ehiã be woakpɔe"
+    "conflict": "Ehiã be woakpɔe",
+    "files_one": "Faɛl {{count}} le lalam",
+    "files_other": "Faɛl {{count}} le lalam"
   },
   "surveillance": {
     "title": "Nutome ƒe kpuie",
@@ -224,7 +250,11 @@
     "removePhoto": "Ɖe foto ɖa",
     "choosePhoto": "Tia wò foto",
     "photoHint": "Wò foto la nɔa telefon sia dzi ɖeɖeko.",
-    "photoError": "Míete ŋu zã foto ma o. Tia bubu."
+    "photoError": "Míete ŋu zã foto ma o. Tia bubu.",
+    "theme": "Ale si wòdze",
+    "theme_system": "Fon la",
+    "theme_light": "Kekeli",
+    "theme_dark": "Viviti"
   },
   "pwa": {
     "updateTitle": "Nɔnɔme yeye ɖe le klalo",
@@ -248,7 +278,8 @@
     "range": "Nu sia medze abe nyateƒe ene o. Gakpɔ dzidzeme la.",
     "bothBp": "Ŋlɔ BP xexlẽdzesi eveawo siaa.",
     "oneVital": "Ŋlɔ dzidzeme ɖeka ya teti.",
-    "future": "Tia ɣeyiɣi si gbɔna."
+    "future": "Tia ɣeyiɣi si gbɔna.",
+    "evidence": "Xɔ dɔnɔ la ƒe lɔlɔ̃ ɖe gbe me, de asi alo ɖe eƒe foto gbã."
   },
   "notFound": {
     "text": "Axa sia meli o.",
@@ -329,5 +360,35 @@
     "minute": "Aɖabaƒoƒowo",
     "now": "Fifia",
     "done": "Wu enu"
+  },
+  "capture": {
+    "record": "Xɔ lɔlɔ̃ la ɖe gbe me",
+    "stop": "Dzudzɔ gbexɔxɔ",
+    "again": "Gaxɔe ɖe gbe me",
+    "recording": "Wole gbe xɔm… sekend {{seconds}} susɔ",
+    "spokenHint": "Xlẽ nyawo, emegbe xɔ dɔnɔ la ƒe gbe esime wòle ɛ̃ gblɔm. Sekend 30 me.",
+    "noMic": "Fon sia mate ŋu axɔ gbe o. Na ame bubu si se be dɔnɔ la lɔ̃ la nàŋlɔ eƒe ŋkɔ ɖe ete.",
+    "signHere": "De asi ɖe afi sia",
+    "signHint": "Dɔnɔ la atsɔ asibide ade asi.",
+    "clear": "Tutui",
+    "signatureLabel": "Dɔnɔ la ƒe asidede",
+    "takePhoto": "Ɖe asibidetsu ƒe foto",
+    "thumbHint": "Tsɔ dɔnɔ la ƒe asibidetsu si wosi atike na la ƒo ɖe lɔlɔ̃ agbalẽ la dzi, emegbe ɖe eƒe foto.",
+    "photoAlt": "Dɔnɔ la ƒe asibidetsu ƒe foto",
+    "retake": "Gaɖee",
+    "witness": "Ɖaseɖila ƒe ŋkɔ",
+    "witnessHint": "Mehiã o. Ame bubu si se be dɔnɔ la lɔ̃.",
+    "witnessNeeded": "Ehiã ne gbexɔxɔ meli o.",
+    "recorded": "Woxɔe · sekend {{seconds}}",
+    "addPhoto": "Tsɔ foto kpe ɖe eŋu",
+    "photoN": "Foto {{n}}",
+    "removePhoto": "Ɖe {{label}} ɖa",
+    "dictate": "Ƒo nu ŋlɔ nyawo",
+    "listening": "Ele to ɖom… zi edzi nàdzudzɔ"
+  },
+  "editPatient": {
+    "title": "Trɔ nyatakakawo",
+    "save": "Dzra tɔtrɔwo ɖo",
+    "edit": "Trɔe"
   }
 }

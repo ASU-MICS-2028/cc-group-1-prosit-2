@@ -4,6 +4,7 @@ import type {
   Entity,
   OutboxItem,
   Patient,
+  Media,
   ProfilePhoto,
   Vitals,
 } from "./types"
@@ -18,6 +19,7 @@ export const db = new Dexie("healthconnect") as Dexie & {
   appointments: EntityTable<Appointment, "id">
   outbox: EntityTable<OutboxItem, "seq">
   profilePhotos: EntityTable<ProfilePhoto, "userId">
+  media: EntityTable<Media, "id">
 }
 
 db.version(1).stores({
@@ -28,6 +30,19 @@ db.version(1).stores({
 })
 // v2: the signed-in health worker's profile photo, kept on this phone only.
 db.version(2).stores({ profilePhotos: "userId" })
+// v3: files that belong to records (consent evidence, wound photos), and the consent method
+// "verbal" renamed "spoken" to match the database (Liza's schema).
+db.version(3)
+  .stores({ media: "id, patientId, ownerId, uploadedAt" })
+  .upgrade((tx) =>
+    tx
+      .table<Patient, string>("patients")
+      .toCollection()
+      .modify((p) => {
+        if ((p.consent.method as string) === "verbal")
+          p.consent.method = "spoken"
+      })
+  )
 
 const table = {
   patient: db.patients,

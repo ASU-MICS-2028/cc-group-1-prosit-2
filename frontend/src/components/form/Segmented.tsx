@@ -12,6 +12,7 @@ export function Segmented<T extends string>({
   onChange,
   options,
   tone,
+  hideLegend = false,
 }: {
   name: string
   legend: string
@@ -20,10 +21,17 @@ export function Segmented<T extends string>({
   options: readonly { value: T; label: string }[]
   /** colour the chosen option by meaning, e.g. emergency in red */
   tone?: (value: T) => "primary" | "warning" | "destructive"
+  /** when the page title already says what the choice is (tabs) */
+  hideLegend?: boolean
 }) {
   return (
     <fieldset>
-      <legend className="mb-1.5 text-sm font-medium tracking-[0.01em] text-foreground">
+      <legend
+        className={cn(
+          "mb-1.5 text-sm font-medium tracking-[0.01em] text-foreground",
+          hideLegend && "sr-only"
+        )}
+      >
         {legend}
       </legend>
       <div
@@ -44,8 +52,10 @@ export function Segmented<T extends string>({
                 selected &&
                   t === "primary" &&
                   "bg-primary text-primary-foreground",
-                selected && t === "warning" && "bg-warning text-white",
-                selected && t === "destructive" && "bg-destructive text-white"
+                selected && t === "warning" && "bg-warning text-background",
+                selected &&
+                  t === "destructive" &&
+                  "bg-destructive text-background"
               )}
             >
               <input

@@ -1,8 +1,11 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import {
+  Fingerprint,
   HeartPulse,
   MapPin,
   Mars,
+  MessageCircle,
+  PenLine,
   Phone,
   ShieldCheck,
   Thermometer,
@@ -20,6 +23,7 @@ import { db } from "@/db/local"
 import type { Appointment, AppointmentType, Patient, Vitals } from "@/db/types"
 import { ReferralStatusChip } from "@/features/referrals/ReferralStatusChip"
 import { formatDateTime } from "@/lib/dates"
+import { useMediaFor, useObjectUrl } from "@/lib/media"
 import { cn } from "@/lib/utils"
 import {
   ageFrom,
@@ -57,7 +61,19 @@ export function Component() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={fullName(patient)} back="/patients" />
+      <PageHeader
+        title={fullName(patient)}
+        back="/patients"
+        action={
+          <Link
+            to={`/patients/${patient.id}/edit`}
+            className="mb-0.5 inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-secondary px-4 text-sm font-semibold text-secondary-foreground"
+          >
+            <PenLine className="size-4" aria-hidden />
+            {t("editPatient.edit")}
+          </Link>
+        }
+      />
       <Summary
         patient={patient}
         readings={vitals?.length ?? 0}
@@ -87,7 +103,7 @@ export function Component() {
           {t("patient.appointments")}
         </h2>
         {appointments?.length === 0 ? (
-          <EmptyState>{t("appointments.empty")}</EmptyState>
+          <EmptyState>{t("appointments.empty_upcoming")}</EmptyState>
         ) : (
           <ul className="space-y-2">
             {appointments?.map((a) => (
@@ -111,7 +127,87 @@ export function Component() {
           </ul>
         )}
       </section>
+      <ConsentRecord patient={patient} />
     </div>
+  )
+}
+
+const CONSENT_ICON = {
+  spoken: MessageCircle,
+  thumbprint: Fingerprint,
+  signature: PenLine,
+}
+
+/**
+ * What the patient agreed to, how, and the proof: play the voice clip or see the signature or
+ * thumbprint photo. Lets a nurse or an auditor check consent without leaving the record.
+ */
+function ConsentRecord({ patient }: { patient: Patient }) {
+  const { t } = useTranslation()
+  const { consent } = patient
+  const media = useMediaFor(patient.id)?.find(
+    (m) => m.id === consent.evidence?.mediaId
+  )
+  const url = useObjectUrl(media?.blob)
+  const Icon = CONSENT_ICON[consent.method]
+  return (
+    <section className="space-y-3">
+      <h2 className="text-base font-semibold text-heading">
+        {t("patient.consentTitle")}
+      </h2>
+      <Card className="space-y-3 p-4 text-sm">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
+            <Icon className="size-5" aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-heading">
+              {t(`consent.${consent.method}`)}
+            </p>
+            <p className="text-muted-foreground">
+              {t("patient.consentOn", {
+                date: formatDateTime(consent.at),
+                version: consent.statementVersion ?? "v1",
+              })}
+            </p>
+            {consent.witness ? (
+              <p className="text-muted-foreground">
+                {t("patient.witness", { name: consent.witness })}
+              </p>
+            ) : null}
+          </div>
+          {media ? (
+            <span
+              className={cn(
+                "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold",
+                media.uploadedAt
+                  ? "bg-secondary text-secondary-foreground"
+                  : "bg-warning/10 text-warning"
+              )}
+            >
+              {media.uploadedAt
+                ? t("patient.fileSent")
+                : t("patient.fileWaiting")}
+            </span>
+          ) : null}
+        </div>
+        {url && media?.kind === "consent-audio" ? (
+          <audio controls src={url} className="w-full" />
+        ) : url ? (
+          <img
+            src={url}
+            alt={
+              media?.kind === "consent-photo"
+                ? t("capture.photoAlt")
+                : t("capture.signatureLabel")
+            }
+            className="max-h-48 w-full rounded-lg bg-secondary/50 object-contain"
+          />
+        ) : !consent.evidence ? (
+          <p className="text-muted-foreground">{t("patient.noEvidence")}</p>
+        ) : null}
+      </Card>
+    </section>
   )
 }
 
@@ -153,7 +249,7 @@ function Summary({
     { count: referrals, label: t("nav.referrals"), to: "#visits" },
   ]
   const action =
-    "inline-flex h-11 min-w-0 flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold whitespace-nowrap"
+    "inline-flex min-h-11 min-w-0 flex-1 items-center justify-center rounded-lg px-3 py-2 text-center text-sm leading-tight font-semibold"
   return (
     <Card className="p-5">
       <div className="flex items-center gap-4">
@@ -176,7 +272,7 @@ function Summary({
                 <span className="text-xl font-bold text-heading tabular-nums">
                   {s.count}
                 </span>
-                <span className="truncate text-xs text-muted-foreground">
+                <span className="text-xs leading-tight text-muted-foreground hyphens-auto [overflow-wrap:anywhere]">
                   {s.label}
                 </span>
               </a>
@@ -198,7 +294,7 @@ function Summary({
         </p>
         <p className="flex items-center gap-1.5 text-muted-foreground">
           <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
-          <span className="truncate">
+          <span>
             {patient.community}, {patient.district}
           </span>
         </p>
@@ -224,19 +320,19 @@ function Summary({
           to={`/patients/${patient.id}/vitals/new`}
           className={cn(action, "bg-primary text-primary-foreground")}
         >
-          <span className="truncate">{t("patient.recordVitals")}</span>
+          <span>{t("patient.recordVitals")}</span>
         </Link>
         <Link
           to={`/patients/${patient.id}/appointments/new`}
-          className={cn(action, "bg-secondary text-primary")}
+          className={cn(action, "bg-secondary text-secondary-foreground")}
         >
-          <span className="truncate">{t("patient.book")}</span>
+          <span>{t("patient.book")}</span>
         </Link>
         {patient.phone ? (
           <a
             href={`tel:${patient.phone.replace(/\s/g, "")}`}
             aria-label={t("patient.call", { phone: patient.phone })}
-            className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-primary"
+            className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-secondary-foreground"
           >
             <Phone className="size-5" aria-hidden />
           </a>
@@ -272,6 +368,7 @@ function VitalsRow({ v }: { v: Vitals }) {
     <li className="rounded-xl bg-card shadow-card p-4 text-sm">
       <p className="text-muted-foreground">{formatDateTime(v.takenAt)}</p>
       <p className="font-medium text-foreground">{parts.join(" · ")}</p>
+      <VitalsPhotos vitalsId={v.id} />
       {flags.length > 0 ? (
         <p
           className={cn(
@@ -285,6 +382,33 @@ function VitalsRow({ v }: { v: Vitals }) {
       ) : null}
     </li>
   )
+}
+
+/** Wound or skin photos taken with a reading, as small thumbnails. */
+function VitalsPhotos({ vitalsId }: { vitalsId: string }) {
+  const media = useMediaFor(vitalsId)
+  if (!media?.length) return null
+  return (
+    <div className="mt-2 flex gap-2">
+      {media.map((m, i) => (
+        <MediaThumb key={m.id} blob={m.blob} n={i + 1} />
+      ))}
+    </div>
+  )
+}
+
+function MediaThumb({ blob, n }: { blob: Blob; n: number }) {
+  const { t } = useTranslation()
+  const url = useObjectUrl(blob)
+  return url ? (
+    <a href={url} target="_blank" rel="noreferrer">
+      <img
+        src={url}
+        alt={t("capture.photoN", { n })}
+        className="size-16 rounded-lg object-cover"
+      />
+    </a>
+  ) : null
 }
 
 /**

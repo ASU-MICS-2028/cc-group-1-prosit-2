@@ -59,7 +59,7 @@ export function ProfileCard({
       <div className="absolute -top-12 left-5 rounded-full bg-background p-1.5">
         <Avatar user={user} className="size-[84px] text-2xl" />
       </div>
-      <p className="truncate text-lg font-semibold text-foreground">
+      <p className="text-lg font-semibold break-words text-foreground">
         {user.name}
       </p>
       <p className="text-sm font-medium text-muted-foreground">

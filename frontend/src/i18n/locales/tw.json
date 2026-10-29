@@ -85,7 +85,13 @@
     "noVitals": "Wɔnkyerɛw nsusuiɛ biara mmaeɛ.",
     "appointments": "Nsrahwɛ ne nsoma",
     "latest": "Nsusuiɛ a ɛtwa toɔ",
-    "call": "Frɛ {{phone}}"
+    "call": "Frɛ {{phone}}",
+    "consentTitle": "Penee",
+    "consentOn": "Ɔpenee {{date}} · nsɛm {{version}}",
+    "witness": "Adansefoɔ: {{name}}",
+    "fileWaiting": "Ɛretwɛn sɛ ɛbɛkɔ",
+    "fileSent": "Ɛkɔ dedaw",
+    "noEvidence": "Wɔankyere: adansefoɔ bi di ho adanse."
   },
   "newPatient": {
     "title": "Kyerɛw ɔyarefoɔ din",
@@ -103,10 +109,13 @@
     "placeTitle": "Baabi a ɔte",
     "placeText": "Sɛnea ɛbɛyɛ a apɔmuden adwumayɛfoɔ ne ayaresabea a ɛfata bɛtumi ahwɛ no.",
     "phoneWhy": "Ɛho nhia. Ɛyɛ nsrahwɛ nkaeɛ nko ara.",
-    "nationalIdWhy": "Ɛho nhia. Ɛyɛ NHIS nhwehwɛmu nko ara."
+    "nationalIdWhy": "Ɛho nhia. Ɛyɛ NHIS nhwehwɛmu nko ara.",
+    "statementTitle": "Kenkan yei kyerɛ ayarefoɔ no",
+    "statement": "Yɛpɛ sɛ yɛkora wo apɔwmuden ho nsɛm wɔ fon yi so, na yɛde kɔma Ghana Health Service wɔ ɔkwan a ɛho tɔ so so, sɛnea wo apɔwmuden adwumayɛfoɔ bɛtumi ahwɛ wo yie. Wo apɔwmuden adwumayɛfoɔ nko ara na wɔbɛhunu. Wobɛtumi aka sɛ dabi, na wobɛtumi aka akyerɛ yɛn sɛ yɛnnyae bere biara. Wopene so?",
+    "statementVersion": "Penee ho nsɛm {{version}}"
   },
   "consent": {
-    "verbal": "Ɔkasa mu",
+    "spoken": "Ɔkasa mu",
     "thumbprint": "Nsateaa nsɛnkyerɛnne",
     "signature": "Nsaano"
   },
@@ -128,7 +137,9 @@
     "save": "Kora nsusuiɛ no",
     "bodyTitle": "Mu duru ne tenten",
     "bodyAdd": "Fa mu duru ne tenten ka ho",
-    "bodyRemove": "Yi fi hɔ"
+    "bodyRemove": "Yi fi hɔ",
+    "photos": "Kuro anaa honam ho yareɛ mfonini",
+    "photosHint": "Ɛnyɛ dɛ ɛsɛ. Kɔsi 3. Ayarefoɔ no ayaresa nko ara; bisa ansa na woatwa."
   },
   "flags": {
     "bpCrisis": "Mogya mmoroso a ano yɛ den paa",
@@ -141,8 +152,19 @@
     "pulseLow": "Koma bɔ brɛoo"
   },
   "appointments": {
-    "title": "Nsrahwɛ a ɛreba",
-    "empty": "Wɔnhyɛɛ nsrahwɛ biara da."
+    "title": "Nsrahwɛ",
+    "upcoming": "Deɛ ɛreba",
+    "overdue": "Bere atwam",
+    "past": "Deɛ atwam",
+    "empty_upcoming": "Wɔnhyehyɛɛ nsrahwɛ biara.",
+    "empty_overdue": "Biribiara nni hɔ a ne bere atwam. Ayekoo.",
+    "empty_past": "Nsrahwɛ biara nwieeɛ ɛ.",
+    "overdueTag": "bere atwam",
+    "markDone": "Awie",
+    "reschedule": "Sesa bere",
+    "more": "Nneɛma foforɔ",
+    "markMissed": "Ayarefoɔ no amma",
+    "cancel": "Twa nsrahwɛ no mu"
   },
   "newAppointment": {
     "title": "Hyɛ nsrahwɛ anaa nsoma da",
@@ -151,7 +173,9 @@
     "facility": "Ayaresabea",
     "priority": "Ɛhia sɛn",
     "reason": "Nea enti",
-    "save": "Hyɛ da"
+    "save": "Hyɛ da",
+    "editTitle": "Sesa nsrahwɛ no",
+    "saveChanges": "Kora nsakraeɛ no"
   },
   "appointmentType": {
     "follow_up": "Nsrahwɛ bio",
@@ -187,7 +211,9 @@
     "allSent": "Wɔasoma biribiara a ɛwɔ fon yi so.",
     "queued": "Ɛretwɛn",
     "failed": "Ɛbɛsan abɔ mmɔden",
-    "conflict": "Ɛhia sɛ wɔhwɛ"
+    "conflict": "Ɛhia sɛ wɔhwɛ",
+    "files_one": "Fael {{count}} retwɛn",
+    "files_other": "Fael {{count}} retwɛn"
   },
   "surveillance": {
     "title": "Mansin nsɛm tiawa",
@@ -224,7 +250,11 @@
     "removePhoto": "Yi mfonini",
     "choosePhoto": "Paw wo mfonini",
     "photoHint": "Wo mfonini no tena fon yi so nko ara.",
-    "photoError": "Yɛantumi amfa mfonini no anni dwuma. Paw foforɔ."
+    "photoError": "Yɛantumi amfa mfonini no anni dwuma. Paw foforɔ.",
+    "theme": "Sɛnea ɛte",
+    "theme_system": "Fon no",
+    "theme_light": "Hann",
+    "theme_dark": "Sum"
   },
   "pwa": {
     "updateTitle": "Nhyehyɛeɛ foforɔ aba",
@@ -248,7 +278,8 @@
     "range": "Eyi nte sɛ nokware. Hwɛ nsusuiɛ no bio.",
     "bothBp": "Kyerɛw BP nɔma abien no nyinaa.",
     "oneVital": "Kyerɛw nsusuiɛ baako pɛ, anyɛ yiye koraa.",
-    "future": "Paw bere a ɛreba."
+    "future": "Paw bere a ɛreba.",
+    "evidence": "Kyere, hyɛ nsa anaa twa ayarefoɔ no penee no mfonini kane."
   },
   "notFound": {
     "text": "Krataafa yi nni hɔ.",
@@ -329,5 +360,35 @@
     "minute": "Simma",
     "now": "Seesei",
     "done": "Wie"
+  },
+  "capture": {
+    "record": "Kyere penee no",
+    "stop": "Gyae kyere",
+    "again": "San kyere bio",
+    "recording": "Ɛrekyere… sɛkɛn {{seconds}} aka",
+    "spokenHint": "Kenkan nsɛm no, na kyere ayarefoɔ no sɛ ɔreka sɛ aane. Sɛkɛn 30 mu.",
+    "noMic": "Fon yi ntumi nkyere nne. Ma obi foforɔ a ɔtee sɛ ayarefoɔ no pene so no nkyerɛw ne din wɔ aseɛ ha.",
+    "signHere": "Hyɛ wo nsa ha",
+    "signHint": "Ayarefoɔ no de ne nsateaa hyɛ ne nsa.",
+    "clear": "Pepa",
+    "signatureLabel": "Ayarefoɔ no nsahyɛ",
+    "takePhoto": "Twa nsateaa nsɛnkyerɛnne no mfonini",
+    "thumbHint": "Fa ayarefoɔ no kokuromotie a wɔde aduru asra no hyɛ penee krataa no so, na twa ho mfonini.",
+    "photoAlt": "Ayarefoɔ no kokuromotie nsɛnkyerɛnne mfonini",
+    "retake": "San twa bio",
+    "witness": "Adansefoɔ din",
+    "witnessHint": "Ɛnyɛ dɛ ɛsɛ. Obi foforɔ a ɔtee sɛ ayarefoɔ no pene so.",
+    "witnessNeeded": "Ɛho hia bere a nne nni hɔ.",
+    "recorded": "Wɔakyere · sɛkɛn {{seconds}}",
+    "addPhoto": "Fa mfonini ka ho",
+    "photoN": "Mfonini {{n}}",
+    "removePhoto": "Yi {{label}} fi hɔ",
+    "dictate": "Kasa kyerɛw nsɛm",
+    "listening": "Ɛretie… mia na ɛngyae"
+  },
+  "editPatient": {
+    "title": "Sesa nsɛm no",
+    "save": "Kora nsakraeɛ no",
+    "edit": "Sesa"
   }
 }
