@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks"
-import { Check, CircleCheckBig, Siren, X } from "lucide-react"
+import { Check, CircleCheckBig, Siren, X } from "@/components/icons"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
@@ -79,7 +79,7 @@ export function Component() {
       {/* Figma "Día / Semana / Mes" segmented control */}
       <div
         role="tablist"
-        className="mb-4 grid grid-cols-2 gap-1 rounded-md bg-card p-1 ring-1 ring-border"
+        className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-card p-1 shadow-card"
       >
         {(["open", "done"] as const).map((k) => (
           <button
@@ -88,7 +88,7 @@ export function Component() {
             aria-selected={tab === k}
             onClick={() => setTab(k)}
             className={cn(
-              "h-11 rounded-md text-sm font-semibold",
+              "h-11 rounded-[14px] text-sm font-semibold",
               tab === k
                 ? "bg-primary text-primary-foreground"
                 : "text-foreground hover:bg-muted"
@@ -101,7 +101,9 @@ export function Component() {
         ))}
       </div>
       {rows && shown.length === 0 ? (
-        <EmptyState>
+        <EmptyState
+          illustration={tab === "open" ? "empty-referrals" : "no-data"}
+        >
           {tab === "open" ? t("referrals.emptyOpen") : t("referrals.emptyDone")}
         </EmptyState>
       ) : (

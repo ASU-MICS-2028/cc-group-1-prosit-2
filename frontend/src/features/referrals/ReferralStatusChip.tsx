@@ -1,4 +1,9 @@
-import { CircleCheckBig, CircleDashed, CircleX, Clock } from "lucide-react"
+import {
+  CircleCheckBig,
+  CircleDashed,
+  CircleX,
+  Clock,
+} from "@/components/icons"
 import { useTranslation } from "react-i18next"
 import type { ReferralStatus } from "@/db/types"
 import { cn } from "@/lib/utils"

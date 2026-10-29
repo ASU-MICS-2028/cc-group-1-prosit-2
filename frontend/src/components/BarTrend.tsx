@@ -39,7 +39,7 @@ export function BarTrend({
   const current = bars[shown]
 
   return (
-    <figure className="rounded-xl border border-border bg-card p-4">
+    <figure className="rounded-xl bg-card shadow-card p-4">
       <figcaption className="text-base font-semibold text-heading">
         {title}
       </figcaption>

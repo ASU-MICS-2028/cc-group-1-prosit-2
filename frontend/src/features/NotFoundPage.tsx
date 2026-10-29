@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/PageHeader"
 export function Component() {
   const { t } = useTranslation()
   return (
-    <EmptyState>
+    <EmptyState illustration="not-found">
       <p className="mb-3">{t("notFound.text")}</p>
       <Link to="/" className="font-medium text-primary underline">
         {t("notFound.home")}

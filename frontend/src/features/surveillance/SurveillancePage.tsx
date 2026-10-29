@@ -4,7 +4,7 @@ import {
   Thermometer,
   TrendingUp,
   Users,
-} from "lucide-react"
+} from "@/components/icons"
 import { useEffect, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { weeklyCounts, type WeeklyCount } from "@/api/surveillance"
@@ -79,7 +79,9 @@ export function Component() {
     return (
       <>
         <PageHeader title={t("surveillance.title")} />
-        <EmptyState>{t("surveillance.offline")}</EmptyState>
+        <EmptyState illustration="offline">
+          {t("surveillance.offline")}
+        </EmptyState>
       </>
     )
 
@@ -167,7 +169,7 @@ export function Component() {
 
       <div
         role="tablist"
-        className="mb-4 grid grid-cols-2 gap-1 rounded-md bg-card p-1 ring-1 ring-border"
+        className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-card p-1 shadow-card"
       >
         {(["week", "month"] as const).map((k) => (
           <button
@@ -176,7 +178,7 @@ export function Component() {
             aria-selected={period === k}
             onClick={() => setPeriod(k)}
             className={cn(
-              "h-11 rounded-md text-sm font-semibold",
+              "h-11 rounded-[14px] text-sm font-semibold",
               period === k
                 ? "bg-primary text-primary-foreground"
                 : "text-foreground hover:bg-muted"
@@ -235,7 +237,9 @@ export function Component() {
           </div>
         </>
       ) : (
-        <EmptyState>{t("surveillance.empty")}</EmptyState>
+        <EmptyState illustration="no-data">
+          {t("surveillance.empty")}
+        </EmptyState>
       )}
 
       <section className="mt-6 space-y-2">
@@ -243,7 +247,7 @@ export function Component() {
           <Activity className="size-5 text-primary" aria-hidden />
           {t("surveillance.allDistricts")}
         </h2>
-        <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <div className="overflow-x-auto rounded-xl bg-card shadow-card">
           <table className="w-full text-sm">
             <thead className="text-left text-xs text-muted-foreground">
               <tr className="border-b border-border">

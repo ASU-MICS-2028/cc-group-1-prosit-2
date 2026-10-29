@@ -7,14 +7,16 @@ import {
   ShieldCheck,
   Venus,
   VenusAndMars,
-} from "lucide-react"
+} from "@/components/icons"
 import { useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { z } from "zod"
 import { ChoiceTiles } from "@/components/form/ChoiceTiles"
-import { Field, Input, Select } from "@/components/form/Field"
+import { Dropdown } from "@/components/form/Dropdown"
+import { Segmented } from "@/components/form/Segmented"
+import { Field, Input } from "@/components/form/Field"
 import { describe } from "@/components/form/describe"
 import { Stepper } from "@/components/form/Stepper"
 import { Card, PageHeader } from "@/components/PageHeader"
@@ -169,7 +171,7 @@ export function Component() {
   const last = step === STEPS.length - 1
 
   return (
-    <div className="mx-auto max-w-lg">
+    <div className="mx-auto flex min-h-[calc(100svh-5rem)] flex-col max-w-lg">
       <PageHeader
         title={titles[step]}
         subtitle={subtitles[step]}
@@ -188,10 +190,15 @@ export function Component() {
                 next()
               }
         }
-        className="space-y-5"
+        className="flex flex-1 flex-col gap-5"
       >
         {step === 0 ? (
           <>
+            <img
+              src="/illustrations/consent.svg"
+              alt=""
+              className="mx-auto h-36 w-auto"
+            />
             <Card className="flex gap-3 p-4">
               <ShieldCheck
                 className="size-6 shrink-0 text-primary"
@@ -293,12 +300,22 @@ export function Component() {
                 />
               )}
             />
-            <Field id="knowsBirthDate" label={t("newPatient.knowsBirthDate")}>
-              <Select {...register("knowsBirthDate")} id="knowsBirthDate">
-                <option value="yes">{t("newPatient.birthDateYes")}</option>
-                <option value="no">{t("newPatient.birthDateNo")}</option>
-              </Select>
-            </Field>
+            <Controller
+              control={control}
+              name="knowsBirthDate"
+              render={({ field }) => (
+                <Segmented
+                  name="knowsBirthDate"
+                  legend={t("newPatient.knowsBirthDate")}
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={[
+                    { value: "yes", label: t("newPatient.birthDateYes") },
+                    { value: "no", label: t("newPatient.birthDateNo") },
+                  ]}
+                />
+              )}
+            />
             {knowsBirthDate ? (
               <Field
                 id="dateOfBirth"
@@ -373,13 +390,22 @@ export function Component() {
               id="preferredLanguage"
               label={t("patient.preferredLanguage")}
             >
-              <Select {...register("preferredLanguage")} id="preferredLanguage">
-                {LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.label}
-                  </option>
-                ))}
-              </Select>
+              <Controller
+                control={control}
+                name="preferredLanguage"
+                render={({ field }) => (
+                  <Dropdown
+                    id="preferredLanguage"
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={LANGUAGES.map((l) => ({
+                      value: l.code,
+                      label: l.label,
+                      hint: l.sub,
+                    }))}
+                  />
+                )}
+              />
             </Field>
           </>
         ) : null}
@@ -387,7 +413,7 @@ export function Component() {
         <Button
           type="submit"
           size="xl"
-          className="mt-4 w-full"
+          className="mt-auto w-full"
           disabled={isSubmitting}
         >
           {last ? t("newPatient.save") : t("common.next")}

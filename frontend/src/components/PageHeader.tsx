@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft } from "@/components/icons"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
@@ -24,7 +24,7 @@ export function PageHeader({
 }) {
   const { t } = useTranslation()
   const backClass =
-    "-ml-2 mb-4 inline-flex h-11 items-center gap-3 rounded-md px-2 text-sm font-semibold text-heading"
+    "-ml-2 mb-6 inline-flex h-11 items-center gap-3 rounded-md px-2 text-base font-semibold text-heading"
   const backContent = (
     <>
       <ArrowLeft className="size-6" aria-hidden />
@@ -56,16 +56,30 @@ export function PageHeader({
   )
 }
 
-/** What a list shows when it has nothing in it yet. */
-export function EmptyState({ children }: { children: ReactNode }) {
+/** What a list shows when it has nothing in it yet, with one of the app's illustrations. */
+export function EmptyState({
+  children,
+  illustration,
+}: {
+  children: ReactNode
+  /** file name in public/illustrations, without .svg */
+  illustration?: string
+}) {
   return (
-    <div className="rounded-xl border border-dashed border-border bg-card/60 p-8 text-center text-sm text-muted-foreground">
+    <div className="rounded-xl bg-card/70 p-8 text-center text-sm text-muted-foreground">
+      {illustration ? (
+        <img
+          src={`/illustrations/${illustration}.svg`}
+          alt=""
+          className="mx-auto mb-4 h-36 w-auto max-w-full"
+        />
+      ) : null}
       {children}
     </div>
   )
 }
 
-/** Figma "Cards / outlined": white, 1 px grey outline, 12 px corners. */
+/** Kit "Cards Reportes": white, no border, 18 px corners, soft elevation shadow. */
 export function Card({
   className = "",
   children,
@@ -74,7 +88,7 @@ export function Card({
   children: ReactNode
 }) {
   return (
-    <div className={`rounded-xl border border-border bg-card ${className}`}>
+    <div className={`rounded-xl bg-card shadow-card ${className}`}>
       {children}
     </div>
   )

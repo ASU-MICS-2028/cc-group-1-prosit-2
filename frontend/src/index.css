@@ -33,6 +33,8 @@
   --color-heading: var(--heading);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
+  /* Kit "Elevation 3": borderless cards (the outlined cards were dropped) */
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px 0 rgb(0 0 0 / 0.05);
   /* M3 elevation 3: the floating add button */
   --shadow-floating:
     0 1px 3px 0 rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
@@ -53,7 +55,7 @@
   --radius-sm: 4px; /* text fields */
   --radius-md: 5px; /* buttons */
   --radius-lg: 8px; /* search bar */
-  --radius-xl: 12px; /* cards */
+  --radius-xl: 18px; /* cards (kit "Cards Reportes") */
   --radius-2xl: 16px; /* floating button */
   --radius-3xl: 28px;
   --radius-4xl: 32px;

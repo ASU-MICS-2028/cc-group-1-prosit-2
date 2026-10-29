@@ -64,7 +64,7 @@ export function AppLayout() {
               {({ isActive }) => (
                 <>
                   <span className={pill(item, isActive)}>
-                    <item.icon className="size-5" aria-hidden />
+                    <item.icon className="size-6" filled={isActive} />
                   </span>
                   <span className={isActive ? "font-semibold" : undefined}>
                     {t(item.key)}
@@ -79,7 +79,7 @@ export function AppLayout() {
         <OfflineBanner />
         <main
           className={cn(
-            "mx-auto w-full max-w-3xl px-4 pt-6 md:px-8 md:pt-10 md:pb-10",
+            "mx-auto w-full max-w-3xl px-5 pt-[max(2.5rem,env(safe-area-inset-top))] md:px-8 md:pt-12 md:pb-10",
             hideBottomNav ? "pb-10" : "pb-28"
           )}
         >
@@ -103,7 +103,7 @@ export function AppLayout() {
               {({ isActive }) => (
                 <>
                   <span className={pill(item, isActive)}>
-                    <item.icon className="size-5" aria-hidden />
+                    <item.icon className="size-6" filled={isActive} />
                   </span>
                   {t(item.key)}
                 </>

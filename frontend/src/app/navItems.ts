@@ -7,14 +7,14 @@ import {
   Plus,
   RefreshCw,
   Users,
-  type LucideIcon,
-} from "lucide-react"
+  type IconComponent,
+} from "@/components/icons"
 import type { Role } from "@/auth/session"
 
 export interface NavItem {
   to: string
   key: `nav.${"home" | "patients" | "add" | "referrals" | "appointments" | "summary" | "sync" | "profile"}`
-  icon: LucideIcon
+  icon: IconComponent
   end: boolean
   /** The design's centre "Agregar" tab: orange when active */
   add?: boolean

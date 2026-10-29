@@ -83,7 +83,7 @@ export function Component() {
       </form>
 
       {DEMO_MODE ? (
-        <section className="space-y-2 rounded-xl border border-dashed border-border p-4 text-sm">
+        <section className="space-y-2 rounded-xl bg-card/70 p-4 text-sm">
           <p className="font-semibold text-foreground">
             {t("login.demoTitle")}
           </p>

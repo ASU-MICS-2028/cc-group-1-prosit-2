@@ -1,10 +1,10 @@
-import type { LucideIcon } from "lucide-react"
+import type { IconComponent } from "@/components/icons"
 import { cn } from "@/lib/utils"
 
 export interface Choice<T extends string> {
   value: T
   label: string
-  icon: LucideIcon
+  icon: IconComponent
 }
 
 /**
@@ -42,11 +42,11 @@ export function ChoiceTiles<T extends string>({
             <label
               key={v}
               className={cn(
-                "flex aspect-square w-[5.5rem] cursor-pointer flex-col items-center justify-center gap-2 rounded-md border text-sm transition-colors has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
+                "flex aspect-square w-[5.5rem] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl text-sm transition-colors has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
                 selected
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-input bg-card text-foreground hover:border-primary",
-                error && !selected && "border-destructive"
+                  ? "bg-primary text-primary-foreground shadow-card"
+                  : "bg-card text-foreground shadow-card hover:bg-secondary",
+                error && !selected && "ring-2 ring-destructive"
               )}
             >
               <input
@@ -57,7 +57,7 @@ export function ChoiceTiles<T extends string>({
                 onChange={() => onChange(v)}
                 className="sr-only"
               />
-              <Icon className="size-8" aria-hidden strokeWidth={1.75} />
+              <Icon className="size-8" aria-hidden />
               {label}
             </label>
           )

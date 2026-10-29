@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks"
-import { Hospital, Siren } from "lucide-react"
+import { Hospital, Siren } from "@/components/icons"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
 import { buttonVariants } from "@/components/ui/button"
@@ -56,6 +56,11 @@ export function Component() {
         {t("refer.text", { name: patient ? fullName(patient) : "" })}
       </p>
 
+      <img
+        src="/illustrations/refer.svg"
+        alt=""
+        className="mx-auto h-36 w-auto"
+      />
       <div
         role="alert"
         className="space-y-3 rounded-xl border-2 border-destructive bg-destructive-soft p-5 text-destructive"

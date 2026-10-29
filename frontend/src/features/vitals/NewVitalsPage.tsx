@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Ruler, TriangleAlert, X } from "lucide-react"
+import { Ruler, TriangleAlert, X } from "@/components/icons"
 import { useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -137,14 +137,18 @@ export function Component() {
   )
 
   return (
-    <>
+    <div className="mx-auto flex min-h-[calc(100svh-5rem)] flex-col max-w-lg">
       <PageHeader title={t("vitals.title")} back={`/patients/${id}`} />
       {patient ? (
         <p className="-mt-3 mb-5 text-sm text-muted-foreground">
           {fullName(patient)}
         </p>
       ) : null}
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <form
+        noValidate
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-1 flex-col gap-5"
+      >
         <Field id="takenAt" label={t("vitals.takenAt")} error={err("takenAt")}>
           <Input
             type="datetime-local"
@@ -159,7 +163,7 @@ export function Component() {
           {number("pulse", t("vitals.pulse"), t("vitals.perMinute"))}
         </div>
         {body ? (
-          <fieldset className="rounded-xl border border-border bg-card p-4">
+          <fieldset className="rounded-xl bg-card shadow-card p-4">
             <legend className="sr-only">{t("vitals.bodyTitle")}</legend>
             <div className="mb-3 flex items-center justify-between">
               <p className="font-semibold text-foreground">
@@ -243,12 +247,12 @@ export function Component() {
         <Button
           type="submit"
           size="xl"
-          className="w-full"
+          className="mt-auto w-full"
           disabled={isSubmitting}
         >
           {t("vitals.save")}
         </Button>
       </form>
-    </>
+    </div>
   )
 }
