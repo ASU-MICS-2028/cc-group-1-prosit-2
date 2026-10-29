@@ -14,6 +14,11 @@ RUN npm run build
 # Stage 2: serve it. The "unprivileged" image runs as a non-root user and
 # listens on 8080.
 FROM nginxinc/nginx-unprivileged:stable-alpine
+# Take Alpine's security fixes released since the base image was built (the deploy's Trivy
+# gate blocks fixable CRITICAL CVEs), then drop back to the image's unprivileged user.
+USER root
+RUN apk upgrade --no-cache
+USER 101
 COPY .nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 8080
