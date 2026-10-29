@@ -85,6 +85,31 @@ At least one measurement is required. The app's flags (high BP, fever…) are pr
 | status | `scheduled` \| `completed` \| `missed` \| `cancelled` | |
 | createdAt, updatedAt, version | | |
 
+## FHIR alignment (Lab 6 Part C)
+
+The lab's starter schema has `patients`, `observations` and `access_log`. Our proposal fits it with three changes, each closer to FHIR than the starter:
+
+| Ours | Lab starter | FHIR | Why ours |
+|---|---|---|---|
+| `id` UUID from the phone | `SERIAL` | `Patient.id` is any string id | Offline records need an id before they reach the server; serial ids clash between phones. |
+| `givenName` + `familyName` | `full_name` | `HumanName.given[]`, `HumanName.family` | Maps 1:1 to FHIR; a single string has to be split later. |
+| `consent { given, method, at }` | `consent_given_at` | a separate `Consent` resource | Act 843 needs proof of *how* consent was given, not only when. |
+
+**Vitals become Observations.** The app sends one Vitals form, and the API (or the database) stores one `observations` row per measurement, with a LOINC code so a real FHIR server can read it later:
+
+| Form field | `observation_type` | LOINC | Unit (UCUM) |
+|---|---|---|---|
+| systolic | `blood_pressure_systolic` | 8480-6 | mm[Hg] |
+| diastolic | `blood_pressure_diastolic` | 8462-4 | mm[Hg] |
+| temperatureC | `body_temperature` | 8310-5 | Cel |
+| pulse | `heart_rate` | 8867-4 | /min |
+| weightKg | `body_weight` | 29463-7 | kg |
+| heightCm | `body_height` | 8302-2 | cm |
+
+FHIR groups systolic and diastolic as components of one blood-pressure Observation (85354-9); two rows are fine for the MVP. Appointments map to the FHIR `Appointment` resource, and referrals to `ServiceRequest` (future work).
+
+**Data minimisation (Act 843):** `phone` and `nationalId` are optional and asked only when the patient wants reminders or NHIS checks. The app doesn't collect religion, ethnicity, income or GPS location. Germain's write-up justifies each column; if a field can't be justified there, drop it here too.
+
 ## Endpoints the frontend calls
 
 All under `/api`, JSON, `Authorization: Bearer <token>`. nginx serves the app and `/api` on the same address, so CORS isn't needed.
