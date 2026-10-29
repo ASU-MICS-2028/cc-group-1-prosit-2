@@ -1,0 +1,24 @@
+# Stage 1: build the static app. It runs on the builder's own CPU ($BUILDPLATFORM) even when
+# the image is for another (arm64 for the Graviton server): the output is plain files.
+FROM --platform=$BUILDPLATFORM node:24-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+# The cache mount keeps downloaded packages between builds, so a retry after a
+# network drop resumes instead of starting over; the retry flags ride out short
+# drops on slow connections.
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000
+COPY . .
+RUN npm run build
+
+# Stage 2: serve it. The "unprivileged" image runs as a non-root user and
+# listens on 8080.
+FROM nginxinc/nginx-unprivileged:stable-alpine
+# Take Alpine's security fixes released since the base image was built (the deploy's Trivy
+# gate blocks fixable CRITICAL CVEs), then drop back to the image's unprivileged user.
+USER root
+RUN apk upgrade --no-cache
+USER 101
+COPY .nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 8080

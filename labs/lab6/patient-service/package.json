@@ -1,0 +1,18 @@
+{
+  "name": "healthconnect-patient-service",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Lab 6 Part D: patient-record service with transactional audit logging and database-enforced roles",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.700.0",
+    "express": "^5.1.0",
+    "pg": "^8.16.0"
+  }
+}

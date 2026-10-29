@@ -1,0 +1,14 @@
+# Misconfigurations accepted on purpose (Trivy config scan in CI). Each one is reviewed in
+# docs/adr/0005-hosting-delivery-and-operations.md; remove a line when the reason goes away.
+
+# AWS-0104 unrestricted egress: the app server may reach port 443 anywhere (AWS service
+# addresses change; a VPC interface endpoint per service would cost ~$7/month each). All other
+# outbound traffic is limited to PostgreSQL to the database's security group (network.tf).
+AVD-AWS-0104
+AWS-0104
+
+# AWS-0054 HTTP listener: the load balancer is internal and reached only through CloudFront's
+# VPC origin on AWS's private network. TLS on that leg needs a custom domain (known gap,
+# deploy/README.md); every viewer connection is HTTPS at CloudFront.
+AVD-AWS-0054
+AWS-0054

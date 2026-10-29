@@ -1,0 +1,161 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+/* Poppins, the design's font, served from the app itself (Latin, 4 weights, ~31 KB) so it is
+   cached with the app and works offline (docs/adr/0002). */
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-500.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-700.css";
+/* Ghanaian letters (Twi ɔ ɛ, Ewe ʋ ƒ ɖ, Hausa ɓ ɗ ƙ): the extended subset, downloaded only when a
+   page uses one of them (unicode-range). */
+@import "@fontsource/poppins/latin-ext-400.css";
+@import "@fontsource/poppins/latin-ext-500.css";
+@import "@fontsource/poppins/latin-ext-600.css";
+@import "@fontsource/poppins/latin-ext-700.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans:
+    Poppins, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-chart-5: var(--chart-5);
+  --color-chart-sys: var(--chart-sys);
+  --color-chart-dia: var(--chart-dia);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-accent-orange: var(--accent-orange);
+  --color-nav: var(--nav);
+  --color-heading: var(--heading);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  /* Kit "Elevation 3": borderless cards (the outlined cards were dropped) */
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  /* M3 elevation 3: the floating add button */
+  --shadow-floating:
+    0 1px 3px 0 rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: 4px; /* text fields */
+  --radius-md: 5px; /* buttons */
+  --radius-lg: 8px; /* search bar */
+  --radius-xl: 18px; /* cards (kit "Cards Reportes") */
+  --radius-2xl: 16px; /* floating button */
+  --radius-3xl: 28px;
+  --radius-4xl: 32px;
+}
+
+:root {
+  /* From the HealthCheck Figma file (Style Guide → Color Guide, and the screens' variables). */
+  --background: #f2f3f5; /* screen */
+  --foreground: #1c1b1f; /* M3 on-surface: body text */
+  --heading: #242731; /* page titles */
+  --card: #ffffff;
+  --card-foreground: #1c1b1f;
+  --popover: #ffffff;
+  --popover-foreground: #1c1b1f;
+  /* Azul Principal: 4.8:1 on white (text), 4.35:1 on the screen grey (bold/large text only) */
+  --primary: #0066ff;
+  --primary-foreground: #ffffff;
+  /* BTN SECONDARY pressed, tags, avatars */
+  --secondary: #e8f0ff;
+  --secondary-foreground: #0050c8;
+  /* Inputs' grey (#7C828F) is 3.5:1 on the screen grey, too faint for small text; this is the
+     same hue darkened to 5.6:1 */
+  --muted: #eceef1;
+  --muted-foreground: #5c616c;
+  --accent: #e8f0ff;
+  --accent-foreground: #0050c8;
+  /* M3 error red (the input's error state) */
+  --destructive: #b3261e;
+  --destructive-soft: #fceeee;
+  /* Urgent-but-not-emergency and "waiting to sync": a darker orange than the brand #FA5805 so
+     small text stays readable (5.7:1) */
+  --warning: #b34000;
+  --warning-soft: #fff0e6;
+  /* The brand orange: the active "Add" tab and the heart. 3.3:1 with white, so icons only,
+     never text on it */
+  --accent-orange: #fa5805;
+  --info: #365588;
+  --info-soft: #e8f0ff;
+  /* M3 surface 3: the bottom navigation bar and the floating button */
+  --nav: #eee8f4;
+  --border: #b6b6b6; /* card outline */
+  --input: #7c828f; /* text-field outline */
+  --ring: #0066ff;
+  --chart-1: #0066ff;
+  --chart-2: #606bfb;
+  --chart-3: #73cdff;
+  --chart-4: #fa5805;
+  --chart-5: #365588;
+  /* Blood-pressure trend: validated pair (CVD and contrast checks pass on white) */
+  --chart-sys: #0066ff;
+  --chart-dia: #fa5805;
+  --radius: 12px;
+}
+
+.dark {
+  --background: #121318;
+  --foreground: #e6e1e5;
+  --heading: #f2f3f5;
+  --card: #1e2028;
+  --card-foreground: #e6e1e5;
+  --popover: #1e2028;
+  --popover-foreground: #e6e1e5;
+  --primary: #6291ff;
+  --primary-foreground: #0b1a33;
+  --secondary: #23314d;
+  --secondary-foreground: #c9dbff;
+  --muted: #26282f;
+  --muted-foreground: #a9adb7;
+  --accent: #23314d;
+  --accent-foreground: #c9dbff;
+  --destructive: #f2b8b5;
+  --destructive-soft: #3b1d1c;
+  --warning: #ffb48a;
+  --warning-soft: #3b2417;
+  --accent-orange: #fa5805;
+  --info: #9bb6e6;
+  --info-soft: #23314d;
+  --nav: #2b2930;
+  --border: #44464f;
+  --input: #8e9099;
+  --ring: #6291ff;
+  /* Same pair, re-stepped and re-validated for the dark surface */
+  --chart-sys: #4f82f5;
+  --chart-dia: #e8600e;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

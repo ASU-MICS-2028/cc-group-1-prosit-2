@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="theme-color"
+      content="#f2f3f5"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#121318"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Before the first paint, so a dark-mode phone never flashes white (lib/theme.ts).
+      try {
+        var pref = localStorage.getItem("healthconnect.theme") || "system"
+        var dark =
+          pref === "dark" ||
+          (pref === "system" &&
+            matchMedia("(prefers-color-scheme: dark)").matches)
+        document.documentElement.classList.toggle("dark", dark)
+      } catch (e) {}
+    </script>
+    <meta
+      name="description"
+      content="HealthConnect Ghana: patient records, vitals and referrals for Community Health Volunteers, even offline."
+    />
+    <title>HealthConnect</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
