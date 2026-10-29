@@ -1,14 +1,28 @@
 import { useLiveQuery } from "dexie-react-hooks"
-import { CalendarPlus, HeartPulse, TriangleAlert } from "lucide-react"
+import {
+  CalendarPlus,
+  HeartPulse,
+  Thermometer,
+  TriangleAlert,
+  Weight,
+} from "lucide-react"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
-import { EmptyState, PageHeader } from "@/components/PageHeader"
+import { BpTrend } from "@/components/BpTrend"
+import { Card, EmptyState, PageHeader } from "@/components/PageHeader"
 import { buttonVariants } from "@/components/ui/button"
 import { db } from "@/db/local"
 import type { Vitals } from "@/db/types"
 import { formatDateTime } from "@/lib/dates"
 import { cn } from "@/lib/utils"
-import { ageFrom, bmi, URGENT_FLAGS, vitalsFlags } from "@/lib/vitals"
+import {
+  ageFrom,
+  bmi,
+  type Flag,
+  URGENT_FLAGS,
+  vitalsFlags,
+} from "@/lib/vitals"
 import { fullName, usePatient } from "./usePatients"
 
 export function Component() {
@@ -77,6 +91,9 @@ export function Component() {
           {t("patient.book")}
         </Link>
       </div>
+
+      {vitals?.length ? <Latest readings={vitals} /> : null}
+      {vitals ? <BpTrend readings={vitals} /> : null}
 
       <section className="space-y-3">
         <h2 className="text-base font-semibold text-heading">
@@ -160,5 +177,90 @@ function VitalsRow({ v }: { v: Vitals }) {
         </p>
       ) : null}
     </li>
+  )
+}
+
+/**
+ * The latest value of each measure, as number cards (Figma "Metrics"): the value in text ink,
+ * and a flag with an icon and words when it needs attention, never colour alone.
+ */
+function Latest({ readings }: { readings: Vitals[] }) {
+  const { t } = useTranslation()
+  const latest = <K extends keyof Vitals>(key: K) =>
+    readings.find((r) => r[key] != null)
+  const bp = latest("systolic")
+  const temp = latest("temperatureC")
+  const weight = latest("weightKg")
+  const flagged = (v: Vitals | undefined, own: Flag[]) =>
+    v ? vitalsFlags(v).filter((f) => own.includes(f)) : []
+  return (
+    <section className="space-y-3">
+      <h2 className="text-base font-semibold text-heading">
+        {t("patient.latest")}
+      </h2>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <Metric
+          icon={<HeartPulse />}
+          label={t("vitals.bp")}
+          value={bp ? `${bp.systolic}/${bp.diastolic}` : "–"}
+          unit="mmHg"
+          flags={flagged(bp, ["bpCrisis", "bpHigh", "bpLow"])}
+        />
+        <Metric
+          icon={<Thermometer />}
+          label={t("vitals.temperature")}
+          value={temp ? String(temp.temperatureC) : "–"}
+          unit="°C"
+          flags={flagged(temp, ["highFever", "fever", "lowTemp"])}
+        />
+        <Metric
+          icon={<Weight />}
+          label={t("vitals.weight")}
+          value={weight ? String(weight.weightKg) : "–"}
+          unit="kg"
+          flags={[]}
+        />
+      </div>
+    </section>
+  )
+}
+
+function Metric({
+  icon,
+  label,
+  value,
+  unit,
+  flags,
+}: {
+  icon: ReactNode
+  label: string
+  value: string
+  unit: string
+  flags: Flag[]
+}) {
+  const { t } = useTranslation()
+  const urgent = flags.some((f) => URGENT_FLAGS.includes(f))
+  return (
+    <Card className="space-y-1 p-4 [&>svg]:size-5 [&>svg]:text-primary">
+      {icon}
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="text-2xl leading-8 font-semibold text-foreground tabular-nums">
+        {value}{" "}
+        <span className="text-xs font-normal text-muted-foreground">
+          {unit}
+        </span>
+      </p>
+      {flags.length ? (
+        <p
+          className={cn(
+            "flex items-center gap-1 text-xs font-semibold",
+            urgent ? "text-destructive" : "text-warning"
+          )}
+        >
+          <TriangleAlert className="size-3.5 shrink-0" aria-hidden />
+          {t(`flags.${flags[0]}`)}
+        </p>
+      ) : null}
+    </Card>
   )
 }

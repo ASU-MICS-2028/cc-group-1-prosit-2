@@ -1,10 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ShieldCheck } from "lucide-react"
+import {
+  Fingerprint,
+  Mars,
+  MessageCircle,
+  PenLine,
+  ShieldCheck,
+  Venus,
+  VenusAndMars,
+} from "lucide-react"
 import { useState } from "react"
-import { useForm, useWatch } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { z } from "zod"
+import { ChoiceTiles } from "@/components/form/ChoiceTiles"
 import { Field, Input, Select } from "@/components/form/Field"
 import { describe } from "@/components/form/describe"
 import { Stepper } from "@/components/form/Stepper"
@@ -42,7 +51,7 @@ function birthIssue(v: {
 const personStep = z.object({
   givenName: z.string().trim().min(1, "errors.required"),
   familyName: z.string().trim().min(1, "errors.required"),
-  sex: z.enum(["female", "male"], { error: "errors.required" }),
+  sex: z.enum(["female", "male", "other"], { error: "errors.required" }),
   knowsBirthDate: z.enum(["yes", "no"]),
   dateOfBirth: z.string().optional(),
   ageYears: z.string().optional(),
@@ -144,7 +153,7 @@ export function Component() {
       version: 0,
     }
     await saveAndQueue("patient", patient)
-    navigate(`/patients/${patient.id}`, { replace: true })
+    navigate(`/patients/${patient.id}/registered`, { replace: true })
   }
 
   const titles = [
@@ -192,13 +201,35 @@ export function Component() {
                 {t("newPatient.consentPromise")}
               </p>
             </Card>
-            <Field id="consentMethod" label={t("newPatient.consentMethod")}>
-              <Select {...register("consentMethod")} id="consentMethod">
-                <option value="verbal">{t("consent.verbal")}</option>
-                <option value="thumbprint">{t("consent.thumbprint")}</option>
-                <option value="signature">{t("consent.signature")}</option>
-              </Select>
-            </Field>
+            <Controller
+              control={control}
+              name="consentMethod"
+              render={({ field }) => (
+                <ChoiceTiles
+                  name="consentMethod"
+                  legend={t("newPatient.consentMethod")}
+                  value={field.value}
+                  onChange={field.onChange}
+                  choices={[
+                    {
+                      value: "verbal",
+                      label: t("consent.verbal"),
+                      icon: MessageCircle,
+                    },
+                    {
+                      value: "thumbprint",
+                      label: t("consent.thumbprint"),
+                      icon: Fingerprint,
+                    },
+                    {
+                      value: "signature",
+                      label: t("consent.signature"),
+                      icon: PenLine,
+                    },
+                  ]}
+                />
+              )}
+            />
             <label className="flex min-h-11 items-start gap-3 text-sm text-foreground">
               <input
                 type="checkbox"
@@ -240,19 +271,28 @@ export function Component() {
                 {...describe("familyName", err("familyName"))}
               />
             </Field>
-            <Field id="sex" label={t("patient.sex")} error={err("sex")}>
-              <Select
-                {...register("sex")}
-                {...describe("sex", err("sex"))}
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  {t("common.choose")}
-                </option>
-                <option value="female">{t("sex.female")}</option>
-                <option value="male">{t("sex.male")}</option>
-              </Select>
-            </Field>
+            <Controller
+              control={control}
+              name="sex"
+              render={({ field }) => (
+                <ChoiceTiles
+                  name="sex"
+                  legend={t("patient.sex")}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={err("sex")}
+                  choices={[
+                    { value: "female", label: t("sex.female"), icon: Venus },
+                    { value: "male", label: t("sex.male"), icon: Mars },
+                    {
+                      value: "other",
+                      label: t("sex.other"),
+                      icon: VenusAndMars,
+                    },
+                  ]}
+                />
+              )}
+            />
             <Field id="knowsBirthDate" label={t("newPatient.knowsBirthDate")}>
               <Select {...register("knowsBirthDate")} id="knowsBirthDate">
                 <option value="yes">{t("newPatient.birthDateYes")}</option>

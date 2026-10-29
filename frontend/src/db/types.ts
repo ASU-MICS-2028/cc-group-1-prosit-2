@@ -1,7 +1,7 @@
 // The records the app keeps on the phone. Field names follow the API contract the team agrees
 // on Tue 27 Oct (docs/frontend-needs.md); until then this is the frontend's proposal.
 
-export type Sex = "female" | "male"
+export type Sex = "female" | "male" | "other"
 
 export type ConsentMethod = "verbal" | "thumbprint" | "signature"
 

@@ -15,6 +15,8 @@
   --font-sans:
     Poppins, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --color-chart-5: var(--chart-5);
+  --color-chart-sys: var(--chart-sys);
+  --color-chart-dia: var(--chart-dia);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
@@ -100,6 +102,9 @@
   --chart-3: #73cdff;
   --chart-4: #fa5805;
   --chart-5: #365588;
+  /* Blood-pressure trend: validated pair (CVD and contrast checks pass on white) */
+  --chart-sys: #0066ff;
+  --chart-dia: #fa5805;
   --radius: 12px;
 }
 
@@ -130,6 +135,9 @@
   --border: #44464f;
   --input: #8e9099;
   --ring: #6291ff;
+  /* Same pair, re-stepped and re-validated for the dark surface */
+  --chart-sys: #4f82f5;
+  --chart-dia: #e8600e;
 }
 
 @layer base {
