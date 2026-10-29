@@ -84,7 +84,8 @@
     "vitals": "Nsusuiɛ",
     "noVitals": "Wɔnkyerɛw nsusuiɛ biara mmaeɛ.",
     "appointments": "Nsrahwɛ ne nsoma",
-    "latest": "Nsusuiɛ a ɛtwa toɔ"
+    "latest": "Nsusuiɛ a ɛtwa toɔ",
+    "call": "Frɛ {{phone}}"
   },
   "newPatient": {
     "title": "Kyerɛw ɔyarefoɔ din",
@@ -317,5 +318,16 @@
     "accepted": "Wɔagye atom",
     "declined": "Wɔapo",
     "seen": "Wɔahunu no"
+  },
+  "date": {
+    "choose": "Yi da bi",
+    "chooseYear": "Yi afe no",
+    "prevMonth": "Bosome a atwam",
+    "nextMonth": "Bosome a edi so",
+    "time": "Bere",
+    "hour": "Dɔnhwerew",
+    "minute": "Simma",
+    "now": "Seesei",
+    "done": "Wie"
   }
 }

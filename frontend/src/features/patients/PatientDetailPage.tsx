@@ -1,9 +1,14 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import {
-  CalendarPlus,
   HeartPulse,
+  MapPin,
+  Mars,
+  Phone,
+  ShieldCheck,
   Thermometer,
   TriangleAlert,
+  Venus,
+  VenusAndMars,
   Weight,
 } from "@/components/icons"
 import type { ReactNode } from "react"
@@ -11,9 +16,8 @@ import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
 import { BpTrend } from "@/components/BpTrend"
 import { Card, EmptyState, PageHeader } from "@/components/PageHeader"
-import { buttonVariants } from "@/components/ui/button"
 import { db } from "@/db/local"
-import type { Vitals } from "@/db/types"
+import type { Appointment, AppointmentType, Patient, Vitals } from "@/db/types"
 import { ReferralStatusChip } from "@/features/referrals/ReferralStatusChip"
 import { formatDateTime } from "@/lib/dates"
 import { cn } from "@/lib/utils"
@@ -54,49 +58,16 @@ export function Component() {
   return (
     <div className="space-y-6">
       <PageHeader title={fullName(patient)} back="/patients" />
-      <dl className="grid grid-cols-2 gap-3 rounded-xl bg-card shadow-card p-4 text-sm">
-        <Item label={t("patient.sex")} value={t(`sex.${patient.sex}`)} />
-        <Item
-          label={t("patient.age")}
-          value={
-            t("patients.age", { count: ageFrom(patient.dateOfBirth) }) +
-            (patient.birthDateEstimated ? ` (${t("patient.estimated")})` : "")
-          }
-        />
-        <Item label={t("patient.community")} value={patient.community} />
-        <Item label={t("patient.district")} value={patient.district} />
-        {patient.phone ? (
-          <Item label={t("patient.phone")} value={patient.phone} />
-        ) : null}
-        {patient.nationalId ? (
-          <Item label={t("patient.nationalId")} value={patient.nationalId} />
-        ) : null}
-      </dl>
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Link
-          to={`/patients/${patient.id}/vitals/new`}
-          className={cn(buttonVariants({ size: "xl" }), "w-full")}
-        >
-          <HeartPulse aria-hidden />
-          {t("patient.recordVitals")}
-        </Link>
-        <Link
-          to={`/patients/${patient.id}/appointments/new`}
-          className={cn(
-            buttonVariants({ size: "xl", variant: "secondary" }),
-            "w-full"
-          )}
-        >
-          <CalendarPlus aria-hidden />
-          {t("patient.book")}
-        </Link>
-      </div>
+      <Summary
+        patient={patient}
+        readings={vitals?.length ?? 0}
+        appointments={appointments ?? []}
+      />
 
       {vitals?.length ? <Latest readings={vitals} /> : null}
       {vitals ? <BpTrend readings={vitals} /> : null}
 
-      <section className="space-y-3">
+      <section id="vitals" className="scroll-mt-6 space-y-3">
         <h2 className="text-base font-semibold text-heading">
           {t("patient.vitals")}
         </h2>
@@ -111,7 +82,7 @@ export function Component() {
         )}
       </section>
 
-      <section className="space-y-3">
+      <section id="visits" className="scroll-mt-6 space-y-3">
         <h2 className="text-base font-semibold text-heading">
           {t("patient.appointments")}
         </h2>
@@ -144,14 +115,144 @@ export function Component() {
   )
 }
 
-function Item({ label, value }: { label: string; value: string }) {
+const SEX_ICON = { female: Venus, male: Mars, other: VenusAndMars }
+
+/** "0246787657" → "024 678 7657", the way Ghanaian numbers are read out. */
+const groupPhone = (phone: string) =>
+  phone.replace(/\s/g, "").replace(/^(\d{3})(\d{3})(\d+)$/, "$1 $2 $3")
+
+const REFERRAL_TYPES: AppointmentType[] = ["referral", "teleconsult"]
+
+/**
+ * Laid out like an Instagram profile header: the photo on the left with the counts lined up
+ * beside it (each jumps to its list), a short "bio" under them, then the actions side by side.
+ * The ID number is masked (last 4 only): it's rarely needed during a visit and shouldn't be read
+ * off the screen by people nearby.
+ */
+function Summary({
+  patient,
+  readings,
+  appointments,
+}: {
+  patient: Patient
+  readings: number
+  appointments: Appointment[]
+}) {
+  const { t } = useTranslation()
+  const SexIcon = SEX_ICON[patient.sex]
+  const referrals = appointments.filter((a) =>
+    REFERRAL_TYPES.includes(a.type)
+  ).length
+  const stats = [
+    { count: readings, label: t("patient.vitals"), to: "#vitals" },
+    {
+      count: appointments.length - referrals,
+      label: t("nav.appointments"),
+      to: "#visits",
+    },
+    { count: referrals, label: t("nav.referrals"), to: "#visits" },
+  ]
+  const action =
+    "inline-flex h-11 min-w-0 flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold whitespace-nowrap"
   return (
-    <div>
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium text-foreground">{value}</dd>
-    </div>
+    <Card className="p-5">
+      <div className="flex items-center gap-4">
+        {/* the ring echoes Instagram's story ring, in the brand blue */}
+        <span className="shrink-0 rounded-full bg-gradient-to-tr from-primary to-[#5b9dff] p-[3px]">
+          <span
+            aria-hidden
+            className="grid size-[76px] place-items-center rounded-full border-[3px] border-card bg-primary text-2xl font-semibold text-primary-foreground"
+          >
+            {initials(fullName(patient))}
+          </span>
+        </span>
+        <ul className="grid flex-1 grid-cols-3 gap-1 text-center">
+          {stats.map((s) => (
+            <li key={s.label}>
+              <a
+                href={s.to}
+                className="flex flex-col rounded-lg py-1 hover:bg-secondary"
+              >
+                <span className="text-xl font-bold text-heading tabular-nums">
+                  {s.count}
+                </span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {s.label}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mt-4 space-y-1 text-sm">
+        <p className="flex items-center gap-1.5 font-semibold text-heading">
+          <SexIcon className="size-4 text-primary" aria-hidden />
+          {t(`sex.${patient.sex}`)} ·{" "}
+          {t("patients.age", { count: ageFrom(patient.dateOfBirth) })}
+          {patient.birthDateEstimated ? (
+            <span className="font-normal text-muted-foreground">
+              ({t("patient.estimated")})
+            </span>
+          ) : null}
+        </p>
+        <p className="flex items-center gap-1.5 text-muted-foreground">
+          <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
+          <span className="truncate">
+            {patient.community}, {patient.district}
+          </span>
+        </p>
+        {patient.phone ? (
+          <p className="flex items-center gap-1.5 text-muted-foreground tabular-nums">
+            <Phone className="size-4 shrink-0 text-primary" aria-hidden />
+            {groupPhone(patient.phone)}
+          </p>
+        ) : null}
+        {patient.nationalId ? (
+          <p className="flex items-center gap-1.5 text-muted-foreground">
+            <ShieldCheck className="size-4 shrink-0 text-primary" aria-hidden />
+            <span className="sr-only">{t("patient.nationalId")}: </span>
+            <span className="tabular-nums">
+              •••• {patient.nationalId.replace(/\W/g, "").slice(-4)}
+            </span>
+          </p>
+        ) : null}
+      </div>
+
+      <div className="mt-4 flex gap-2">
+        <Link
+          to={`/patients/${patient.id}/vitals/new`}
+          className={cn(action, "bg-primary text-primary-foreground")}
+        >
+          <span className="truncate">{t("patient.recordVitals")}</span>
+        </Link>
+        <Link
+          to={`/patients/${patient.id}/appointments/new`}
+          className={cn(action, "bg-secondary text-primary")}
+        >
+          <span className="truncate">{t("patient.book")}</span>
+        </Link>
+        {patient.phone ? (
+          <a
+            href={`tel:${patient.phone.replace(/\s/g, "")}`}
+            aria-label={t("patient.call", { phone: patient.phone })}
+            className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-primary"
+          >
+            <Phone className="size-5" aria-hidden />
+          </a>
+        ) : null}
+      </div>
+    </Card>
   )
 }
+
+const initials = (name: string) =>
+  name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]!.toUpperCase())
+    .join("")
 
 function VitalsRow({ v }: { v: Vitals }) {
   const { t } = useTranslation()

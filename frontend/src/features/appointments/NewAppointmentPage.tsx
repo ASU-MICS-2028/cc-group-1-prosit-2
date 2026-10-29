@@ -3,6 +3,7 @@ import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { z } from "zod"
+import { DatePicker } from "@/components/form/DatePicker"
 import { Dropdown } from "@/components/form/Dropdown"
 import { Field, Input, Textarea } from "@/components/form/Field"
 import { Segmented } from "@/components/form/Segmented"
@@ -126,10 +127,22 @@ export function Component() {
           label={t("newAppointment.when")}
           error={err("scheduledAt")}
         >
-          <Input
-            type="datetime-local"
-            {...register("scheduledAt")}
-            {...describe("scheduledAt", err("scheduledAt"))}
+          <Controller
+            control={control}
+            name="scheduledAt"
+            render={({ field }) => (
+              <DatePicker
+                id="scheduledAt"
+                withTime
+                value={field.value}
+                onChange={field.onChange}
+                min={new Date()}
+                invalid={!!err("scheduledAt")}
+                describedBy={
+                  err("scheduledAt") ? "scheduledAt-error" : undefined
+                }
+              />
+            )}
           />
         </Field>
         <Field
