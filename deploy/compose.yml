@@ -1,0 +1,54 @@
+# What runs on the app server, once per environment:
+#
+#   docker compose -p healthconnect-production --env-file .../production/release.env up -d
+#   docker compose -p healthconnect-staging    --env-file .../staging/release.env    up -d
+#
+# remote-deploy.sh writes release.env (image tags) next to settings.env (written at first
+# boot: port, database name, secret ARN, bucket). Two projects, so production and staging
+# have their own containers and network and never see each other.
+
+name: healthconnect
+
+services:
+  frontend:
+    image: ${REGISTRY}/healthconnect/frontend:${FRONTEND_TAG}
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 128m
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+
+  # Bernard's API. Only started when the deploy has a backend image (profile "api"), so the
+  # app can ship before the API exists. It reads its database password from Secrets Manager
+  # with the server's role: no password in this file or on disk.
+  backend:
+    image: ${REGISTRY}/healthconnect/backend:${BACKEND_TAG:-none}
+    profiles: ["api"]
+    restart: unless-stopped
+    env_file: settings.env
+    environment:
+      PORT: "8080"
+    expose: ["8080"]
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 512m
+    volumes:
+      - /opt/healthconnect/rds-ca.pem:/opt/healthconnect/rds-ca.pem:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health || curl -fsS http://127.0.0.1:8080/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 20s

@@ -48,6 +48,17 @@ resource "aws_s3_bucket_lifecycle_configuration" "media" {
       days_after_initiation = 7
     }
   }
+
+  # Versioning lets a deleted or overwritten photo be recovered; old versions are kept 30 days
+  # and then removed, so storage doesn't grow forever.
+  rule {
+    id     = "expire-old-versions"
+    status = "Enabled"
+    filter {}
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+  }
 }
 
 # Refuse plain HTTP. (Every object is encrypted with our key by the default above.)

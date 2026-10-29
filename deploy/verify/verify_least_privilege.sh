@@ -8,7 +8,7 @@
 # The forbidden "delete the database" is safe to try: the role has no rds:* permission at all,
 # and the database also has deletion protection.
 set -uo pipefail
-source /opt/healthconnect/settings.env
+source /opt/healthconnect/production/settings.env
 export AWS_REGION
 
 pass() { echo "PASS: $*"; }
