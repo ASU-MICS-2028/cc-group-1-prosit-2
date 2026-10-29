@@ -17,14 +17,15 @@
     "sync": "Soma",
     "profile": "Me ho nsɛm",
     "add": "Fa ka ho",
-    "referrals": "Nsoma"
+    "referrals": "Nsoma",
+    "audit": "Dwumadie"
   },
   "roles": {
     "chv": "Mpɔtam Apɔmuden Boafoɔ",
     "nurse": "Nɔɔse / Awogyefoɔ",
     "doctor": "Dɔkota",
     "district_officer": "Mansin Apɔmuden Panyin",
-    "admin": "Ɔhwɛfoɔ"
+    "admin": "Ɔhwɛfoɔ (nhwehwɛmu)"
   },
   "login": {
     "title": "Wura mu",
@@ -49,7 +50,28 @@
     "upcoming": "Nsrahwɛ a ɛreba",
     "waiting": "Ɛretwɛn sɛ ɛbɛkɔ",
     "urgent_one": "Nsusuiɛ {{count}} nnawɔtwe yi ka sɛ wɔmfa ɔyarefoɔ nkɔ ayaresabea ɛnnɛ",
-    "urgent_other": "Nsusuiɛ {{count}} nnawɔtwe yi ka sɛ wɔmfa ayarefoɔ nkɔ ayaresabea ɛnnɛ"
+    "urgent_other": "Nsusuiɛ {{count}} nnawɔtwe yi ka sɛ wɔmfa ayarefoɔ nkɔ ayaresabea ɛnnɛ",
+    "visitsToday": "Nsrahwɛ ɛnnɛ",
+    "toSend": "Deɛ ɛbɛkɔ",
+    "urgentPatients_one": "Ayarefoɔ {{count}} hia sɛ wɔde no kɔ ɛnnɛ",
+    "urgentPatients_other": "Ayarefoɔ {{count}} hia sɛ wɔde wɔn kɔ ɛnnɛ",
+    "today": "Ɛnnɛ",
+    "visitsDone": "Nsrahwɛ {{done}} wɔ {{total}} mu awie",
+    "dueToday": "Deɛ aka",
+    "overdue": "Bere atwam",
+    "openReferrals": "Nsoma a ɛda hɔ",
+    "weekTitle": "Nsusuiɛ nnawɔtwe yi",
+    "flagged_one": "{{count}} hia nhwɛ",
+    "flagged_other": "{{count}} hia nhwɛ",
+    "highBp": "Mogya mmoroso",
+    "feverWeek": "Atiridiiɛ nnawɔtwe yi",
+    "ofPatients_one": "wɔ ayarefoɔ {{count}} a wɔhwɛɛ wɔn mu",
+    "ofPatients_other": "wɔ ayarefoɔ {{count}} a wɔhwɛɛ wɔn mu",
+    "nextVisits": "Nsrahwɛ a ɛreba",
+    "seeAll": "Hwɛ ne nyinaa",
+    "noNextVisits": "Wɔnhyehyɛɛ biribi.",
+    "readings_one": "Nsusuiɛ {{count}}",
+    "readings_other": "Nsusuiɛ {{count}}"
   },
   "patients": {
     "title": "Ayarefoɔ",
@@ -59,7 +81,20 @@
     "noMatch": "Ɔyarefoɔ biara nhyia wo nhwehwɛmu no.",
     "notFound": "Ɔyarefoɔ yi nni fon yi so.",
     "age_one": "Afe {{count}}",
-    "age_other": "Mfeɛ {{count}}"
+    "age_other": "Mfeɛ {{count}}",
+    "count_one": "Ayarefoɔ {{count}} wɔ fon yi so",
+    "count_other": "Ayarefoɔ {{count}} wɔ fon yi so",
+    "filterLabel": "Kyerɛ",
+    "filter_all": "Ne nyinaa",
+    "filter_urgent": "Soma ɛnnɛ",
+    "filter_due": "Nsrahwɛ du",
+    "filter_unsynced": "Ɛnkɔɔ",
+    "status_urgent": "Soma ɛnnɛ",
+    "status_overdue": "Nsrahwɛ bere atwam",
+    "status_today": "Nsrahwɛ ɛnnɛ",
+    "status_unsynced": "Ɛnkɔɔ",
+    "reading": "Nsusuiɛ",
+    "noReading": "Nsusuiɛ biara nni hɔ"
   },
   "sex": {
     "female": "Ɔbaa",
@@ -390,5 +425,46 @@
     "title": "Sesa nsɛm no",
     "save": "Kora nsakraeɛ no",
     "edit": "Sesa"
+  },
+  "audit": {
+    "title": "Dwumadie nkrataa",
+    "subtitle": "Obiara a ɔbuee, ɔyɛeɛ anaa ɔsesaa ayarefoɔ nkrataa, ne mmɔden biara a wɔamma kwan.",
+    "todayViews": "Wɔbuee ɛnnɛ",
+    "todayChanges": "Wɔsesaa ɛnnɛ",
+    "todayDenied": "Wɔamma kwan ɛnnɛ",
+    "search": "Hwehwɛ apɔwmuden adwumayɛni anaa ayarefoɔ",
+    "filter_all": "Ne nyinaa",
+    "filter_view": "Wɔbuee",
+    "filter_change": "Wɔyɛeɛ anaa wɔsesaeɛ",
+    "filter_denied": "Wɔamma kwan",
+    "action_view": "buee",
+    "action_create": "yɛeɛ",
+    "action_update": "sesaa",
+    "action_denied": "wɔamma no kwan",
+    "what_patient": "ayarefoɔ nkrataa bi",
+    "what_vitals": "nsusuiɛ bi",
+    "what_appointment": "nsrahwɛ anaa nsoma bi",
+    "what_page": "krataafa {{path}}",
+    "onPhone": "ɛwɔ fon yi so, ɛnkɔɔ ɛ",
+    "empty": "Wɔnkyerɛw biribi ɛ.",
+    "recordTitle": "Wɔn a wɔbuee nkrataa yi",
+    "serverNote": "Fon yi so nkrataa a ɛkyerɛ obi a ɔbuee. Server no kora ne nyinaa wɔ pon bi so a wontumi nsesa anaa nyi biribi fi mu a ɛnkyerɛ."
+  },
+  "time": {
+    "justNow": "seesei ara",
+    "minutesAgo_one": "simma {{count}} a atwam",
+    "minutesAgo_other": "simma {{count}} a atwam",
+    "inMinutes_one": "simma {{count}} mu",
+    "inMinutes_other": "simma {{count}} mu",
+    "hoursAgo_one": "dɔnhwerew {{count}} a atwam",
+    "hoursAgo_other": "dɔnhwerew {{count}} a atwam",
+    "inHours_one": "dɔnhwerew {{count}} mu",
+    "inHours_other": "dɔnhwerew {{count}} mu",
+    "yesterday": "ɛnnora",
+    "tomorrow": "ɔkyena",
+    "daysAgo_one": "nnafua {{count}} a atwam",
+    "daysAgo_other": "nnafua {{count}} a atwam",
+    "inDays_one": "nnafua {{count}} mu",
+    "inDays_other": "nnafua {{count}} mu"
   }
 }

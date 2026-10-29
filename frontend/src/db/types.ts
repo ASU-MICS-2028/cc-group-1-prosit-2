@@ -147,6 +147,34 @@ export interface Media {
   lastError?: string
 }
 
+export type AuditAction = "view" | "create" | "update" | "denied"
+
+/**
+ * One access to patient data, recorded on the phone as it happens (FHIR AuditEvent; the
+ * server's access_log, Lab 6). Kept even offline and uploaded with the next sync, where the
+ * server chains it into its tamper-evident log. Act 843 s.28: who saw or changed what, when.
+ */
+export interface AuditEvent {
+  id: string
+  /** ISO time */
+  at: string
+  actorId: string
+  actorName: string
+  role: string
+  action: AuditAction
+  /** what was touched: a record type, or a page for a refused visit */
+  entity: Entity | "page"
+  entityId?: string
+  patientId?: string
+  outcome: "success" | "denied"
+  /** FHIR purposeOfUse: TREAT for care, HOPERAT for administration */
+  purpose: "TREAT" | "HOPERAT"
+  /** e.g. the address of a refused page */
+  detail?: string
+  /** set once the server has it */
+  syncedAt?: string
+}
+
 /** A health worker's profile photo: resized on the phone, stored on the phone only. */
 export interface ProfilePhoto {
   userId: string

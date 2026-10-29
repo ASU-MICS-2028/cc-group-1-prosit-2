@@ -7,7 +7,7 @@ import { api } from "./client"
  *   POST /api/auth/verify  { phone, code }  -> { token, expiresAt, user }
  *
  * Until the backend has these endpoints, demo mode (the default; VITE_AUTH_MODE=api turns it
- * off) answers locally for four synthetic health workers with the code 123456.
+ * off) answers locally for five synthetic health workers with the code 123456.
  */
 export const DEMO_MODE = import.meta.env.VITE_AUTH_MODE !== "api"
 export const DEMO_CODE = "123456"
@@ -35,6 +35,12 @@ export const DEMO_USERS: Record<string, User> = {
     id: "ghs-officer-07",
     name: "Yaw Darko",
     role: "district_officer",
+    district: "Shai-Osudoku",
+  },
+  "+233200000105": {
+    id: "auditor-02",
+    name: "Adwoa Boakye",
+    role: "admin",
     district: "Shai-Osudoku",
   },
 }

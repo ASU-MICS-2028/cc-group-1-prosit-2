@@ -86,7 +86,8 @@ export function useSession(): Session | null {
 
 /** Where a signed-in person starts. */
 export function homeFor(role: Role): string {
-  return role === "district_officer" || role === "admin" ? "/surveillance" : "/"
+  if (role === "admin") return "/audit"
+  return role === "district_officer" ? "/surveillance" : "/"
 }
 
 /** Roles that work with individual patients (the officer view is anonymised counts only). */

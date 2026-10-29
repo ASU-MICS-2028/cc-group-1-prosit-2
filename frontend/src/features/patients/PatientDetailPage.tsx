@@ -14,7 +14,7 @@ import {
   VenusAndMars,
   Weight,
 } from "@/components/icons"
-import type { ReactNode } from "react"
+import { type ReactNode, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
 import { BpTrend } from "@/components/BpTrend"
@@ -22,6 +22,8 @@ import { Card, EmptyState, PageHeader } from "@/components/PageHeader"
 import { db } from "@/db/local"
 import type { Appointment, AppointmentType, Patient, Vitals } from "@/db/types"
 import { ReferralStatusChip } from "@/features/referrals/ReferralStatusChip"
+import { AuditRow } from "@/features/audit/AuditRow"
+import { logAccess, useAuditEvents } from "@/lib/audit"
 import { formatDateTime } from "@/lib/dates"
 import { useMediaFor, useObjectUrl } from "@/lib/media"
 import { cn } from "@/lib/utils"
@@ -38,6 +40,16 @@ export function Component() {
   const { t } = useTranslation()
   const { id } = useParams()
   const patient = usePatient(id)
+  // Opening a record is an access to health data: record it (once per visit to the page).
+  const logged = useRef<string | null>(null)
+  useEffect(() => {
+    if (!patient || logged.current === patient.id) return
+    logged.current = patient.id
+    void logAccess("view", "patient", {
+      entityId: patient.id,
+      patientId: patient.id,
+    })
+  }, [patient])
   const vitals = useLiveQuery(
     () =>
       db.vitals
@@ -128,6 +140,7 @@ export function Component() {
         )}
       </section>
       <ConsentRecord patient={patient} />
+      <RecordAccess patientId={patient.id} />
     </div>
   )
 }
@@ -206,6 +219,30 @@ function ConsentRecord({ patient }: { patient: Patient }) {
         ) : !consent.evidence ? (
           <p className="text-muted-foreground">{t("patient.noEvidence")}</p>
         ) : null}
+      </Card>
+    </section>
+  )
+}
+
+/**
+ * Who opened or changed this record, newest first (Act 843: a patient may ask who has seen
+ * their data). The full trail, with refused attempts, is on the auditor's Activity page.
+ */
+function RecordAccess({ patientId }: { patientId: string }) {
+  const { t } = useTranslation()
+  const events = useAuditEvents(patientId, 5)
+  if (!events?.length) return null
+  return (
+    <section className="space-y-3">
+      <h2 className="text-base font-semibold text-heading">
+        {t("audit.recordTitle")}
+      </h2>
+      <Card className="px-4 py-1">
+        <ul className="divide-y divide-border/60">
+          {events.map((e) => (
+            <AuditRow key={e.id} e={e} showPatient={false} />
+          ))}
+        </ul>
       </Card>
     </section>
   )

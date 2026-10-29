@@ -17,14 +17,15 @@
     "sync": "Sync",
     "profile": "Profile",
     "add": "Add",
-    "referrals": "Referrals"
+    "referrals": "Referrals",
+    "audit": "Activity"
   },
   "roles": {
     "chv": "Community Health Volunteer",
     "nurse": "Nurse / Midwife",
     "doctor": "Doctor",
     "district_officer": "District Health Officer",
-    "admin": "Administrator"
+    "admin": "Administrator (auditor)"
   },
   "login": {
     "title": "Sign in",
@@ -49,7 +50,28 @@
     "upcoming": "Upcoming visits",
     "waiting": "Waiting to sync",
     "urgent_one": "{{count}} reading this week said refer today",
-    "urgent_other": "{{count}} readings this week said refer today"
+    "urgent_other": "{{count}} readings this week said refer today",
+    "visitsToday": "Visits today",
+    "toSend": "To send",
+    "urgentPatients_one": "{{count}} patient needs referring today",
+    "urgentPatients_other": "{{count}} patients need referring today",
+    "today": "Today",
+    "visitsDone": "{{done}} of {{total}} visits done",
+    "dueToday": "Still to visit",
+    "overdue": "Overdue",
+    "openReferrals": "Open referrals",
+    "weekTitle": "Readings this week",
+    "flagged_one": "{{count}} needed attention",
+    "flagged_other": "{{count}} needed attention",
+    "highBp": "High blood pressure",
+    "feverWeek": "Fever this week",
+    "ofPatients_one": "of {{count}} patient checked",
+    "ofPatients_other": "of {{count}} patients checked",
+    "nextVisits": "Next visits",
+    "seeAll": "See all",
+    "noNextVisits": "Nothing booked yet.",
+    "readings_one": "{{count}} reading",
+    "readings_other": "{{count}} readings"
   },
   "patients": {
     "title": "Patients",
@@ -59,7 +81,20 @@
     "noMatch": "No patient matches your search.",
     "notFound": "This patient is not on this phone.",
     "age_one": "{{count}} year",
-    "age_other": "{{count}} years"
+    "age_other": "{{count}} years",
+    "count_one": "{{count}} patient on this phone",
+    "count_other": "{{count}} patients on this phone",
+    "filterLabel": "Show",
+    "filter_all": "All",
+    "filter_urgent": "Refer today",
+    "filter_due": "Visit due",
+    "filter_unsynced": "Not sent",
+    "status_urgent": "Refer today",
+    "status_overdue": "Visit overdue",
+    "status_today": "Visit today",
+    "status_unsynced": "Not sent",
+    "reading": "Reading",
+    "noReading": "No readings yet"
   },
   "sex": {
     "female": "Female",
@@ -390,5 +425,46 @@
     "title": "Edit details",
     "save": "Save changes",
     "edit": "Edit"
+  },
+  "audit": {
+    "title": "Activity log",
+    "subtitle": "Who opened, created or changed patient records, and every refused attempt.",
+    "todayViews": "Opened today",
+    "todayChanges": "Changed today",
+    "todayDenied": "Refused today",
+    "search": "Search by health worker or patient",
+    "filter_all": "Everything",
+    "filter_view": "Opened",
+    "filter_change": "Created or changed",
+    "filter_denied": "Refused",
+    "action_view": "opened",
+    "action_create": "created",
+    "action_update": "changed",
+    "action_denied": "was refused",
+    "what_patient": "a patient record",
+    "what_vitals": "a vitals reading",
+    "what_appointment": "a visit or referral",
+    "what_page": "the page {{path}}",
+    "onPhone": "on this phone, not uploaded yet",
+    "empty": "Nothing recorded yet.",
+    "recordTitle": "Who opened this record",
+    "serverNote": "This phone's record of access. The server keeps the full log in an append-only, hash-chained table, so entries can't be changed or removed without it showing."
+  },
+  "time": {
+    "justNow": "just now",
+    "minutesAgo_one": "{{count}} minute ago",
+    "minutesAgo_other": "{{count}} minutes ago",
+    "inMinutes_one": "in {{count}} minute",
+    "inMinutes_other": "in {{count}} minutes",
+    "hoursAgo_one": "{{count}} hour ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "inHours_one": "in {{count}} hour",
+    "inHours_other": "in {{count}} hours",
+    "yesterday": "yesterday",
+    "tomorrow": "tomorrow",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "inDays_one": "in {{count}} day",
+    "inDays_other": "in {{count}} days"
   }
 }

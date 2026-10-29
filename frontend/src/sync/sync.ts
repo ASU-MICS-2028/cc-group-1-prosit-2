@@ -57,8 +57,37 @@ async function send(): Promise<SyncResult> {
   if (result.failed === 0) {
     const uploaded = await upload()
     if (uploaded) result.uploaded = uploaded
+    await uploadAudit()
   }
   return result
+}
+
+/**
+ * The audit trail goes up in batches after the records it describes. The server appends each
+ * event to access_log (hash-chained, append-only) and ignores ids it already has, so a batch
+ * resent after a lost reply does no harm.
+ *   POST /api/audit-events  { events: AuditEvent[] }  -> 204
+ */
+async function uploadAudit() {
+  for (;;) {
+    const batch = await db.auditEvents
+      .filter((e) => !e.syncedAt)
+      .limit(100)
+      .toArray()
+    if (batch.length === 0) return
+    try {
+      await api("/audit-events", {
+        method: "POST",
+        body: { events: batch.map((e) => ({ ...e, syncedAt: undefined })) },
+      })
+    } catch {
+      return // offline or not deployed yet: the events wait on the phone
+    }
+    const at = new Date().toISOString()
+    await db.auditEvents.bulkUpdate(
+      batch.map((e) => ({ key: e.id, changes: { syncedAt: at } }))
+    )
+  }
 }
 
 /**
