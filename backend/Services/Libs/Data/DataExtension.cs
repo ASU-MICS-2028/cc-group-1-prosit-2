@@ -14,6 +14,7 @@ public static class DataExtension
         services.AddSingleton(settings);
         services.AddSingleton<IDatabaseSecretReader>(_ => SecretsManagerSecretReader.For(settings));
         services.AddSingleton<Database>();
+        services.AddSingleton<RoleSessions>();
 
         // EF Core uses the same connection pool (and so the same Secrets Manager password and TLS rules) as everything else.
         services.AddDbContext<AppDbContext>((provider, options) =>

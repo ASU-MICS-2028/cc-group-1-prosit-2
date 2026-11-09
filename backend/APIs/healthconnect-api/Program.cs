@@ -1,7 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using HealthConnect.Api.OpenApi;
+using HealthConnect.AuthService;
 using HealthConnect.Data;
 using HealthConnect.PlatformService;
+using HealthConnect.RecordsService;
+using HealthConnect.SharedLibrary;
 using HealthConnect.SharedLibrary.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
@@ -25,7 +29,12 @@ builder.Host.UseSerilog((context, _, logger) =>
 });
 
 builder.Services.AddProblemDetails();
-builder.Services.AddOpenApi();
+// The API contract (OpenAPI), with the sign-in token described so tools know which calls need it.
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+    options.AddOperationTransformer<BearerRequirementTransformer>();
+});
 
 // Enums travel as the snake_case names the app uses ("district_officer", "follow_up").
 // Numbers must be JSON numbers (not "45" as text), which also keeps the contract's number types exact.
@@ -46,8 +55,11 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 // Each service adds itself here. A new service is one line.
 builder.Services
+    .AddSharedLibrary()
     .AddData(builder.Configuration)
-    .AddPlatformService();
+    .AddPlatformService()
+    .AddAuthService(builder.Configuration)
+    .AddRecordsService();
 
 var app = builder.Build();
 
@@ -60,6 +72,7 @@ app.UseSerilogRequestLogging(options =>
 });
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseAuthService();
 
 app.MapFeatures();
 

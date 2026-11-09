@@ -59,6 +59,10 @@ Or run everything in containers: `docker compose -f docker-compose.dev.yml --pro
 
 `GET /health` is 200 only when the API can really reach the database (it opens a connection and runs `select 1`, giving up after 4 seconds) **and** every migration has been applied. It says nothing about why it failed; the reason is in the log.
 
+## Sign-in
+
+Phone number plus SMS code, then a 7-day token. The endpoints, rules, who-may-call-what table, the demo workers and their fixed demo code (`123456`, only for the five synthetic accounts, switch off with `Demo__Enabled=false`) are in [docs/auth.md](../docs/auth.md). To use it from the app locally: `VITE_AUTH_MODE=api npm run dev` in `frontend/`.
+
 ## The database and migrations
 
 The tables, roles, row-level security and the audit log are defined by plain SQL migrations in `Services/Libs/Data/Migrations/Sql/`, which EF Core runs (it keeps the list of what was applied). They are SQL rather than EF models because row-level security, triggers, roles and the audit hash chain cannot be written in EF's model. The API applies pending migrations when it starts, so a deploy needs no extra step, and `/health` stays red until they are done (so a failed migration rolls the release back).

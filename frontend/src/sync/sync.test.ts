@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { db, newId, saveAndQueue } from "@/db/local"
-import type { Vitals } from "@/db/types"
+import type { Appointment, Patient, Vitals } from "@/db/types"
 import { syncNow } from "./sync"
 
 function vitals(): Vitals {
@@ -104,5 +104,216 @@ describe("file uploads", () => {
       })
     )
     expect((await db.media.get(media.id))?.uploadedAt).toBeTruthy()
+  })
+})
+
+function appointment(patientId = newId()): Appointment {
+  const now = new Date().toISOString()
+  return {
+    id: newId(),
+    patientId,
+    type: "referral",
+    scheduledAt: now,
+    facility: "Dodowa District Hospital",
+    reason: "High BP",
+    priority: "urgent",
+    status: "scheduled",
+    referralStatus: "requested",
+    createdAt: now,
+    updatedAt: now,
+    version: 0,
+  }
+}
+
+function patient(): Patient {
+  const now = new Date().toISOString()
+  return {
+    id: newId(),
+    givenName: "Ama",
+    familyName: "Owusu",
+    sex: "female",
+    dateOfBirth: "1966-07-01",
+    birthDateEstimated: true,
+    community: "Dodowa",
+    district: "Shai-Osudoku",
+    preferredLanguage: "tw",
+    consent: { given: true, method: "spoken", at: now },
+    createdAt: now,
+    updatedAt: now,
+    version: 0,
+  }
+}
+
+describe("versions", () => {
+  it("keeps the version the server answers with and builds queued changes on it", async () => {
+    const a = appointment()
+    await saveAndQueue("appointment", a)
+    await saveAndQueue("appointment", { ...a, reason: "Edited" }, "update")
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({ ...a, version: 1 }, { status: 201 })
+      )
+      .mockResolvedValue(Response.json({ ...a, reason: "Edited", version: 2 }))
+    vi.stubGlobal("fetch", fetch)
+
+    await syncNow()
+
+    const bodies = fetch.mock.calls
+      .filter(([, init]) => init?.method === "PUT")
+      .map(([, init]) => JSON.parse(init.body as string))
+    expect(bodies.map((b) => b.version)).toEqual([0, 1])
+    expect((await db.appointments.get(a.id))?.version).toBe(2)
+    expect(await db.outbox.count()).toBe(0)
+  })
+})
+
+describe("conflicts", () => {
+  const conflict = (current: object) =>
+    new Response(JSON.stringify({ error: "conflict", current }), {
+      status: 409,
+    })
+
+  it("keeps the server's copy of an appointment and drops the phone's change", async () => {
+    const a = appointment()
+    await db.appointments.put(a)
+    await saveAndQueue("appointment", { ...a, reason: "Phone edit" }, "update")
+    const theirs = {
+      ...a,
+      referralStatus: "accepted",
+      handledBy: "nurse-17",
+      version: 3,
+    }
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(conflict(theirs)))
+
+    expect(await syncNow()).toMatchObject({ sent: 0, conflicts: 1, failed: 0 })
+
+    const kept = await db.appointments.get(a.id)
+    expect(kept).toMatchObject({ referralStatus: "accepted", version: 3 })
+    expect(await db.outbox.count()).toBe(0)
+    expect(
+      (await db.auditEvents.toArray()).some((e) =>
+        e.detail?.includes("server's copy")
+      )
+    ).toBe(true)
+  })
+
+  it("sends a patient's change again on top of the server's version", async () => {
+    const p = patient()
+    await db.patients.put(p)
+    await saveAndQueue("patient", { ...p, community: "Ayikuma" }, "update")
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        conflict({ ...p, community: "Doryumu", version: 4 })
+      )
+      .mockResolvedValueOnce(
+        Response.json({ ...p, community: "Ayikuma", version: 5 })
+      )
+    vi.stubGlobal("fetch", fetch)
+
+    expect(await syncNow()).toMatchObject({ sent: 1, conflicts: 1 })
+
+    const second = JSON.parse(fetch.mock.calls[1][1].body as string)
+    expect(second).toMatchObject({ community: "Ayikuma", version: 4 })
+    expect(await db.patients.get(p.id)).toMatchObject({
+      community: "Ayikuma",
+      version: 5,
+    })
+  })
+})
+
+describe("pulling", () => {
+  it("stores what other workers saved, without nulls, and only asks for newer ones next time", async () => {
+    const a = {
+      ...appointment(),
+      handledBy: null,
+      referralStatus: "accepted",
+      version: 2,
+    }
+    const fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.startsWith("/api/appointments"))
+        return Promise.resolve(Response.json([a]))
+      return Promise.resolve(Response.json([]))
+    })
+    vi.stubGlobal("fetch", fetch)
+
+    expect(await syncNow()).toMatchObject({ pulled: 1 })
+
+    const stored = await db.appointments.get(a.id)
+    expect(stored).toMatchObject({ referralStatus: "accepted", version: 2 })
+    expect(stored).not.toHaveProperty("handledBy")
+
+    await syncNow()
+    const asked = fetch.mock.calls
+      .map(([url]) => url as string)
+      .filter((u) => u.startsWith("/api/appointments"))
+    expect(asked[0]).toBe("/api/appointments")
+    expect(asked[1]).toBe(
+      `/api/appointments?updatedSince=${encodeURIComponent(a.updatedAt)}`
+    )
+  })
+
+  it("leaves a record alone while this phone still has a change waiting for it", async () => {
+    const a = appointment()
+    await db.appointments.put(a)
+    await saveAndQueue("appointment", { ...a, reason: "Mine" }, "update")
+    const fetch = vi
+      .fn()
+      .mockImplementation((_url: string, init?: RequestInit) => {
+        if (init?.method === "PUT")
+          return Promise.reject(new TypeError("offline"))
+        return Promise.resolve(Response.json([]))
+      })
+    vi.stubGlobal("fetch", fetch)
+    // offline: nothing is pulled either, and nothing is overwritten
+    await syncNow()
+    expect((await db.appointments.get(a.id))?.reason).toBe("Mine")
+  })
+
+  it("does not overwrite a newer local copy and stops quietly when offline", async () => {
+    const a = { ...appointment(), version: 5 }
+    await db.appointments.put(a)
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((url: string) =>
+          url.startsWith("/api/appointments")
+            ? Promise.resolve(
+                Response.json([{ ...a, reason: "Older", version: 4 }])
+              )
+            : Promise.reject(new TypeError("offline"))
+        )
+    )
+
+    const result = await syncNow()
+
+    expect(result.pulled).toBeUndefined()
+    expect((await db.appointments.get(a.id))?.reason).toBe(a.reason)
+  })
+})
+
+describe("audit upload", () => {
+  it("sends the events inside { events } and marks them as sent", async () => {
+    const v = vitals()
+    await saveAndQueue("vitals", v)
+    const fetch = vi
+      .fn()
+      .mockImplementation((url: string) =>
+        Promise.resolve(
+          url === "/api/audit-events"
+            ? new Response(null, { status: 204 })
+            : Response.json([])
+        )
+      )
+    vi.stubGlobal("fetch", fetch)
+
+    await syncNow()
+
+    const call = fetch.mock.calls.find(([url]) => url === "/api/audit-events")!
+    const body = JSON.parse(call[1].body as string)
+    expect(body.events[0]).toMatchObject({ entity: "vitals", action: "create" })
+    expect((await db.auditEvents.toArray()).every((e) => e.syncedAt)).toBe(true)
   })
 })
