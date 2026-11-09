@@ -170,6 +170,19 @@ public sealed class VitalsTests(RecordsDatabase database) : RecordsTestBase(data
     }
 
     [Fact]
+    public async Task A_reading_id_already_used_for_a_patient_the_caller_cannot_see_is_a_conflict_not_a_crash()
+    {
+        var elsewhere = await SavedPatientAsync(Nurse, district: "Kintampo North");
+        var mine = await SavedPatientAsync();
+        var id = Guid.NewGuid();
+        await PutVitalsAsync(id, Vitals(id, elsewhere), Nurse);
+
+        var reply = await PutVitalsAsync(id, Vitals(id, mine), Chv);
+
+        Assert.Equal(409, reply.Status);
+    }
+
+    [Fact]
     public async Task A_nurse_can_add_a_reading_to_any_patient()
     {
         var elsewhere = await SavedPatientAsync(Nurse, district: "Kintampo North");

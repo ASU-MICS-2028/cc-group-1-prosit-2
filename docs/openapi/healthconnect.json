@@ -454,6 +454,236 @@
           }
         ]
       }
+    },
+    "/api/audit-events": {
+      "post": {
+        "tags": [
+          "Audit"
+        ],
+        "operationId": "PostAuditEvents",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AuditEventDto"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditUploadResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Audit"
+        ],
+        "operationId": "GetAuditEvents",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AuditEntryDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/audit-events/verify": {
+      "get": {
+        "tags": [
+          "Audit"
+        ],
+        "operationId": "VerifyAuditEvents",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditVerification"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/media/{id}/upload-url": {
+      "post": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "PostMediaUploadUrl",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaUploadResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaUploadResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/surveillance/weekly": {
+      "get": {
+        "tags": [
+          "Surveillance"
+        ],
+        "operationId": "GetSurveillanceWeekly",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeeklyCountDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -540,6 +770,183 @@
           },
           "version": {
             "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AuditEntryDto": {
+        "required": [
+          "id",
+          "actorId",
+          "role",
+          "action",
+          "outcome",
+          "purpose",
+          "entity",
+          "entityId",
+          "patientId",
+          "detail",
+          "sourceIp",
+          "recordedAt",
+          "happenedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "actorId": {
+            "type": "string"
+          },
+          "role": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "action": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "entity": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "entityId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "patientId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceIp": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "happenedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "AuditEventDto": {
+        "required": [
+          "id",
+          "at",
+          "action",
+          "entity",
+          "entityId",
+          "patientId",
+          "outcome",
+          "purpose",
+          "detail"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "action": {
+            "type": "string"
+          },
+          "entity": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "patientId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "AuditUploadResult": {
+        "required": [
+          "received",
+          "saved"
+        ],
+        "type": "object",
+        "properties": {
+          "received": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "saved": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AuditVerification": {
+        "required": [
+          "intact",
+          "entriesChecked",
+          "firstBadId"
+        ],
+        "type": "object",
+        "properties": {
+          "intact": {
+            "type": "boolean"
+          },
+          "entriesChecked": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "firstBadId": {
+            "type": [
+              "null",
+              "integer"
+            ],
             "format": "int32"
           }
         }
@@ -661,6 +1068,69 @@
             "additionalProperties": {
               "type": "string"
             }
+          }
+        }
+      },
+      "MediaUploadRequest": {
+        "required": [
+          "kind",
+          "mime",
+          "size",
+          "sha256",
+          "patientId",
+          "ownerEntity",
+          "ownerId"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "patientId": {
+            "type": "string"
+          },
+          "ownerEntity": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaUploadResponse": {
+        "required": [
+          "url",
+          "headers",
+          "expiresAt",
+          "key"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "key": {
+            "type": "string"
           }
         }
       },
@@ -892,6 +1362,49 @@
             "format": "int32"
           }
         }
+      },
+      "WeeklyCountDto": {
+        "required": [
+          "district",
+          "week",
+          "patients_seen",
+          "patients_high_bp",
+          "patients_fever",
+          "suppressed"
+        ],
+        "type": "object",
+        "properties": {
+          "district": {
+            "type": "string"
+          },
+          "week": {
+            "type": "string"
+          },
+          "patients_seen": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "patients_high_bp": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "patients_fever": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "suppressed": {
+            "type": "boolean"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -918,6 +1431,15 @@
     },
     {
       "name": "Appointments"
+    },
+    {
+      "name": "Audit"
+    },
+    {
+      "name": "Media"
+    },
+    {
+      "name": "Surveillance"
     }
   ]
 }

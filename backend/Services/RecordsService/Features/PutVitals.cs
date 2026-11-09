@@ -86,7 +86,7 @@ public sealed partial class PutVitals : IFeature
                 LogSaved(logger, user.Id, id);
                 return Results.Json(saved, statusCode: StatusCodes.Status201Created);
             }
-            catch (PostgresException refusal) when (refusal.SqlState == PostgresErrorCodes.UniqueViolation && attempt == 0)
+            catch (PostgresException refusal) when (refusal.SqlState == PostgresErrorCodes.UniqueViolation)
             {
                 // The same reading arrived twice at the same moment and the other one won: read it back and answer as for a repeat.
             }

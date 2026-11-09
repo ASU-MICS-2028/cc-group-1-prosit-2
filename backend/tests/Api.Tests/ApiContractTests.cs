@@ -29,8 +29,8 @@ public sealed class ApiContractTests
 
         Assert.Equal(
             [
-                "/api/appointments", "/api/appointments/{id}", "/api/auth/code", "/api/auth/me", "/api/auth/verify",
-                "/api/patients", "/api/patients/{id}", "/api/vitals", "/api/vitals/{id}", "/health",
+                "/api/appointments", "/api/appointments/{id}", "/api/audit-events", "/api/audit-events/verify", "/api/auth/code", "/api/auth/me", "/api/auth/verify",
+                "/api/media/{id}/upload-url", "/api/patients", "/api/patients/{id}", "/api/surveillance/weekly", "/api/vitals", "/api/vitals/{id}", "/health",
             ],
             paths);
     }

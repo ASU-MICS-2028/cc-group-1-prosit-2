@@ -303,4 +303,82 @@ public sealed class RecordsFlowTests(SignInApi api) : IClassFixture<SignInApi>
             await on.ExecuteNonQueryAsync();
         }
     }
+
+    // ------------------------------------------------------------------ the audit trail over HTTP
+
+    [Fact]
+    public async Task A_phone_uploads_its_audit_events_and_only_the_auditor_can_read_and_verify_them()
+    {
+        var chv = await ChvAsync();
+        var auditor = await TokenAsync("+233200000105");
+        var patient = Guid.NewGuid();
+        var events = new[]
+        {
+            new { id = Guid.NewGuid().ToString(), at = Created, actorId = "chv-042", actorName = "Akosua", role = "chv", action = "view", entity = "patient", entityId = patient.ToString(), patientId = patient.ToString(), outcome = "success", purpose = "TREAT" },
+        };
+
+        var upload = await SendAsync(HttpMethod.Post, "/api/audit-events", chv, events);
+        var chvRead = await SendAsync(HttpMethod.Get, "/api/audit-events", chv);
+        var chvVerify = await SendAsync(HttpMethod.Get, "/api/audit-events/verify", chv);
+        var read = await SendAsync(HttpMethod.Get, $"/api/audit-events?patientId={patient}", auditor);
+        var verify = await SendAsync(HttpMethod.Get, "/api/audit-events/verify", auditor);
+
+        Assert.Equal(HttpStatusCode.OK, upload.StatusCode);
+        Assert.Equal(1, (await JsonOf(upload)).GetProperty("saved").GetInt32());
+        Assert.Equal(HttpStatusCode.Forbidden, chvRead.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, chvVerify.StatusCode);
+        var entries = await JsonOf(read);
+        Assert.Equal(1, entries.GetArrayLength());
+        Assert.Equal("chv-042", entries[0].GetProperty("actorId").GetString());
+        Assert.True((await JsonOf(verify)).GetProperty("intact").GetBoolean());
+    }
+
+    [Fact]
+    public async Task Without_a_token_the_audit_endpoints_are_a_401()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized, (await SendAsync(HttpMethod.Post, "/api/audit-events", null, Array.Empty<object>())).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await SendAsync(HttpMethod.Get, "/api/audit-events", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await SendAsync(HttpMethod.Get, "/api/audit-events/verify", null)).StatusCode);
+    }
+
+    // ------------------------------------------------------------------ media and the district summary over HTTP
+
+    [Fact]
+    public async Task A_media_link_needs_a_token_a_clinical_role_and_a_bucket()
+    {
+        var chv = await ChvAsync();
+        var officer = await TokenAsync("+233200000104");
+        var patient = Guid.NewGuid();
+        var id = Guid.NewGuid();
+        var request = new { kind = "wound-photo", mime = "image/jpeg", size = 90_000, sha256 = new string('d', 64), patientId = patient.ToString(), ownerEntity = "patient", ownerId = patient.ToString() };
+
+        var anonymous = await SendAsync(HttpMethod.Post, $"/api/media/{id}/upload-url", null, request);
+        var forbidden = await SendAsync(HttpMethod.Post, $"/api/media/{id}/upload-url", officer, request);
+        var noBucket = await SendAsync(HttpMethod.Post, $"/api/media/{id}/upload-url", chv, request);
+        var tooBig = await SendAsync(HttpMethod.Post, $"/api/media/{id}/upload-url", chv, new { request.kind, request.mime, size = 3_000_000, request.sha256, request.patientId, request.ownerEntity, request.ownerId });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, anonymous.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, noBucket.StatusCode);   // this test API has no bucket, like a laptop
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, tooBig.StatusCode);
+        Assert.NotNull((await JsonOf(tooBig)).GetProperty("errors").GetProperty("size").GetString());
+    }
+
+    [Fact]
+    public async Task Only_the_officer_and_the_auditor_read_the_district_summary()
+    {
+        var officer = await TokenAsync("+233200000104");
+        var auditor = await TokenAsync("+233200000105");
+        var chv = await ChvAsync();
+        var nurse = await NurseAsync();
+
+        Assert.Equal(HttpStatusCode.Unauthorized, (await SendAsync(HttpMethod.Get, "/api/surveillance/weekly", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await SendAsync(HttpMethod.Get, "/api/surveillance/weekly", chv)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await SendAsync(HttpMethod.Get, "/api/surveillance/weekly", nurse)).StatusCode);
+        var asOfficer = await SendAsync(HttpMethod.Get, "/api/surveillance/weekly", officer);
+        var asAuditor = await SendAsync(HttpMethod.Get, "/api/surveillance/weekly", auditor);
+        Assert.Equal(HttpStatusCode.OK, asOfficer.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, asAuditor.StatusCode);
+        Assert.Equal(JsonValueKind.Array, (await JsonOf(asOfficer)).ValueKind);
+    }
 }

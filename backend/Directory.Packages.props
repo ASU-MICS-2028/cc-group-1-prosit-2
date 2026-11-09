@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- API host -->
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.11" />
     <PackageVersion Include="AWSSDK.SecretsManager" Version="4.0.100.25" />
     <PackageVersion Include="Dapper" Version="2.1.89" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />

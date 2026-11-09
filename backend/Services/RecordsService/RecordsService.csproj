@@ -11,6 +11,7 @@
     <InternalsVisibleTo Include="HealthConnect.RecordsService.Tests" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" />
     <PackageReference Include="Dapper" />
   </ItemGroup>
 </Project>

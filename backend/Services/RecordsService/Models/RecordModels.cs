@@ -63,3 +63,51 @@ public sealed record AppointmentDto(
     DateTimeOffset? CreatedAt,
     DateTimeOffset? UpdatedAt,
     int Version);
+
+/// <summary>One access event as the phone records it (frontend/src/db/types.ts AuditEvent). Who did it comes from the sign-in, not from this.</summary>
+public sealed record AuditEventDto(
+    string Id,
+    DateTimeOffset At,
+    string Action,
+    string Entity,
+    string? EntityId,
+    string? PatientId,
+    string Outcome,
+    string Purpose,
+    string? Detail);
+
+/// <summary>How many events arrived and how many were new (the rest had been uploaded before).</summary>
+public sealed record AuditUploadResult(int Received, int Saved);
+
+/// <summary>One entry of the server's audit log, as the auditor reads it.</summary>
+public sealed record AuditEntryDto(
+    int Id,
+    string ActorId,
+    string? Role,
+    string Action,
+    string Outcome,
+    string Purpose,
+    string? Entity,
+    string? EntityId,
+    string? PatientId,
+    string? Detail,
+    string? SourceIp,
+    DateTimeOffset RecordedAt,
+    DateTimeOffset? HappenedAt);
+
+/// <summary>Whether the log's hash chain still checks out; if not, the first entry that does not.</summary>
+public sealed record AuditVerification(bool Intact, long EntriesChecked, int? FirstBadId);
+
+/// <summary>Asks for a link to upload one file: what it is, how big, its SHA-256 (the proof it was not changed), and the patient and record it belongs to.</summary>
+public sealed record MediaUploadRequest(
+    string Kind,
+    string Mime,
+    int Size,
+    string Sha256,
+    string PatientId,
+    string OwnerEntity,
+    string OwnerId);
+
+/// <summary>The link and what the phone must send with it. The link stops working at expiresAt.</summary>
+public sealed record MediaUploadResponse(string Url, IReadOnlyDictionary<string, string> Headers, DateTimeOffset ExpiresAt, string Key);
+
