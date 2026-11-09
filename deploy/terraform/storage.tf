@@ -61,6 +61,25 @@ resource "aws_s3_bucket_lifecycle_configuration" "media" {
   }
 }
 
+# The phone uploads each photo, recording or signature straight to this bucket with the
+# presigned PUT link the API issues (POST /api/media/{id}/upload-url). That is a cross-site
+# request from the app's address, so the browser only sends it if the bucket allows that
+# address. Only PUT, only from our two CloudFront sites, and only the headers the API signs
+# (Content-Type, x-amz-server-side-encryption, x-amz-checksum-sha256). Reading files still
+# goes through the API; nothing here makes the bucket public.
+resource "aws_s3_bucket_cors_configuration" "media" {
+  bucket = aws_s3_bucket.media.id
+
+  cors_rule {
+    id              = "app-uploads"
+    allowed_methods = ["PUT"]
+    allowed_origins = [for env, d in aws_cloudfront_distribution.app : "https://${d.domain_name}"]
+    allowed_headers = ["content-type", "x-amz-server-side-encryption", "x-amz-checksum-sha256"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
 # Refuse plain HTTP. (Every object is encrypted with our key by the default above.)
 data "aws_iam_policy_document" "media" {
   statement {
