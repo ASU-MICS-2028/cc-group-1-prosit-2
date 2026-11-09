@@ -12,6 +12,12 @@ public static class ApiResults
     public static IResult Error(int statusCode, string code) =>
         Results.Json(new { error = code }, statusCode: statusCode);
 
+    /// <summary>
+    /// 409: the server has a different version. The app keeps its change and shows "Needs review"; <paramref name="current"/> is what the server holds.
+    /// </summary>
+    public static IResult Conflict(object current) =>
+        Results.Json(new { error = "conflict", current }, statusCode: StatusCodes.Status409Conflict);
+
     /// <summary>422 with the wrong fields: { "errors": { "phone": "..." } }.</summary>
     public static IResult Validation(IReadOnlyDictionary<string, string> errors) =>
         Results.Json(new { errors }, statusCode: StatusCodes.Status422UnprocessableEntity);

@@ -27,7 +27,12 @@ public sealed class ApiContractTests
     {
         var paths = (await ContractAsync()).GetProperty("paths").EnumerateObject().Select(p => p.Name).Where(name => !name.StartsWith("/test/", StringComparison.Ordinal)).Order().ToList();
 
-        Assert.Equal(["/api/auth/code", "/api/auth/me", "/api/auth/verify", "/health"], paths);
+        Assert.Equal(
+            [
+                "/api/appointments", "/api/appointments/{id}", "/api/auth/code", "/api/auth/me", "/api/auth/verify",
+                "/api/patients", "/api/patients/{id}", "/api/vitals", "/api/vitals/{id}", "/health",
+            ],
+            paths);
     }
 
     [Fact]

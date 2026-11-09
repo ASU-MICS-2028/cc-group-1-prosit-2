@@ -4,6 +4,7 @@ using HealthConnect.Api.OpenApi;
 using HealthConnect.AuthService;
 using HealthConnect.Data;
 using HealthConnect.PlatformService;
+using HealthConnect.RecordsService;
 using HealthConnect.SharedLibrary;
 using HealthConnect.SharedLibrary.Features;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -57,7 +58,8 @@ builder.Services
     .AddSharedLibrary()
     .AddData(builder.Configuration)
     .AddPlatformService()
-    .AddAuthService(builder.Configuration);
+    .AddAuthService(builder.Configuration)
+    .AddRecordsService();
 
 var app = builder.Build();
 

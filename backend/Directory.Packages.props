@@ -6,6 +6,7 @@
   <ItemGroup>
     <!-- API host -->
     <PackageVersion Include="AWSSDK.SecretsManager" Version="4.0.100.25" />
+    <PackageVersion Include="Dapper" Version="2.1.89" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.14" />
