@@ -1,7 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import type { EntityTable } from "dexie"
 import { ApiError, api } from "@/api/client"
-import { getSession } from "@/auth/session"
+import { getSession, isDemoSession } from "@/auth/session"
 import { auditEvent, db } from "@/db/local"
 import type {
   Appointment,
@@ -59,6 +59,8 @@ export function syncNow(): Promise<SyncResult> {
 
 async function send(): Promise<SyncResult> {
   const result: SyncResult = { sent: 0, failed: 0, conflicts: 0 }
+  // Offline demo mode has no server account: everything stays on this phone, and the server is not asked.
+  if (isDemoSession()) return result
   const queued = await db.outbox.orderBy("seq").toArray()
   for (const waiting of queued) {
     // read it again: an earlier save or conflict in this run may have moved its version or dropped it
