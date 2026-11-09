@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Data: the one PostgreSQL database. How the API finds its address and password (Secrets Manager on AWS), and its health check. -->
+  <ItemGroup>
+    <ProjectReference Include="..\SharedLibrary\SharedLibrary.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The migrations are plain SQL files (row-level security, triggers and roles cannot be written in EF's model),
+         shipped inside the assembly so the API can apply them when it starts. -->
+    <EmbeddedResource Include="Migrations\Sql\*.sql" LogicalName="HealthConnect.Data.Sql.%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Lets the unit tests check the small internal helpers (reading the password out of the secret). -->
+    <InternalsVisibleTo Include="HealthConnect.Data.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.SecretsManager" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+</Project>

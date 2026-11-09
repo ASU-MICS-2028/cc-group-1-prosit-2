@@ -24,7 +24,8 @@ env:
   COVERAGE_MIN: 70
   PYTHON_VERSION: "3.12"   # only used to run pre-commit
   NODE_VERSION: "24"
-  BACKEND_DIR: backend   # API (Bernard picks the stack; its test job is added with it)
+  DOTNET_VERSION: "10.0.x"
+  BACKEND_DIR: backend   # API: ASP.NET Core (C#), see backend/README.md
   FRONTEND_DIR: frontend # React app
 
 jobs:
@@ -124,6 +125,7 @@ jobs:
       pull-requests: read
     outputs:
       frontend: ${{ steps.filter.outputs.frontend == 'true' && steps.exists.outputs.frontend == 'true' }}
+      backend: ${{ steps.filter.outputs.backend == 'true' && steps.exists.outputs.backend == 'true' }}
       docker: ${{ steps.filter.outputs.docker }}
       infra: ${{ steps.filter.outputs.infra }}
     steps:
@@ -131,12 +133,16 @@ jobs:
       - id: exists
         run: |
           [ -f "$FRONTEND_DIR/package.json" ] && echo "frontend=true" >> "$GITHUB_OUTPUT" || echo "frontend=false" >> "$GITHUB_OUTPUT"
+          [ -f "$BACKEND_DIR/HealthConnect.sln" ] && echo "backend=true" >> "$GITHUB_OUTPUT" || echo "backend=false" >> "$GITHUB_OUTPUT"
       - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
             frontend:
               - 'frontend/**'
+              - '.github/workflows/ci.yml'
+            backend:
+              - 'backend/**'
               - '.github/workflows/ci.yml'
             docker:
               - '**/Dockerfile'
@@ -149,9 +155,43 @@ jobs:
               - '.github/workflows/**'
 
   # ---------------------------------------------------------------------------
-  # Backend: added once the API stack is chosen (Tue 27 Oct). It must run the
-  # unit tests with the same COVERAGE_MIN gate, then join `needs` in ci-passed.
+  # Backend: C# API. Code style, build (warnings are errors), then every test project
+  # with the same COVERAGE_MIN line-coverage gate (coverlet runs inside each test project).
+  # The integration tests start a real PostgreSQL in Docker (Testcontainers), which
+  # the ubuntu runner has.
   # ---------------------------------------------------------------------------
+  backend:
+    name: Backend (format + build + tests)
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.BACKEND_DIR }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Restore
+        run: dotnet restore
+      - name: Format check
+        run: dotnet format --verify-no-changes --no-restore
+      - name: Build
+        run: dotnet build --no-restore -c Release
+      - name: Tests with coverage gate
+        # The build fails if line coverage is below COVERAGE_MIN.
+        run: >
+          dotnet test --no-restore --no-build -c Release
+          -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura -p:CoverletOutput=./coverage/
+          -p:Threshold="${COVERAGE_MIN}" -p:ThresholdType=line -p:ThresholdStat=total
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-coverage
+          path: ${{ env.BACKEND_DIR }}/**/coverage/*.xml
+          if-no-files-found: ignore
 
   # ---------------------------------------------------------------------------
   # Frontend: React — lint, format, audit, unit tests + coverage gate, build
@@ -250,6 +290,20 @@ jobs:
           [ "$code" = 503 ] && grep -q api_unavailable body.json
           curl -sI http://127.0.0.1:8080/sw.js | grep -qi "cache-control: no-cache"
           docker logs fe | tail -5
+      # Same for the API: no database here, so /health must say so (503) in JSON, and the process must not be root.
+      - name: Smoke test the backend container
+        if: matrix.service == 'backend' && steps.check.outputs.present == 'true'
+        run: |
+          docker run -d --name be -p 8080:8080 --read-only --tmpfs /tmp \
+            --cap-drop ALL --security-opt no-new-privileges:true healthconnect/backend:ci
+          code=000
+          for _ in $(seq 1 30); do
+            code=$(curl -s -o body.json -w "%{http_code}" http://127.0.0.1:8080/health) && [ "$code" != 000 ] && break || sleep 1
+          done
+          cat body.json; echo
+          [ "$code" = 503 ] && grep -q '"status":"unhealthy"' body.json
+          [ "$(docker exec be id -u)" != 0 ]
+          docker logs be | tail -5
 
   # ---------------------------------------------------------------------------
   # Infrastructure: Terraform format + validate (no AWS credentials needed),
@@ -302,7 +356,7 @@ jobs:
   ci-passed:
     name: CI passed
     if: always()
-    needs: [branch-flow, pre-commit, secrets, changes, frontend, docker, infra]
+    needs: [branch-flow, pre-commit, secrets, changes, backend, frontend, docker, infra]
     runs-on: ubuntu-latest
     steps:
       - name: Verify every job passed or was skipped

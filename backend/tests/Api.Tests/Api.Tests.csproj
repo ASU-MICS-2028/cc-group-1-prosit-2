@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- Coverage is measured on the code these tests are about; CI enforces the threshold. -->
+    <Include>[HealthConnect.Api]*</Include>
+    <ExcludeByAttribute>GeneratedCodeAttribute,CompilerGeneratedAttribute,ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
+    <ExcludeByFile>**/*.g.cs,**/*.generated.cs,**/Migrations/**</ExcludeByFile>
+    <SkipAutoProps>true</SkipAutoProps>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\APIs\healthconnect-api\healthconnect-api.csproj" />
+    <ProjectReference Include="..\Shared\Tests.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="coverlet.msbuild">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="HealthConnect.Tests.Shared" />
+  </ItemGroup>
+</Project>

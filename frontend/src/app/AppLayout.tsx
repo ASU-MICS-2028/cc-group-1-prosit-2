@@ -8,6 +8,7 @@ import { syncNow } from "@/sync/sync"
 import { Loading } from "./Loading"
 import { navFor, type NavItem } from "./navItems"
 import { useHideBottomNav } from "./useHideBottomNav"
+import { BrandLockup } from "@/components/Brand"
 
 /** Sync on our own: when the app opens and whenever the network comes back. */
 function useAutoSync(enabled: boolean) {
@@ -51,8 +52,8 @@ export function AppLayout() {
           aria-label={t("nav.label")}
           className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col gap-1 bg-nav p-4 md:flex"
         >
-          <p className="mb-6 px-3 pt-2 text-2xl font-bold text-primary">
-            HealthConnect
+          <p className="mb-6 px-3 pt-2">
+            <BrandLockup size={34} />
           </p>
           {items.map((item) => (
             <NavLink

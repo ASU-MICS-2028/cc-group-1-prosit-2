@@ -248,7 +248,23 @@
     "failed": "Ɛbɛsan abɔ mmɔden",
     "conflict": "Ɛhia sɛ wɔhwɛ",
     "files_one": "Fael {{count}} retwɛn",
-    "files_other": "Fael {{count}} retwɛn"
+    "files_other": "Fael {{count}} retwɛn",
+    "review_title": "Someone else changed this patient",
+    "review_text": "Choose which version to keep.",
+    "yours": "This phone",
+    "theirs": "Server",
+    "keepMine": "Keep mine",
+    "useServer": "Use the server's",
+    "empty": "(empty)",
+    "field_givenName": "First name",
+    "field_familyName": "Last name",
+    "field_sex": "Sex",
+    "field_dateOfBirth": "Date of birth",
+    "field_phone": "Phone",
+    "field_nationalId": "ID number",
+    "field_community": "Community",
+    "field_district": "District",
+    "field_preferredLanguage": "Language"
   },
   "surveillance": {
     "title": "Mansin nsɛm tiawa",
@@ -448,7 +464,15 @@
     "onPhone": "ɛwɔ fon yi so, ɛnkɔɔ ɛ",
     "empty": "Wɔnkyerɛw biribi ɛ.",
     "recordTitle": "Wɔn a wɔbuee nkrataa yi",
-    "serverNote": "Fon yi so nkrataa a ɛkyerɛ obi a ɔbuee. Server no kora ne nyinaa wɔ pon bi so a wontumi nsesa anaa nyi biribi fi mu a ɛnkyerɛ."
+    "serverNote": "Fon yi so nkrataa a ɛkyerɛ obi a ɔbuee. Server no kora ne nyinaa wɔ pon bi so a wontumi nsesa anaa nyi biribi fi mu a ɛnkyerɛ.",
+    "signedIn": "signed in",
+    "signInRefused": "was refused at sign-in",
+    "serverTitle": "Server log",
+    "serverIntact_one": "Checked: {{count}} entry, none changed.",
+    "serverIntact_other": "Checked: {{count}} entries, none changed.",
+    "serverBroken": "Warning: entry {{id}} does not match the chain. The log may have been changed.",
+    "serverOffline": "Connect to the internet to read the server's log.",
+    "serverEmpty": "The server has no entries yet."
   },
   "time": {
     "justNow": "seesei ara",

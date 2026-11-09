@@ -27,10 +27,16 @@ export function AuditRow({
   const { t } = useTranslation()
   const Icon = ICON[e.action]
   const denied = e.outcome === "denied"
-  const what =
-    e.entity === "page"
-      ? t("audit.what_page", { path: e.detail ?? "" })
-      : t(`audit.what_${e.entity}`)
+  const text =
+    e.entity === "sign-in"
+      ? denied
+        ? t("audit.signInRefused")
+        : t("audit.signedIn")
+      : `${t(`audit.action_${e.action}`)} ${
+          e.entity === "page"
+            ? t("audit.what_page", { path: e.detail ?? "" })
+            : t(`audit.what_${e.entity}`)
+        }`
   return (
     <li className="flex items-start gap-3 py-3">
       <span
@@ -54,7 +60,7 @@ export function AuditRow({
           <span className="text-muted-foreground">
             ({t(`roles.${e.role}`, { defaultValue: e.role })})
           </span>{" "}
-          {t(`audit.action_${e.action}`)} {what}
+          {text}
           {showPatient && patientName ? (
             <>
               {" · "}

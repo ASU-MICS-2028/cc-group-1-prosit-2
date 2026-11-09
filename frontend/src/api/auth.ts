@@ -6,10 +6,11 @@ import { api } from "./client"
  *   POST /api/auth/code    { phone }        -> 204, an SMS is sent
  *   POST /api/auth/verify  { phone, code }  -> { token, expiresAt, user }
  *
- * Until the backend has these endpoints, demo mode (the default; VITE_AUTH_MODE=api turns it
- * off) answers locally for five synthetic health workers with the code 123456.
+ * The app talks to the real API by default. Offline demo mode (build or run with
+ * VITE_AUTH_MODE=demo) answers locally for five synthetic health workers with the code 123456,
+ * with built-in sample data, and never calls the server.
  */
-export const DEMO_MODE = import.meta.env.VITE_AUTH_MODE !== "api"
+export const DEMO_MODE = import.meta.env.VITE_AUTH_MODE === "demo"
 export const DEMO_CODE = "123456"
 
 export const DEMO_USERS: Record<string, User> = {

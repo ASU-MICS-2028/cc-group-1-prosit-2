@@ -67,6 +67,8 @@ export default defineConfig({
     proxy: { "/api": process.env.API_PROXY_TARGET ?? "http://localhost:8000" },
   },
   test: {
+    // The tests run the app in its offline demo mode; the ones that need the API stub fetch.
+    env: { VITE_AUTH_MODE: "demo" },
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     // Pages are lazy chunks compiled on first use; under a full parallel run that can pass 5 s.

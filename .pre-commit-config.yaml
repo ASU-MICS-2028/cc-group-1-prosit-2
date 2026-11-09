@@ -19,6 +19,7 @@ repos:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
       - id: end-of-file-fixer
+        exclude: ^docs/openapi/   # written by the backend build without a final newline, and rewritten on every build
       - id: check-yaml
       - id: check-json
         exclude: ^frontend/tsconfig.*\.json$   # tsconfig files allow comments

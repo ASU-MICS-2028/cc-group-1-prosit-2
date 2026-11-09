@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- RecordsService: the clinical records the app syncs: patients, vitals and appointments (visits, referrals), saved by the phone's own id and pulled by other workers. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Libs\SharedLibrary\SharedLibrary.csproj" />
+    <ProjectReference Include="..\Libs\Data\Data.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="HealthConnect.RecordsService.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" />
+    <PackageReference Include="Dapper" />
+  </ItemGroup>
+</Project>
