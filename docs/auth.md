@@ -47,6 +47,10 @@ Tokens are signed with HMAC-SHA256. The key is **32 random bytes made by the API
 
 No SMS provider is connected yet, so the MVP has **five synthetic demo workers**, the same people and ids as the app's offline demo mode (`020 000 0101` to `0105`: chv-042, nurse-17, dr-eshun, ghs-officer-07, auditor-02). With `Demo:Enabled` on (the default in `appsettings.json`), the fixed code **123456** signs in those five accounts, and **only** those; a real worker never accepts it. The API logs a warning at start-up while it is on, and every demo sign-in is logged.
 
+### Sample data
+
+While `Demo:Enabled` is on, the API also fills an empty database with **invented** patients, readings, visits and referrals when it starts, so every screen has something to show: 33 patients in four districts (names end in `-Demo`), eight weeks of readings, a few upcoming, overdue, done and missed visits for the demo CHV, and referrals the demo nurse has accepted, seen and declined. Kintampo North's fever count rises towards the present, to show the outbreak signal; Sawla-Tuna-Kalba is too small to be shown. It goes through the same code as the API (every rule is checked), only adds what is missing, adds the new week's readings each week, and never overwrites. Switch it off alone with `Demo__SampleData=false`; `Demo__Enabled=false` switches off both. The records stay in the database until someone removes them, so remove them before real use (`name LIKE '%-Demo'`).
+
 **Before real people use the system:** set `Demo__Enabled=false`, remove or deactivate the demo rows in `users`, add the real workers, and connect an SMS provider behind `ISmsSender`.
 
 ## Known limits

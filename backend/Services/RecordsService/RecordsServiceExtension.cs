@@ -1,6 +1,8 @@
 using Amazon;
 using Amazon.S3;
 using Dapper;
+using HealthConnect.Data;
+using HealthConnect.RecordsService.Demo;
 using HealthConnect.RecordsService.Features;
 using HealthConnect.RecordsService.Media;
 using HealthConnect.SharedLibrary.Features;
@@ -19,6 +21,7 @@ public static class RecordsServiceExtension
 
         // Media goes straight from the phone to the private bucket the deploy names. The signer talks to AWS only when it first signs a link.
         services.AddSingleton(sp => new MediaOptions(sp.GetRequiredService<IConfiguration>()["MEDIA_BUCKET"]));
+        services.AddSingleton<IDatabaseSeeder, DemoRecordsSeeder>();
         services.AddSingleton<IMediaUrlSigner>(sp => new S3MediaUrlSigner(new Lazy<IAmazonS3>(() =>
             sp.GetRequiredService<IConfiguration>()["AWS_REGION"] is { Length: > 0 } region
                 ? new AmazonS3Client(RegionEndpoint.GetBySystemName(region))
