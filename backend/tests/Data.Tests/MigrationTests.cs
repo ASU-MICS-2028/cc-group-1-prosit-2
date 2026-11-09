@@ -12,7 +12,7 @@ namespace HealthConnect.Data.Tests;
 [Collection(SchemaCollection.Name)]
 public sealed class MigrationTests(SchemaFixture fixture)
 {
-    private static readonly string[] AllMigrations = ["20261109000001_Baseline", "20261109000002_ClinicalRecords"];
+    private static readonly string[] AllMigrations = ["20261109000000_UpgradeFirstDraft", "20261109000001_Baseline", "20261109000002_ClinicalRecords"];
 
     private static readonly string[] AllTables =
     [
@@ -70,7 +70,7 @@ public sealed class MigrationTests(SchemaFixture fixture)
     }
 
     [Fact]
-    public async Task Both_migrations_are_pending_until_they_are_applied()
+    public async Task All_migrations_are_pending_until_they_are_applied()
     {
         var connection = await fixture.CreateDatabaseAsync("hc_pending");
         await using var db = SchemaFixture.NewContext(connection);
@@ -123,8 +123,9 @@ public sealed class MigrationTests(SchemaFixture fixture)
     }
 
     [Fact]
-    public void Both_scripts_ship_inside_the_assembly()
+    public void All_scripts_ship_inside_the_assembly()
     {
+        Assert.NotEmpty(ReadScript("0000_upgrade_first_draft.sql"));
         Assert.NotEmpty(ReadScript("0001_baseline.sql"));
         Assert.NotEmpty(ReadScript("0002_clinical_records.sql"));
     }

@@ -27,6 +27,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <!-- Liza's first draft of the schema and its sample data: the starting point for the upgrade test. -->
+    <EmbeddedResource Include="Fixtures\*.sql" LogicalName="HealthConnect.Data.Tests.Fixtures.%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
     <Using Include="Xunit" />
     <Using Include="HealthConnect.Tests.Shared" />
   </ItemGroup>

@@ -107,7 +107,7 @@ public sealed class DatabaseMigratorTests(SchemaFixture fixture)
 
         await RunToEndAsync(MigratorOf(provider));
 
-        Assert.Equal(2, await PendingAsync(connection));
+        Assert.Equal(3, await PendingAsync(connection));
     }
 
     [Fact]
@@ -131,7 +131,7 @@ public sealed class DatabaseMigratorTests(SchemaFixture fixture)
 
         Assert.Equal(HealthStatus.Healthy, before.Entries["database"].Status);
         Assert.Equal(HealthStatus.Unhealthy, before.Entries["schema"].Status);
-        Assert.Contains("2 migration(s) not applied", before.Entries["schema"].Description);
+        Assert.Contains("3 migration(s) not applied", before.Entries["schema"].Description);
         Assert.Equal(HealthStatus.Healthy, after.Status);
     }
 

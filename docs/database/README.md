@@ -2,7 +2,15 @@
 
 PostgreSQL 17 on RDS (`healthconnect` for production, `healthconnect_staging` for staging). The tables are shaped like FHIR R4 resources, and the database itself enforces who may see what and which values are allowed, so a bug or an old app version cannot store nonsense or show a patient to the wrong person. Synthetic data only.
 
-Where it is defined: **the SQL migrations in `backend/Services/Libs/Data/Migrations/Sql/`**, applied by the API when it starts. Migration 1 is Liza's Lab 6 `db/schema.sql` + `db/rbac.sql` unchanged; migration 2 adds what the app needs beyond them. [`db/`](../../db/README.md) keeps the Lab 6 originals and the sample data.
+Where it is defined: **the SQL migrations in `backend/Services/Libs/Data/Migrations/Sql/`**, applied by the API when it starts:
+
+| # | What it does |
+|---|---|
+| 0 | `UpgradeFirstDraft`: only if the database was made from Liza's **first** draft of the schema (the Lab 6 starter, with no district and no FHIR ids), it adds the missing columns and tidies the old values, keeping every row. On a new database, or one with the current schema, it does nothing. |
+| 1 | `Baseline`: Liza's Lab 6 `db/schema.sql` + `db/rbac.sql`, unchanged. |
+| 2 | `ClinicalRecords`: what the app needs beyond them (below). |
+
+[`db/`](../../db/README.md) keeps the Lab 6 originals and the sample data.
 
 ## The tables (ERD)
 
@@ -180,5 +188,5 @@ Every one of these has a test in `backend/tests/Data.Tests`.
 ## Known limits
 
 - The API connects to RDS as the master login `healthconnect`, which owns the tables. It is not a superuser, and the security tests run as a login like it, but a dedicated, lower-privilege login for the API would be better. That needs a second secret and a change in Terraform.
-- Migration 1 can run on a database that already had Lab 6's `schema.sql` applied by hand, so nobody has to check what is on RDS first.
+- Nobody has to check what is on RDS first. The migrations work on a new database, on one where the extended `schema.sql` was applied by hand, and on one made from Liza's first draft (tested with her real scripts in `backend/tests/Data.Tests/Fixtures/`). In that last case her old patients are kept but get the district `unassigned`, so a clinician can see them and no CHV can; their `nhis_number` column stays until a later migration moves it into `patient_identifiers` (Act 843 data minimisation).
 - The audit log's hash covers who, what, when and the outcome. The extra columns for the app's own audit events (event id, entity, detail) arrive with the audit endpoint and will be tested there.
