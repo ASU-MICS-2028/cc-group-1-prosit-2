@@ -1,0 +1,39 @@
+# Local development stack: PostgreSQL, and optionally the API in a container.
+#   docker compose -f docker-compose.dev.yml up -d db          (just the database; run the API with dotnet run)
+#   docker compose -f docker-compose.dev.yml --profile api up --build   (database + API on http://localhost:8000)
+# These credentials are for your laptop only. Never reuse them anywhere else.
+# A fixed project name, so this stack never mixes with another project whose folder is also called "backend".
+name: healthconnect-backend
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: healthconnect
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-healthconnect_dev}
+      POSTGRES_DB: healthconnect
+    ports:
+      - "127.0.0.1:${DB_PORT:-5433}:5432"   # this machine only; 5433 avoids clashing with a local PostgreSQL
+    volumes:
+      - healthconnect-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U healthconnect -d healthconnect"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    profiles: ["api"]
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: Host=db;Port=5432;Database=healthconnect;Username=healthconnect;Password=${POSTGRES_PASSWORD:-healthconnect_dev}
+    ports:
+      - "127.0.0.1:8000:8080"
+
+volumes:
+  healthconnect-db:
