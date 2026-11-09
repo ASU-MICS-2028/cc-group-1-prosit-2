@@ -490,5 +490,21 @@
     "daysAgo_other": "nnafua {{count}} a atwam",
     "inDays_one": "nnafua {{count}} mu",
     "inDays_other": "nnafua {{count}} mu"
+  },
+  "toast": {
+    "label": "Nkra",
+    "dismiss": "Yi fi hɔ",
+    "saveFailed": "Yɛantumi ankora wɔ fon yi so",
+    "saveFailedText": "Deɛ wokyerɛwee no da so wɔ hɔ. Bɔ mmɔden bio.",
+    "willSend": "Wɔbɛsoma bere a intanɛt bɛba bio.",
+    "patientUpdated": "Wɔakora ɔyarefoɔ no nsɛm",
+    "vitalsSaved": "Wɔakora nsusuiɛ no",
+    "appointmentBooked": "Wɔahyɛ nsrahwɛ da",
+    "appointmentUpdated": "Wɔasesa nsrahwɛ no",
+    "appointmentStatus": "Nsrahwɛ: {{status}}",
+    "photoUpdated": "Wɔasesa mfonini no",
+    "photoRemoved": "Wɔayi mfonini no",
+    "synced": "Wɔasoma akɔ sɛva no so",
+    "syncPartial": "Wɔnsomaa nsakraeɛ bi"
   }
 }

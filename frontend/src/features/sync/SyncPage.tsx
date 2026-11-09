@@ -1,6 +1,7 @@
 import { Cloud, CloudOff, RefreshCw } from "@/components/icons"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { toast } from "@/lib/toast"
 import { EmptyState, PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
 import { useOnline } from "@/lib/useOnline"
@@ -82,7 +83,17 @@ export function Component() {
   async function send() {
     setBusy(true)
     try {
-      setResult(await syncNow())
+      const result = await syncNow()
+      setResult(result)
+      const text = t("sync.result", {
+        sent: result.sent,
+        failed: result.failed + result.conflicts,
+      })
+      if (result.failed + result.conflicts > 0)
+        toast.error(t("toast.syncPartial"), text)
+      else toast.success(t("toast.synced"), text)
+    } catch {
+      toast.error(t("login.network"))
     } finally {
       setBusy(false)
     }

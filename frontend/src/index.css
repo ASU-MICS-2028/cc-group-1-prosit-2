@@ -32,6 +32,9 @@
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-destructive-soft: var(--destructive-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
   --color-accent-orange: var(--accent-orange);
@@ -91,6 +94,10 @@
   /* M3 error red (the input's error state) */
   --destructive: #b3261e;
   --destructive-soft: #fceeee;
+  /* "Saved": M3-style green, 6.3:1 on white so it can carry text */
+  --success: #1b7a3a;
+  --success-soft: #e6f4ea;
+  --success-foreground: #ffffff;
   /* Urgent-but-not-emergency and "waiting to sync": a darker orange than the brand #FA5805 so
      small text stays readable (5.7:1) */
   --warning: #b34000;
@@ -134,6 +141,9 @@
   --accent-foreground: #c9dbff;
   --destructive: #f2b8b5;
   --destructive-soft: #3b1d1c;
+  --success: #7fd69a;
+  --success-soft: #16301f;
+  --success-foreground: #0b2414;
   --warning: #ffb48a;
   --warning-soft: #3b2417;
   --accent-orange: #fa5805;
@@ -146,6 +156,47 @@
   /* Same pair, re-stepped and re-validated for the dark surface */
   --chart-sys: #4f82f5;
   --chart-dia: #e8600e;
+}
+
+/* Feedback motion: kept short (under 400 ms) and switched off for people who ask for less motion
+   (each use adds motion-reduce:animate-none). */
+@theme {
+  --animate-shake: shake 0.4s ease-in-out;
+  --animate-pop: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-draw: draw 0.35s ease-out 0.15s both;
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20%,
+    60% {
+      transform: translateX(-4px);
+    }
+    40%,
+    80% {
+      transform: translateX(4px);
+    }
+  }
+  @keyframes pop {
+    0% {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
 }
 
 @layer base {

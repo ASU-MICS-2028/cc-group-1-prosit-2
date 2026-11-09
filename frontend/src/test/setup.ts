@@ -5,6 +5,7 @@ import { cleanup, configure } from "@testing-library/react"
 import { afterEach } from "vitest"
 import { db } from "@/db/local"
 import i18n from "@/i18n"
+import { toast } from "@/lib/toast"
 
 // Pages are lazy chunks; the first one in a run is compiled on demand.
 configure({ asyncUtilTimeout: 10_000 })
@@ -13,6 +14,7 @@ window.scrollTo = () => {}
 
 afterEach(async () => {
   cleanup()
+  toast.clear()
   localStorage.clear()
   await Promise.all(db.tables.map((table) => table.clear()))
   await i18n.changeLanguage("en")

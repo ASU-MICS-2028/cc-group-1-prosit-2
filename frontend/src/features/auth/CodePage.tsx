@@ -6,6 +6,7 @@ import { AuthError, requestCode, verifyCode } from "@/api/auth"
 import { homeFor, saveSession } from "@/auth/session"
 import { CodeInput } from "@/components/form/CodeInput"
 import { Button } from "@/components/ui/button"
+import { ErrorText } from "@/components/form/ErrorText"
 
 const RESEND_AFTER_S = 60
 
@@ -92,12 +93,7 @@ export function Component() {
           invalid={!!error}
         />
         {error ? (
-          <p
-            role="alert"
-            className="text-center text-sm font-medium text-destructive"
-          >
-            {error}
-          </p>
+          <ErrorText className="justify-center text-center">{error}</ErrorText>
         ) : null}
         <Button
           type="submit"

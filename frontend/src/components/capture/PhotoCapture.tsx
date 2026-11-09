@@ -1,5 +1,6 @@
 import { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { ErrorText } from "@/components/form/ErrorText"
 import { RefreshCw } from "@/components/icons"
 import { compressPhoto, useObjectUrl } from "@/lib/media"
 
@@ -77,9 +78,7 @@ export function PhotoCapture({
         {!url ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
       </div>
       {failed ? (
-        <p role="alert" className="mt-2 text-sm text-destructive">
-          {t("profile.photoError")}
-        </p>
+        <ErrorText className="mt-2">{t("profile.photoError")}</ErrorText>
       ) : null}
     </div>
   )

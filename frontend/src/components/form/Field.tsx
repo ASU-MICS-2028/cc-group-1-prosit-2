@@ -1,10 +1,11 @@
 import type { ComponentProps, ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import { ErrorText } from "./ErrorText"
 
 // Figma "Text Fields" (Material 3 outlined): 56 px, 4 px corners, grey outline; 2 px outline in
 // the brand blue when focused and in red with an error.
 const control =
-  "h-14 w-full rounded-sm border border-input bg-transparent px-4 text-base text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-2 focus-visible:border-primary focus-visible:px-[15px] aria-invalid:border-2 aria-invalid:border-destructive aria-invalid:px-[15px]"
+  "h-14 w-full rounded-sm transition-colors border border-input bg-transparent px-4 text-base text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-2 focus-visible:border-primary focus-visible:px-[15px] aria-invalid:border-2 aria-invalid:border-destructive aria-invalid:px-[15px]"
 
 /** A labelled control with its error under it; the label and error are tied to the control for screen readers. */
 export function Field({
@@ -34,15 +35,7 @@ export function Field({
           {hint}
         </p>
       ) : null}
-      {error ? (
-        <p
-          id={`${id}-error`}
-          role="alert"
-          className="text-xs font-medium text-destructive"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <ErrorText id={`${id}-error`}>{error}</ErrorText> : null}
     </div>
   )
 }

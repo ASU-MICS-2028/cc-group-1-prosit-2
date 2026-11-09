@@ -490,5 +490,21 @@
     "daysAgo_other": "ŋkeke {{count}} va yi",
     "inDays_one": "le ŋkeke {{count}} me",
     "inDays_other": "le ŋkeke {{count}} me"
+  },
+  "toast": {
+    "label": "Gbedeasiwo",
+    "dismiss": "Ɖe ɖa",
+    "saveFailed": "Míete ŋu dzrae ɖo ɖe telefon sia dzi o",
+    "saveFailedText": "Nu si nèŋlɔ la gali. Gate kpɔ.",
+    "willSend": "Woaɖoe ɖa ne intanɛt gava.",
+    "patientUpdated": "Wodzra dɔnɔ la ƒe nyatakakawo ɖo",
+    "vitalsSaved": "Wodzra dzidzemewo ɖo",
+    "appointmentBooked": "Woɖo sraɖekpɔ la",
+    "appointmentUpdated": "Wotrɔ sraɖekpɔ la",
+    "appointmentStatus": "Sraɖekpɔ: {{status}}",
+    "photoUpdated": "Wotrɔ foto la",
+    "photoRemoved": "Woɖe foto la ɖa",
+    "synced": "Woɖoe ɖe sɛva la dzi",
+    "syncPartial": "Womeɖo tɔtrɔ aɖewo ɖa o"
   }
 }
