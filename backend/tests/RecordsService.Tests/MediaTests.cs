@@ -57,8 +57,9 @@ public sealed class MediaTests(RecordsDatabase database) : RecordsTestBase(datab
         var signed = query["X-Amz-SignedHeaders"]!.Split(';');
         Assert.Contains("content-type", signed);
         Assert.Contains("x-amz-checksum-sha256", signed);
-        Assert.Contains("x-amz-server-side-encryption", signed);
-        Assert.Equal("aws:kms", reply.Body.GetProperty("headers").GetProperty("x-amz-server-side-encryption").GetString());
+        // Encryption comes from the bucket default (our KMS key); the link must not choose one itself.
+        Assert.DoesNotContain("x-amz-server-side-encryption", signed);
+        Assert.False(reply.Body.GetProperty("headers").TryGetProperty("x-amz-server-side-encryption", out _));
         Assert.Equal("audio/webm", reply.Body.GetProperty("headers").GetProperty("Content-Type").GetString());
         Assert.Equal(Convert.ToBase64String(Convert.FromHexString(Sha)), reply.Body.GetProperty("headers").GetProperty("x-amz-checksum-sha256").GetString());
         Assert.Equal(_now.GetUtcNow().AddMinutes(5), reply.Body.GetProperty("expiresAt").GetDateTimeOffset());
