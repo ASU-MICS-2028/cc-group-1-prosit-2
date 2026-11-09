@@ -90,13 +90,19 @@ public class DatabaseTests
     [Fact]
     public async Task On_the_server_the_password_comes_from_the_secret_each_time_a_connection_is_made()
     {
-        // Nothing listens on this port: we only need to see that Npgsql asked for the password before it tried to connect.
+        // Nothing listens on this port: we only need to see that Npgsql asked for the password. It asks on a background
+        // task, so wait for that call to happen (up to 10 s) instead of checking at one instant, which races on a busy machine.
+        var asked = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var secrets = Substitute.For<IDatabaseSecretReader>();
-        secrets.GetPasswordAsync(Arn, Arg.Any<CancellationToken>()).Returns(new ValueTask<string>("from-secret"));
+        secrets.GetPasswordAsync(Arn, Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            asked.TrySetResult();
+            return new ValueTask<string>("from-secret");
+        });
         await using var database = new Database(OnTheServer("127.0.0.1", 1), secrets);
 
         await Assert.ThrowsAnyAsync<Exception>(async () => await database.DataSource.OpenConnectionAsync(CancellationToken.None));
 
-        await secrets.Received().GetPasswordAsync(Arn, Arg.Any<CancellationToken>());
+        await asked.Task.WaitAsync(TimeSpan.FromSeconds(10));
     }
 }
