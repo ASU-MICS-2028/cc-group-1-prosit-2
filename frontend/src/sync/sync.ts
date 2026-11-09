@@ -47,8 +47,8 @@ let running: Promise<SyncResult> | null = null
  * (lost reply on 2G) does no harm. Each save carries the version the phone last saw; the server
  * answers with the saved record and its new version, which the phone keeps. A 409 means someone
  * else changed the record first, and docs/sync.md says what happens then (appointments and
- * readings: the server's copy is kept; patients: the later save wins). A 409 the phone cannot
- * read is kept in the outbox for review instead.
+ * readings: the server's copy is kept; patients: held for the worker to review). A 409 the phone
+ * cannot read is kept in the outbox, marked conflict, instead.
  */
 export function syncNow(): Promise<SyncResult> {
   running ??= send().finally(() => {
@@ -140,40 +140,24 @@ function conflictCopy(error: unknown): AnyRecord | undefined {
 }
 
 /**
- * Someone else changed the record first (docs/sync.md). Returns true when this phone's change
- * went through after all.
- *  - patient: the later save wins. The change is sent again on top of the server's version.
+ * Someone else changed the record first (docs/sync.md). Returns false: this phone's change did
+ * not go through yet.
+ *  - patient: nothing is overwritten either way. The server's copy is kept next to this phone's
+ *    change and the worker chooses on the Sync page: keepMine() or takeServerCopy().
  *  - appointment, vitals: the server's copy wins and this phone's change is dropped, because a
  *    nurse's answer to a referral must not be undone by an older edit, and a reading is never edited.
- * Either way an audit entry records what happened.
+ * Each outcome is audited.
  */
 async function resolve(item: OutboxItem, current: AnyRecord): Promise<boolean> {
-  const patientId =
-    item.entity === "patient" ? item.entityId : (current as Vitals).patientId
   if (item.entity === "patient") {
-    try {
-      await put(item, {
-        ...item.payload,
-        version: current.version,
-      } as AnyRecord)
-      await db.auditEvents.add(
-        auditEvent(
-          "update",
-          "patient",
-          item.entityId,
-          patientId,
-          "conflict: this phone's change was kept"
-        )
-      )
-      return true
-    } catch {
-      await db.outbox.update(item.seq!, {
-        attempts: item.attempts + 1,
-        lastError: "conflict",
-      })
-      return false
-    }
+    await db.outbox.update(item.seq!, {
+      attempts: item.attempts + 1,
+      lastError: "conflict",
+      serverCopy: current,
+    })
+    return false
   }
+  const patientId = (current as Vitals).patientId
   await table(item.entity).put(clean(current))
   await db.outbox.where("entityId").equals(item.entityId).delete()
   await db.auditEvents.add(
@@ -186,6 +170,47 @@ async function resolve(item: OutboxItem, current: AnyRecord): Promise<boolean> {
     )
   )
   return false
+}
+
+/**
+ * Review step, choice 1: send this phone's version of the patient on top of the server's. The
+ * server's change is replaced by this phone's (the audit trail notes it).
+ */
+export async function keepMine(seq: number): Promise<void> {
+  const item = await db.outbox.get(seq)
+  if (!item?.serverCopy) return
+  await db.outbox.update(seq, {
+    payload: { ...item.payload, version: item.serverCopy.version } as AnyRecord,
+    serverCopy: undefined,
+    lastError: undefined,
+  })
+  await db.auditEvents.add(
+    auditEvent(
+      "update",
+      item.entity,
+      item.entityId,
+      item.entityId,
+      "conflict reviewed: this phone's change was kept"
+    )
+  )
+  await syncNow()
+}
+
+/** Review step, choice 2: drop this phone's change and take the server's copy. */
+export async function takeServerCopy(seq: number): Promise<void> {
+  const item = await db.outbox.get(seq)
+  if (!item?.serverCopy) return
+  await table(item.entity).put(clean(item.serverCopy))
+  await db.outbox.delete(seq)
+  await db.auditEvents.add(
+    auditEvent(
+      "update",
+      item.entity,
+      item.entityId,
+      item.entityId,
+      "conflict reviewed: the server's copy was kept"
+    )
+  )
 }
 
 // ---------------------------------------------------------------- pulling what others saved

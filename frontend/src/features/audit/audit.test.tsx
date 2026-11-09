@@ -92,3 +92,122 @@ describe("audit trail", () => {
     expect((await db.auditEvents.toArray())[0].syncedAt).toBeTruthy()
   })
 })
+
+describe("server log on the audit page", () => {
+  it("shows the server's entries including sign-ins, and says the chain is intact", async () => {
+    const entry = (id: number, extra: object) => ({
+      id,
+      actorId: "chv-042",
+      role: "chv",
+      action: "read",
+      outcome: "success",
+      purpose: "HOPERAT",
+      entity: "sign-in",
+      entityId: "chv-042",
+      patientId: null,
+      detail: "signed in",
+      recordedAt: now,
+      ...extra,
+    })
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: string) =>
+        Promise.resolve(
+          url.startsWith("/api/audit-events/verify")
+            ? Response.json({
+                intact: true,
+                entriesChecked: 2,
+                firstBadId: null,
+              })
+            : Response.json([
+                entry(2, { outcome: "denied", detail: "refused: wrong code" }),
+                entry(1, {}),
+              ])
+        )
+      )
+    )
+
+    renderRoute("/audit", { as: "admin" })
+
+    expect(
+      await screen.findByRole("heading", { name: "Server log" })
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByText("Checked: 2 entries, none changed.")
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByText(/was refused at sign-in/)
+    ).toBeInTheDocument()
+    expect(screen.getByText(/signed in$/)).toBeInTheDocument()
+  })
+
+  it("warns when the server says the chain does not check out", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: string) =>
+        Promise.resolve(
+          url.startsWith("/api/audit-events/verify")
+            ? Response.json({
+                intact: false,
+                entriesChecked: 5,
+                firstBadId: 3,
+              })
+            : Response.json([])
+        )
+      )
+    )
+
+    renderRoute("/audit", { as: "admin" })
+
+    expect(
+      await screen.findByText(/entry 3 does not match the chain/)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText("The server has no entries yet.")
+    ).toBeInTheDocument()
+  })
+
+  it("says so when the server cannot be reached", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("offline")))
+
+    renderRoute("/audit", { as: "admin" })
+
+    expect(
+      await screen.findByText(
+        "Connect to the internet to read the server's log."
+      )
+    ).toBeInTheDocument()
+  })
+})
+
+describe("conflict review on the Sync page", () => {
+  it("shows what differs and lets the worker keep the server's copy", async () => {
+    const user = userEvent.setup()
+    const mine = { ...ama, community: "Ayikuma", version: 3 }
+    await db.patients.put(mine)
+    await db.outbox.add({
+      entity: "patient",
+      entityId: ama.id,
+      op: "update",
+      payload: mine,
+      queuedAt: now,
+      attempts: 1,
+      lastError: "conflict",
+      serverCopy: { ...ama, community: "Doryumu", version: 4 },
+    })
+
+    renderRoute("/sync", { as: "chv" })
+
+    const card = await screen.findByTestId("conflict-review")
+    expect(
+      within(card).getByText(/Someone else changed this patient: Ama Owusu/)
+    ).toBeInTheDocument()
+    expect(within(card).getByText("Ayikuma")).toBeInTheDocument()
+    expect(within(card).getByText("Doryumu")).toBeInTheDocument()
+    await user.click(
+      within(card).getByRole("button", { name: "Use the server's" })
+    )
+    await waitFor(async () => expect(await db.outbox.count()).toBe(0))
+    expect((await db.patients.get(ama.id))?.community).toBe("Doryumu")
+  })
+})

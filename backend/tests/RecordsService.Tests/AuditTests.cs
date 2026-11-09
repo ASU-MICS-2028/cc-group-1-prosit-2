@@ -244,6 +244,17 @@ public sealed class AuditTests(RecordsDatabase database) : RecordsTestBase(datab
     }
 
     [Fact]
+    public async Task Entries_written_at_the_same_moment_still_form_one_unbroken_chain()
+    {
+        // Many phones syncing together: the chain must follow the order entries are committed, not the order their numbers were drawn.
+        await Task.WhenAll(Enumerable.Range(0, 60).Select(_ => UploadAsync(Chv, Event())));
+
+        var check = await ResultReader.RunAsync(await VerifyAuditEvents.Handle(As(Admin), Sessions, CancellationToken.None));
+
+        Assert.True(check.Body.GetProperty("intact").GetBoolean(), check.Body.GetRawText());
+    }
+
+    [Fact]
     public async Task The_log_cannot_be_edited_or_emptied_by_the_service_itself()
     {
         var id = Guid.NewGuid();

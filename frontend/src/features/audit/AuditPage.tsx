@@ -11,6 +11,7 @@ import { startOfToday } from "@/lib/caseload"
 import { cn } from "@/lib/utils"
 import i18n from "@/i18n"
 import { AuditRow } from "./AuditRow"
+import { ServerLog } from "./ServerLog"
 
 const FILTERS = {
   all: () => true,
@@ -147,6 +148,8 @@ export function Component() {
         <ShieldCheck className="size-4 shrink-0 text-primary" aria-hidden />
         {t("audit.serverNote")}
       </p>
+
+      <ServerLog />
     </>
   )
 }
