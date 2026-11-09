@@ -25,8 +25,8 @@ export function Component() {
   }
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-md flex-col items-center gap-6 bg-background px-6 py-10">
-      <h1 className="w-full max-w-48">
+    <main className="mx-auto flex min-h-svh max-w-md flex-col items-center gap-5 bg-background px-6 py-6">
+      <h1 className="w-full max-w-36">
         <BrandLogo />
       </h1>
       <img
@@ -34,7 +34,7 @@ export function Component() {
         alt=""
         width={313}
         height={324}
-        className="h-auto w-full max-w-64"
+        className="hidden max-h-[24svh] w-auto [@media(min-height:780px)]:block"
       />
       <fieldset className="w-full">
         <legend className="mb-3 text-center text-base font-semibold text-foreground">

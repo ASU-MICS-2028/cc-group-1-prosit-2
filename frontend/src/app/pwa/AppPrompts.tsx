@@ -5,7 +5,7 @@ import { useInstallPrompt } from "./useInstallPrompt"
 
 /** Screens where a pop-up would get in the way: signing in and the forms. */
 const QUIET =
-  /^\/(login|patients\/new|patients\/[^/]+\/(vitals|appointments)\/new)/
+  /^\/(welcome|login|patients\/new|patients\/[^/]+\/(vitals|appointments)\/new)/
 
 /**
  * The app's three messages about itself, one at a time:
