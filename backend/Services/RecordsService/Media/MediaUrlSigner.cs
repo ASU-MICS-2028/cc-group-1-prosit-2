@@ -20,7 +20,6 @@ public interface IMediaUrlSigner
 public sealed class S3MediaUrlSigner(Lazy<IAmazonS3> s3) : IMediaUrlSigner
 {
     public const string ChecksumHeader = "x-amz-checksum-sha256";
-    public const string EncryptionHeader = "x-amz-server-side-encryption";
 
     public S3MediaUrlSigner(IAmazonS3 s3)
         : this(new Lazy<IAmazonS3>(s3))
@@ -38,7 +37,9 @@ public sealed class S3MediaUrlSigner(Lazy<IAmazonS3> s3) : IMediaUrlSigner
             Verb = HttpVerb.PUT,
             Expires = expires.UtcDateTime,
             ContentType = mime,
-            ServerSideEncryptionMethod = ServerSideEncryptionMethod.AWSKMS,
+            // No encryption setting here on purpose. Naming "aws:kms" without a key makes S3 use its
+            // own AWS-managed key (aws/s3); leaving it out lets the bucket's default apply, which is
+            // our customer-managed key (alias/healthconnect-data, see deploy/terraform/storage.tf).
         };
         request.Headers[ChecksumHeader] = checksum;
 
@@ -47,7 +48,6 @@ public sealed class S3MediaUrlSigner(Lazy<IAmazonS3> s3) : IMediaUrlSigner
             new Dictionary<string, string>
             {
                 ["Content-Type"] = mime,
-                [EncryptionHeader] = "aws:kms",
                 [ChecksumHeader] = checksum,
             },
             expires);
