@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace HealthConnect.Data;
 
 /// <summary>
-/// Brings the database up to date when the API starts. It runs in the background and retries, because the database may
+/// Brings the database up to date when the API starts, then lets each seeder add the data it starts with. It runs in the background and retries, because the database may
 /// not answer yet (a restart, a slow network). Migrations run in one transaction each and EF holds a lock while they run,
 /// so two API containers starting together cannot both apply the same migration.
 /// </summary>
@@ -42,6 +42,11 @@ public sealed partial class DatabaseMigrator(
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 var pending = (await db.Database.GetPendingMigrationsAsync(stoppingToken)).Count();
                 await db.Database.MigrateAsync(stoppingToken);
+                foreach (var seeder in scope.ServiceProvider.GetServices<IDatabaseSeeder>())
+                {
+                    await seeder.SeedAsync(db, stoppingToken);
+                }
+
                 LogReady(logger, pending);
                 return;
             }

@@ -12,7 +12,7 @@ namespace HealthConnect.Data.Tests;
 [Collection(SchemaCollection.Name)]
 public sealed class MigrationTests(SchemaFixture fixture)
 {
-    private static readonly string[] AllMigrations = ["20261109000000_UpgradeFirstDraft", "20261109000001_Baseline", "20261109000002_ClinicalRecords"];
+    private static readonly string[] AllMigrations = ["20261109000000_UpgradeFirstDraft", "20261109000001_Baseline", "20261109000002_ClinicalRecords", "20261109000003_SignIn"];
 
     private static readonly string[] AllTables =
     [
@@ -128,6 +128,7 @@ public sealed class MigrationTests(SchemaFixture fixture)
         Assert.NotEmpty(ReadScript("0000_upgrade_first_draft.sql"));
         Assert.NotEmpty(ReadScript("0001_baseline.sql"));
         Assert.NotEmpty(ReadScript("0002_clinical_records.sql"));
+        Assert.NotEmpty(ReadScript("0003_sign_in.sql"));
     }
 
     private static string ReadScript(string fileName)
