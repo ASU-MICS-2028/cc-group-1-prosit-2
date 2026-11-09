@@ -269,6 +269,10 @@ function writeCursor(entity: Entity, value: string) {
  */
 async function pull(): Promise<number> {
   let merged = 0
+  // Only the roles that work with patients may read them. The district officer and the auditor
+  // would just get a 403 for each request.
+  const role = getSession()?.user.role
+  if (role !== "chv" && role !== "nurse" && role !== "doctor") return merged
   for (const { entity, cursor } of PULL) {
     try {
       for (;;) {

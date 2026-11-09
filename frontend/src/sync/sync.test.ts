@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { db, newId, saveAndQueue } from "@/db/local"
 import type { Appointment, Patient, Vitals } from "@/db/types"
 import { ApiError, api } from "@/api/client"
@@ -285,6 +285,8 @@ describe("conflicts", () => {
 })
 
 describe("pulling", () => {
+  beforeEach(() => signIn("nurse"))
+
   it("stores what other workers saved, without nulls, and only asks for newer ones next time", async () => {
     const a = {
       ...appointment(),
@@ -434,4 +436,46 @@ describe("demo sessions", () => {
 
     expect(getSession()).toBeNull()
   })
+})
+
+describe("pulling by role", () => {
+  it.each(["district_officer", "admin"] as const)(
+    "does not ask for patient records as the %s, who may not read them",
+    async (role) => {
+      signIn(role)
+      const fetch = vi
+        .fn()
+        .mockImplementation(() => Promise.resolve(Response.json([])))
+      vi.stubGlobal("fetch", fetch)
+
+      await syncNow()
+
+      const asked = fetch.mock.calls.map(([url]) => url as string)
+      expect(
+        asked.filter((u) => /\/api\/(patients|vitals|appointments)/.test(u))
+      ).toEqual([])
+    }
+  )
+
+  it.each(["chv", "nurse", "doctor"] as const)(
+    "still pulls as the %s",
+    async (role) => {
+      signIn(role)
+      const fetch = vi
+        .fn()
+        .mockImplementation(() => Promise.resolve(Response.json([])))
+      vi.stubGlobal("fetch", fetch)
+
+      await syncNow()
+
+      const asked = fetch.mock.calls.map(([url]) => url as string)
+      expect(asked).toEqual(
+        expect.arrayContaining([
+          "/api/patients",
+          "/api/appointments",
+          "/api/vitals",
+        ])
+      )
+    }
+  )
 })
