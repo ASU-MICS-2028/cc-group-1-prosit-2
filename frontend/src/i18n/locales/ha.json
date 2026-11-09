@@ -248,7 +248,23 @@
     "failed": "Za a sake gwadawa",
     "conflict": "Yana buƙatar dubawa",
     "files_one": "Fayil {{count}} yana jira",
-    "files_other": "Fayiloli {{count}} suna jira"
+    "files_other": "Fayiloli {{count}} suna jira",
+    "review_title": "Someone else changed this patient",
+    "review_text": "Choose which version to keep.",
+    "yours": "This phone",
+    "theirs": "Server",
+    "keepMine": "Keep mine",
+    "useServer": "Use the server's",
+    "empty": "(empty)",
+    "field_givenName": "First name",
+    "field_familyName": "Last name",
+    "field_sex": "Sex",
+    "field_dateOfBirth": "Date of birth",
+    "field_phone": "Phone",
+    "field_nationalId": "ID number",
+    "field_community": "Community",
+    "field_district": "District",
+    "field_preferredLanguage": "Language"
   },
   "surveillance": {
     "title": "Taƙaitawar gunduma",
@@ -448,7 +464,15 @@
     "onPhone": "a wannan wayar, ba a aika ba tukuna",
     "empty": "Ba a rubuta komai ba tukuna.",
     "recordTitle": "Waɗanda suka buɗe wannan bayani",
-    "serverNote": "Rajistar wannan wayar ta waɗanda suka buɗe bayanai. Sabar tana ajiye cikakken rajista a teburin da ba za a iya canza ko goge komai ba sai ya bayyana."
+    "serverNote": "Rajistar wannan wayar ta waɗanda suka buɗe bayanai. Sabar tana ajiye cikakken rajista a teburin da ba za a iya canza ko goge komai ba sai ya bayyana.",
+    "signedIn": "signed in",
+    "signInRefused": "was refused at sign-in",
+    "serverTitle": "Server log",
+    "serverIntact_one": "Checked: {{count}} entry, none changed.",
+    "serverIntact_other": "Checked: {{count}} entries, none changed.",
+    "serverBroken": "Warning: entry {{id}} does not match the chain. The log may have been changed.",
+    "serverOffline": "Connect to the internet to read the server's log.",
+    "serverEmpty": "The server has no entries yet."
   },
   "time": {
     "justNow": "yanzun nan",

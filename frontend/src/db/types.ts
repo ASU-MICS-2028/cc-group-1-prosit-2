@@ -120,6 +120,8 @@ export interface OutboxItem {
   queuedAt: string
   attempts: number
   lastError?: string
+  /** For a patient change that met someone else's edit: the server's copy, kept so a person can choose (sync/sync.ts) */
+  serverCopy?: Patient | Vitals | Appointment
 }
 
 export type MediaKind =
@@ -163,7 +165,7 @@ export interface AuditEvent {
   role: string
   action: AuditAction
   /** what was touched: a record type, or a page for a refused visit */
-  entity: Entity | "page"
+  entity: Entity | "page" | "sign-in"
   entityId?: string
   patientId?: string
   outcome: "success" | "denied"

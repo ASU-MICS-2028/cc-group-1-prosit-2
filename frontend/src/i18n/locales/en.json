@@ -248,7 +248,23 @@
     "failed": "Will retry",
     "conflict": "Needs review",
     "files_one": "{{count}} file waiting",
-    "files_other": "{{count}} files waiting"
+    "files_other": "{{count}} files waiting",
+    "review_title": "Someone else changed this patient",
+    "review_text": "Choose which version to keep.",
+    "yours": "This phone",
+    "theirs": "Server",
+    "keepMine": "Keep mine",
+    "useServer": "Use the server's",
+    "empty": "(empty)",
+    "field_givenName": "First name",
+    "field_familyName": "Last name",
+    "field_sex": "Sex",
+    "field_dateOfBirth": "Date of birth",
+    "field_phone": "Phone",
+    "field_nationalId": "ID number",
+    "field_community": "Community",
+    "field_district": "District",
+    "field_preferredLanguage": "Language"
   },
   "surveillance": {
     "title": "District summary",
@@ -448,7 +464,15 @@
     "onPhone": "on this phone, not uploaded yet",
     "empty": "Nothing recorded yet.",
     "recordTitle": "Who opened this record",
-    "serverNote": "This phone's record of access. The server keeps the full log in an append-only, hash-chained table, so entries can't be changed or removed without it showing."
+    "serverNote": "This phone's record of access. The server keeps the full log in an append-only, hash-chained table, so entries can't be changed or removed without it showing.",
+    "signedIn": "signed in",
+    "signInRefused": "was refused at sign-in",
+    "serverTitle": "Server log",
+    "serverIntact_one": "Checked: {{count}} entry, none changed.",
+    "serverIntact_other": "Checked: {{count}} entries, none changed.",
+    "serverBroken": "Warning: entry {{id}} does not match the chain. The log may have been changed.",
+    "serverOffline": "Connect to the internet to read the server's log.",
+    "serverEmpty": "The server has no entries yet."
   },
   "time": {
     "justNow": "just now",

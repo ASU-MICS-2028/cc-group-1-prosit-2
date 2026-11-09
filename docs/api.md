@@ -41,7 +41,7 @@ Returns what the caller may see that changed after that moment, oldest first, at
 
 | | Who | What |
 |---|---|---|
-| `POST /api/audit-events` `{ events: [...] }` | any signed-in worker | The phone's recorded accesses go into the hash-chained, append-only `access_log`. The actor and role come from the token. An event id already stored is ignored. Up to 500 per call. `204`. |
+| `POST /api/audit-events` `{ events: [...] }` | any signed-in worker | The phone's recorded accesses go into the hash-chained, append-only `access_log`. Every sign-in, and every refused try by a registered worker (wrong, late or reused code, too many tries), is written to the same log by the server itself, as entity `sign-in`; numbers that are not registered workers are not (they would let anyone fill the log). The actor and role come from the token. An event id already stored is ignored. Up to 500 per call. `204`. |
 | `GET /api/audit-events?patientId=&limit=` | admin (auditor) | The log, newest first (default 200, at most 1000). |
 | `GET /api/audit-events/verify` | admin (auditor) | Recomputes the hash chain: `{ intact, entriesChecked, firstBadId }`. |
 

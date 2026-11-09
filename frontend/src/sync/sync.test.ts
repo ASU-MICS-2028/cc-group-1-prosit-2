@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { db, newId, saveAndQueue } from "@/db/local"
 import type { Appointment, Patient, Vitals } from "@/db/types"
-import { syncNow } from "./sync"
+import { keepMine, syncNow, takeServerCopy } from "./sync"
 
 function vitals(): Vitals {
   const now = new Date().toISOString()
@@ -198,28 +198,86 @@ describe("conflicts", () => {
     ).toBe(true)
   })
 
-  it("sends a patient's change again on top of the server's version", async () => {
+  async function heldPatientConflict() {
     const p = patient()
     await db.patients.put(p)
     await saveAndQueue("patient", { ...p, community: "Ayikuma" }, "update")
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(
+          conflict({ ...p, community: "Doryumu", version: 4 })
+        )
+        .mockResolvedValue(Response.json([]))
+    )
+    expect(await syncNow()).toMatchObject({ sent: 0, conflicts: 1 })
+    return p
+  }
+
+  it("holds a patient's change for review and overwrites nothing", async () => {
+    const p = await heldPatientConflict()
+
+    const [held] = await db.outbox.toArray()
+    expect(held).toMatchObject({ lastError: "conflict", attempts: 1 })
+    expect(held.serverCopy).toMatchObject({ community: "Doryumu", version: 4 })
+    expect(await db.patients.get(p.id)).toMatchObject({ community: "Ayikuma" })
+  })
+
+  it("keeps the phone's version on request: sends it on top of the server's version", async () => {
+    const p = await heldPatientConflict()
+    const [held] = await db.outbox.toArray()
     const fetch = vi
       .fn()
       .mockResolvedValueOnce(
-        conflict({ ...p, community: "Doryumu", version: 4 })
-      )
-      .mockResolvedValueOnce(
         Response.json({ ...p, community: "Ayikuma", version: 5 })
       )
+      .mockResolvedValue(Response.json([]))
     vi.stubGlobal("fetch", fetch)
 
-    expect(await syncNow()).toMatchObject({ sent: 1, conflicts: 1 })
+    await keepMine(held.seq!)
 
-    const second = JSON.parse(fetch.mock.calls[1][1].body as string)
-    expect(second).toMatchObject({ community: "Ayikuma", version: 4 })
+    const sent = JSON.parse(fetch.mock.calls[0][1].body as string)
+    expect(sent).toMatchObject({ community: "Ayikuma", version: 4 })
+    expect(await db.outbox.count()).toBe(0)
     expect(await db.patients.get(p.id)).toMatchObject({
       community: "Ayikuma",
       version: 5,
     })
+    expect(
+      (await db.auditEvents.toArray()).some((e) =>
+        e.detail?.includes("this phone's change was kept")
+      )
+    ).toBe(true)
+  })
+
+  it("takes the server's copy on request and drops the phone's change", async () => {
+    const p = await heldPatientConflict()
+    const [held] = await db.outbox.toArray()
+
+    await takeServerCopy(held.seq!)
+
+    expect(await db.outbox.count()).toBe(0)
+    expect(await db.patients.get(p.id)).toMatchObject({
+      community: "Doryumu",
+      version: 4,
+    })
+    expect(
+      (await db.auditEvents.toArray()).some((e) =>
+        e.detail?.includes("the server's copy was kept")
+      )
+    ).toBe(true)
+  })
+
+  it("does nothing for an item that is not waiting for review", async () => {
+    await saveAndQueue("vitals", vitals())
+    const [item] = await db.outbox.toArray()
+
+    await keepMine(item.seq!)
+    await takeServerCopy(item.seq!)
+    await keepMine(9999)
+
+    expect(await db.outbox.count()).toBe(1)
   })
 })
 

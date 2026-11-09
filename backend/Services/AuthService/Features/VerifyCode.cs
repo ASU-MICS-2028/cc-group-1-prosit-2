@@ -79,6 +79,7 @@ public sealed partial class VerifyCode : IFeature
         if (demo.Value.Enabled && user.Demo && FixedTimeEquals(code, demo.Value.Code))
         {
             LogDemoSignIn(logger, user.Id, user.Role);
+            await SignInAudit.RecordAsync(db, user, "success", "signed in with the demo code", logger, cancellationToken);
             return await SignInAsync(user, tokens, cancellationToken);
         }
 
@@ -90,12 +91,14 @@ public sealed partial class VerifyCode : IFeature
         if (login is null || login.ExpiresAt <= now)
         {
             LogRefused(logger, user.Id, "no valid code");
+            await SignInAudit.RecordAsync(db, user, "denied", "refused: no valid code", logger, cancellationToken);
             return ApiResults.Error(StatusCodes.Status401Unauthorized, "code_expired");
         }
 
         if (login.Attempts >= settings.MaxAttempts)
         {
             LogRefused(logger, user.Id, "too many wrong tries");
+            await SignInAudit.RecordAsync(db, user, "denied", "refused: too many wrong tries", logger, cancellationToken);
             return ApiResults.Error(StatusCodes.Status429TooManyRequests, "too_many_attempts");
         }
 
@@ -105,6 +108,7 @@ public sealed partial class VerifyCode : IFeature
             await db.LoginCodes.Where(c => c.Id == login.Id).ExecuteUpdateAsync(
                 set => set.SetProperty(c => c.Attempts, c => c.Attempts + 1), cancellationToken);
             LogRefused(logger, user.Id, "wrong code");
+            await SignInAudit.RecordAsync(db, user, "denied", "refused: wrong code", logger, cancellationToken);
             return ApiResults.Error(StatusCodes.Status401Unauthorized, "wrong_code");
         }
 
@@ -114,10 +118,12 @@ public sealed partial class VerifyCode : IFeature
         if (claimed == 0)
         {
             LogRefused(logger, user.Id, "code already used");
+            await SignInAudit.RecordAsync(db, user, "denied", "refused: code already used", logger, cancellationToken);
             return ApiResults.Error(StatusCodes.Status401Unauthorized, "wrong_code");
         }
 
         LogSignedIn(logger, user.Id, user.Role);
+        await SignInAudit.RecordAsync(db, user, "success", "signed in", logger, cancellationToken);
         return await SignInAsync(user, tokens, cancellationToken);
     }
 

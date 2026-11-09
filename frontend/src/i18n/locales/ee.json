@@ -248,7 +248,23 @@
     "failed": "Agagbugbɔ adze agbagba",
     "conflict": "Ehiã be woakpɔe",
     "files_one": "Faɛl {{count}} le lalam",
-    "files_other": "Faɛl {{count}} le lalam"
+    "files_other": "Faɛl {{count}} le lalam",
+    "review_title": "Someone else changed this patient",
+    "review_text": "Choose which version to keep.",
+    "yours": "This phone",
+    "theirs": "Server",
+    "keepMine": "Keep mine",
+    "useServer": "Use the server's",
+    "empty": "(empty)",
+    "field_givenName": "First name",
+    "field_familyName": "Last name",
+    "field_sex": "Sex",
+    "field_dateOfBirth": "Date of birth",
+    "field_phone": "Phone",
+    "field_nationalId": "ID number",
+    "field_community": "Community",
+    "field_district": "District",
+    "field_preferredLanguage": "Language"
   },
   "surveillance": {
     "title": "Nutome ƒe kpuie",
@@ -448,7 +464,15 @@
     "onPhone": "le fon sia dzi, meyi haɖe o",
     "empty": "Naneke womeŋlɔ haɖe o.",
     "recordTitle": "Ame siwo ʋu agbalẽ sia",
-    "serverNote": "Fon sia ƒe ŋkuɖodzi le ame si ʋu agbalẽwo ŋu. Server la dzraa wo katã ɖo ɖe teƒe si womate ŋu atrɔ alo aɖe naneke ɖa le o ne mekpɔe o."
+    "serverNote": "Fon sia ƒe ŋkuɖodzi le ame si ʋu agbalẽwo ŋu. Server la dzraa wo katã ɖo ɖe teƒe si womate ŋu atrɔ alo aɖe naneke ɖa le o ne mekpɔe o.",
+    "signedIn": "signed in",
+    "signInRefused": "was refused at sign-in",
+    "serverTitle": "Server log",
+    "serverIntact_one": "Checked: {{count}} entry, none changed.",
+    "serverIntact_other": "Checked: {{count}} entries, none changed.",
+    "serverBroken": "Warning: entry {{id}} does not match the chain. The log may have been changed.",
+    "serverOffline": "Connect to the internet to read the server's log.",
+    "serverEmpty": "The server has no entries yet."
   },
   "time": {
     "justNow": "fifia ke",
