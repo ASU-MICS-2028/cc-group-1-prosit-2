@@ -97,7 +97,7 @@ public static class Audit
 /// <summary>
 /// POST /api/audit-events: the phone uploads the access events it recorded (who saw or changed what, even while offline). The server
 /// writes each into its hash-chained, append-only log as the signed-in worker: who and which role come from the token, never from the
-/// request, so nobody can write an entry in someone else's name. An event sent twice is stored once.
+/// request, so nobody can write an entry in someone else's name. An event sent twice is stored once. Answers 204.
 /// </summary>
 public sealed partial class PostAuditEvents : IFeature
 {
@@ -106,13 +106,13 @@ public sealed partial class PostAuditEvents : IFeature
             .WithName("PostAuditEvents")
             .WithTags("Audit")
             .RequireAuthorization(AuthPolicies.AnyWorker)
-            .Accepts<List<AuditEventDto>>("application/json")
-            .Produces<AuditUploadResult>(StatusCodes.Status200OK)
+            .Accepts<AuditUploadRequest>("application/json")
+            .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status422UnprocessableEntity);
 
     public static async Task<IResult> Handle(
-        List<AuditEventDto> events,
+        AuditUploadRequest request,
         ClaimsPrincipal principal,
         HttpContext? http,
         RoleSessions sessions,
@@ -120,6 +120,7 @@ public sealed partial class PostAuditEvents : IFeature
         ILogger<PostAuditEvents> logger,
         CancellationToken cancellationToken)
     {
+        var events = request?.Events;
         var errors = Audit.Check(events, time.GetUtcNow());
         if (errors.Count > 0)
         {
@@ -139,7 +140,7 @@ public sealed partial class PostAuditEvents : IFeature
 
         var ip = http?.Connection.RemoteIpAddress?.ToString();
         var saved = 0;
-        foreach (var e in events)
+        foreach (var e in events!)
         {
             var outcome = e.Action == "denied" ? "denied" : e.Outcome;
             saved += await session.Connection.ExecuteAsync(new CommandDefinition(
@@ -169,7 +170,7 @@ public sealed partial class PostAuditEvents : IFeature
 
         await session.CommitAsync(cancellationToken);
         LogUploaded(logger, user.Id, events.Count, saved);
-        return Results.Ok(new AuditUploadResult(events.Count, saved));
+        return Results.NoContent();
     }
 
     [LoggerMessage(Level = LogLevel.Information, Message = "{UserId} uploaded {Received} audit events, {Saved} new")]

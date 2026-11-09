@@ -317,14 +317,13 @@ public sealed class RecordsFlowTests(SignInApi api) : IClassFixture<SignInApi>
             new { id = Guid.NewGuid().ToString(), at = Created, actorId = "chv-042", actorName = "Akosua", role = "chv", action = "view", entity = "patient", entityId = patient.ToString(), patientId = patient.ToString(), outcome = "success", purpose = "TREAT" },
         };
 
-        var upload = await SendAsync(HttpMethod.Post, "/api/audit-events", chv, events);
+        var upload = await SendAsync(HttpMethod.Post, "/api/audit-events", chv, new { events });
         var chvRead = await SendAsync(HttpMethod.Get, "/api/audit-events", chv);
         var chvVerify = await SendAsync(HttpMethod.Get, "/api/audit-events/verify", chv);
         var read = await SendAsync(HttpMethod.Get, $"/api/audit-events?patientId={patient}", auditor);
         var verify = await SendAsync(HttpMethod.Get, "/api/audit-events/verify", auditor);
 
-        Assert.Equal(HttpStatusCode.OK, upload.StatusCode);
-        Assert.Equal(1, (await JsonOf(upload)).GetProperty("saved").GetInt32());
+        Assert.Equal(HttpStatusCode.NoContent, upload.StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, chvRead.StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, chvVerify.StatusCode);
         var entries = await JsonOf(read);
@@ -336,7 +335,7 @@ public sealed class RecordsFlowTests(SignInApi api) : IClassFixture<SignInApi>
     [Fact]
     public async Task Without_a_token_the_audit_endpoints_are_a_401()
     {
-        Assert.Equal(HttpStatusCode.Unauthorized, (await SendAsync(HttpMethod.Post, "/api/audit-events", null, Array.Empty<object>())).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await SendAsync(HttpMethod.Post, "/api/audit-events", null, new { events = Array.Empty<object>() })).StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized, (await SendAsync(HttpMethod.Get, "/api/audit-events", null)).StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized, (await SendAsync(HttpMethod.Get, "/api/audit-events/verify", null)).StatusCode);
     }

@@ -76,8 +76,8 @@ public sealed record AuditEventDto(
     string Purpose,
     string? Detail);
 
-/// <summary>How many events arrived and how many were new (the rest had been uploaded before).</summary>
-public sealed record AuditUploadResult(int Received, int Saved);
+/// <summary>What the phone uploads: the events it recorded since the last upload.</summary>
+public sealed record AuditUploadRequest(List<AuditEventDto> Events);
 
 /// <summary>One entry of the server's audit log, as the auditor reads it.</summary>
 public sealed record AuditEntryDto(
@@ -110,4 +110,3 @@ public sealed record MediaUploadRequest(
 
 /// <summary>The link and what the phone must send with it. The link stops working at expiresAt.</summary>
 public sealed record MediaUploadResponse(string Url, IReadOnlyDictionary<string, string> Headers, DateTimeOffset ExpiresAt, string Key);
-

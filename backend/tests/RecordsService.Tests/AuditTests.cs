@@ -26,7 +26,7 @@ public sealed class AuditTests(RecordsDatabase database) : RecordsTestBase(datab
 
     private async Task<Reply> UploadAsync(Worker who, params AuditEventDto[] events) =>
         await ResultReader.RunAsync(await PostAuditEvents.Handle(
-            [.. events], As(who), null, Sessions, Time, NullLogger<PostAuditEvents>.Instance, CancellationToken.None));
+            new AuditUploadRequest([.. events]), As(who), null, Sessions, Time, NullLogger<PostAuditEvents>.Instance, CancellationToken.None));
 
     private async Task<Reply> ReadAsync(Worker who, Guid? patient = null, int? limit = null) =>
         await ResultReader.RunAsync(await GetAuditEvents.Handle(As(who), Sessions, CancellationToken.None, patient, limit));
@@ -40,9 +40,7 @@ public sealed class AuditTests(RecordsDatabase database) : RecordsTestBase(datab
 
         var reply = await UploadAsync(Chv, Event(viewed, "view", patient: patient), Event(created, "create", "vitals", patient));
 
-        Assert.Equal(200, reply.Status);
-        Assert.Equal(2, reply.Body.GetProperty("received").GetInt32());
-        Assert.Equal(2, reply.Body.GetProperty("saved").GetInt32());
+        Assert.Equal(204, reply.Status);
         var rows = await QueryAsync<(string By, string Role, string Action, string Outcome, string Entity)>(
             "SELECT accessed_by AS By, role AS Role, action AS Action, outcome AS Outcome, entity AS Entity FROM access_log WHERE client_event_id = ANY(@ids) ORDER BY id",
             new { ids = new[] { viewed, created } });
@@ -83,9 +81,7 @@ public sealed class AuditTests(RecordsDatabase database) : RecordsTestBase(datab
 
         var again = await UploadAsync(Chv, Event(id));
 
-        Assert.Equal(200, again.Status);
-        Assert.Equal(1, again.Body.GetProperty("received").GetInt32());
-        Assert.Equal(0, again.Body.GetProperty("saved").GetInt32());
+        Assert.Equal(204, again.Status);
         Assert.Equal(1, await ScalarAsync<int>("SELECT count(*) FROM access_log WHERE client_event_id = @id", new { id }));
     }
 
@@ -100,7 +96,7 @@ public sealed class AuditTests(RecordsDatabase database) : RecordsTestBase(datab
 
         var reply = await UploadAsync(who, Event(id));
 
-        Assert.Equal(200, reply.Status);
+        Assert.Equal(204, reply.Status);
         Assert.Equal(who.Id, await ScalarAsync<string>("SELECT accessed_by FROM access_log WHERE client_event_id = @id", new { id }));
         Assert.Equal(who.Role, await ScalarAsync<string>("SELECT role FROM access_log WHERE client_event_id = @id", new { id }));
     }
@@ -159,7 +155,7 @@ public sealed class AuditTests(RecordsDatabase database) : RecordsTestBase(datab
     public async Task A_token_with_no_worker_in_it_is_refused()
     {
         var reply = await ResultReader.RunAsync(await PostAuditEvents.Handle(
-            [Event()], new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity()), null, Sessions, Time,
+            new AuditUploadRequest([Event()]), new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity()), null, Sessions, Time,
             NullLogger<PostAuditEvents>.Instance, CancellationToken.None));
 
         Assert.Equal(401, reply.Status);
