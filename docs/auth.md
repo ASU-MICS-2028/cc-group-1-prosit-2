@@ -52,8 +52,8 @@ No SMS provider is connected yet, so the MVP has **five synthetic demo workers**
 ## Known limits
 
 - The text is only logged (the number masked); on a laptop `Sms:LogMessages` also logs the text, so a developer can read the code. Never turn that on for a server.
-- Sign-ins are not yet written to the audit log (`access_log`): its columns fit patient access, and the audit step extends them. Meanwhile each sign-in and refusal is a structured log line with the worker's id.
-- A token is checked against the database only on `/auth/me`. A worker switched off keeps a valid token until it expires, except where an endpoint looks the worker up (patient endpoints will).
+- Sign-ins are not written to the audit log (`access_log`), which records what workers do with patient data ([api.md](api.md)). Each sign-in and refusal is a structured log line with the worker's id.
+- A token is checked against the database only on `/auth/me`. A worker switched off keeps a valid token until it expires, except where an endpoint looks the worker up: every data endpoint ([api.md](api.md)) does, so they lose access at once.
 
 ## Try it
 
