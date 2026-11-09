@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { LANGUAGES, setLanguage, type LanguageCode } from "@/i18n"
 import { cn } from "@/lib/utils"
+import { BrandLogo } from "@/components/Brand"
 
 /**
  * First open on a new phone (Figma "Welcome"): the app's name, its illustration, and the
@@ -25,8 +26,8 @@ export function Component() {
 
   return (
     <main className="mx-auto flex min-h-svh max-w-md flex-col items-center gap-6 bg-background px-6 py-10">
-      <h1 className="text-[2.75rem] leading-none font-bold tracking-[0.01em] text-heading">
-        HealthConnect
+      <h1 className="w-full max-w-48">
+        <BrandLogo />
       </h1>
       <img
         src="/illustrations/welcome.svg"

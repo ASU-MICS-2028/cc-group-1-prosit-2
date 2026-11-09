@@ -12,6 +12,7 @@ import {
 import { Field, Input } from "@/components/form/Field"
 import { describe } from "@/components/form/describe"
 import { Button } from "@/components/ui/button"
+import { BrandLockup } from "@/components/Brand"
 
 /**
  * Sign-in step 1 (Figma "Completa tu Registro"): the health worker's phone number. An SMS code
@@ -46,8 +47,8 @@ export function Component() {
 
   return (
     <main className="mx-auto flex min-h-svh max-w-md flex-col gap-6 bg-background px-6 py-10">
-      <p className="text-[1.75rem] leading-9 font-semibold text-primary">
-        HealthConnect
+      <p>
+        <BrandLockup size={44} />
       </p>
       <div className="space-y-3">
         <h1 className="text-[1.75rem] leading-9 font-bold text-heading">
