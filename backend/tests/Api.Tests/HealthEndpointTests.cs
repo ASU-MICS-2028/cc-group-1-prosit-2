@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Npgsql;
 
 namespace HealthConnect.Api.Tests;
 
@@ -23,29 +24,71 @@ public sealed class HealthEndpointTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Health_is_ok_when_the_database_answers()
+    public async Task Health_is_ok_once_the_API_has_migrated_its_database()
     {
         using var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/health", CancellationToken.None);
+        var response = await ApiFactory.HealthWhenReadyAsync(client);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync(CancellationToken.None));
         Assert.Equal("ok", body.RootElement.GetProperty("status").GetString());
         Assert.Equal("healthconnect-api", body.RootElement.GetProperty("service").GetString());
-        Assert.Equal("Healthy", body.RootElement.GetProperty("checks").GetProperty("database").GetString());
+        var checks = body.RootElement.GetProperty("checks");
+        Assert.Equal("Healthy", checks.GetProperty("database").GetString());
+        Assert.Equal("Healthy", checks.GetProperty("schema").GetString());
+    }
+
+    [Fact]
+    public async Task Starting_the_API_creates_the_tables()
+    {
+        using var client = _factory.CreateClient();
+        await ApiFactory.HealthWhenReadyAsync(client);
+
+        await using var source = NpgsqlDataSource.Create(_postgres.ConnectionString);
+        await using var command = source.CreateCommand(
+            "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('patients', 'vitals', 'appointments', 'users', 'media', '__EFMigrationsHistory')");
+
+        Assert.Equal(6L, await command.ExecuteScalarAsync());
     }
 
     [Fact]
     public async Task Health_says_nothing_about_the_database_server_or_login()
     {
         using var client = _factory.CreateClient();
+        await ApiFactory.HealthWhenReadyAsync(client);
 
         var text = await client.GetStringAsync("/health", CancellationToken.None);
 
         Assert.DoesNotContain("Host", text, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Password", text, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("localhost", text, StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+/// <summary>A release whose database changes have not been applied must never be called healthy: the deploy would keep it.</summary>
+[IntegrationTest]
+public sealed class HealthBeforeMigrationsTests : IAsyncLifetime
+{
+    private readonly PostgresFixture _postgres = new();
+
+    public Task InitializeAsync() => _postgres.InitializeAsync();
+
+    public Task DisposeAsync() => _postgres.DisposeAsync();
+
+    [Fact]
+    public async Task Health_is_503_while_the_database_answers_but_the_migrations_are_not_applied()
+    {
+        await using var factory = new ApiFactory(_postgres.ConnectionString, migrate: false);
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/health", CancellationToken.None);
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync(CancellationToken.None));
+        var checks = body.RootElement.GetProperty("checks");
+        Assert.Equal("Healthy", checks.GetProperty("database").GetString());
+        Assert.Equal("Unhealthy", checks.GetProperty("schema").GetString());
     }
 }
 

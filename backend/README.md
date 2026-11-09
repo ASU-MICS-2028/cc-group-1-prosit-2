@@ -57,7 +57,16 @@ Or run everything in containers: `docker compose -f docker-compose.dev.yml --pro
 | Laptop and tests | One connection string, `ConnectionStrings:Default` (set in `appsettings.Development.json`). |
 | The server | The deploy gives the container `DB_HOST`, `DB_NAME`, `DB_SECRET_ARN`, `DB_SSL_CA` and `AWS_REGION`. The API reads the password from AWS Secrets Manager with the server's own role (no password in any file), connects with TLS and checks the database's certificate (`sslmode=verify-full`), and re-reads the password every 30 minutes so a rotation needs no restart. |
 
-`GET /health` is 200 only when the API can really reach the database (it opens a connection and runs `select 1`, giving up after 4 seconds). It says nothing about why it failed; the reason is in the log.
+`GET /health` is 200 only when the API can really reach the database (it opens a connection and runs `select 1`, giving up after 4 seconds) **and** every migration has been applied. It says nothing about why it failed; the reason is in the log.
+
+## The database and migrations
+
+The tables, roles, row-level security and the audit log are defined by plain SQL migrations in `Services/Libs/Data/Migrations/Sql/`, which EF Core runs (it keeps the list of what was applied). They are SQL rather than EF models because row-level security, triggers, roles and the audit hash chain cannot be written in EF's model. The API applies pending migrations when it starts, so a deploy needs no extra step, and `/health` stays red until they are done (so a failed migration rolls the release back).
+
+- The diagram, the FHIR mapping, who can do what and how to add a migration: [docs/database](../docs/database/README.md).
+- List them (from `backend/`): `dotnet tool restore`, then `dotnet ef migrations list --project Services/Libs/Data --startup-project APIs/healthconnect-api --configuration Release`. (Use `--configuration`; in `dotnet ef`, `-c` means "context".)
+- Load the sample data into a local database: see [db/README.md](../db/README.md).
+- The database tests run every rule as each of the four database roles, including as a login that is not a superuser, like RDS's.
 
 ## Check it (same as CI)
 
@@ -76,5 +85,5 @@ Only the fast tests (no Docker): `dotnet test --filter Category=Unit`. Integrati
 - Tests: xUnit 2.9.3, NSubstitute for fakes. Name tests as sentences (`Is_unhealthy_when_the_database_is_not_configured`).
 - Logs are structured JSON outside Development and never contain personal data or secrets (ids only).
 - A service never references another service. Shared code goes in SharedLibrary.
-- Change the database only through migrations (added with the database foundation).
+- Change the database only through migrations, additive and never edited once merged (see [docs/database](../docs/database/README.md)).
 - Synthetic data only, never real patient data (see [CONTRIBUTING.md](../CONTRIBUTING.md)).

@@ -25,9 +25,10 @@ VALUES
 INSERT INTO patient_identifiers (patient_id, system, value)
 SELECT id, 'urn:healthconnect-gh:mrn', 'HC-' || lpad(id::text, 6, '0') FROM patients;
 
--- Consent history mirrors the current state on the patient row.
-INSERT INTO consents (patient_id, status, method, obtained_by, recorded_at)
-SELECT id, 'active', consent_method, 'chv-042', consent_given_at FROM patients;
+-- Consent history mirrors the current state on the patient row. A new consent needs proof, a file or a named witness
+-- (consents_has_evidence, migration 2), so each sample consent has a synthetic witness.
+INSERT INTO consents (patient_id, status, method, obtained_by, witness, statement_version, recorded_at)
+SELECT id, 'active', consent_method, 'chv-042', 'Synthetic Witness', 'v1', consent_given_at FROM patients;
 
 -- Vital signs: one row per value with its LOINC code and UCUM unit; BP pairs share a panel.
 WITH v(full_name, days_ago, sys, dia, temp, pulse, weight) AS (VALUES
