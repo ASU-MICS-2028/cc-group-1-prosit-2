@@ -1,4 +1,4 @@
-import { clearSession, getSession } from "@/auth/session"
+import { clearSession, getSession, isDemoSession } from "@/auth/session"
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? ""
 
@@ -24,7 +24,8 @@ export async function api<T>(
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
   })
-  if (res.status === 401) clearSession()
+  // A demo session's token was never issued by the server, so its 401 does not mean "signed out".
+  if (res.status === 401 && !isDemoSession()) clearSession()
   if (!res.ok) {
     const text = await res.text().catch(() => "")
     throw new ApiError(res.status, text || res.statusText)

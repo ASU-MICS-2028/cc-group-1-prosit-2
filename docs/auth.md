@@ -66,4 +66,4 @@ curl -s -X POST localhost:8000/api/auth/verify -H 'Content-Type: application/jso
   -d '{"phone":"020 000 0101","code":"123456"}'
 ```
 
-To use the real sign-in in the app, build it with `VITE_AUTH_MODE=api`; `npm run dev` already forwards `/api` to `localhost:8000`.
+The app uses the real sign-in and the real data by default; `npm run dev` forwards `/api` to `localhost:8000`. To work without the backend, run `VITE_AUTH_MODE=demo npm run dev` (offline demo mode: built-in sample data, never calls the server).

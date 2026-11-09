@@ -48,6 +48,11 @@ function read(): Session | null {
 }
 
 /** The signed-in person, or null when nobody is or the token has expired. */
+/** A demo session (offline demo mode) has a made-up token the server never issued, so it must never be sent there. */
+export function isDemoSession(): boolean {
+  return getSession()?.token.startsWith("demo-") ?? false
+}
+
 export function getSession(): Session | null {
   const session = read()
   if (!session) return null

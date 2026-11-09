@@ -61,7 +61,7 @@ Or run everything in containers: `docker compose -f docker-compose.dev.yml --pro
 
 ## Sign-in
 
-Phone number plus SMS code, then a 7-day token. The endpoints, rules, who-may-call-what table, the demo workers and their fixed demo code (`123456`, only for the five synthetic accounts, switch off with `Demo__Enabled=false`) are in [docs/auth.md](../docs/auth.md). To use it from the app locally: `VITE_AUTH_MODE=api npm run dev` in `frontend/`.
+Phone number plus SMS code, then a 7-day token. The endpoints, rules, who-may-call-what table, the demo workers and their fixed demo code (`123456`, only for the five synthetic accounts, switch off with `Demo__Enabled=false`) are in [docs/auth.md](../docs/auth.md). The app uses it by default: run `npm run dev` in `frontend/` (it forwards `/api` to `localhost:8000`). `VITE_AUTH_MODE=demo npm run dev` is the offline demo mode without the backend.
 
 ## The database and migrations
 

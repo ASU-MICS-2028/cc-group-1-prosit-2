@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { db, newId, saveAndQueue } from "@/db/local"
 import type { Appointment, Patient, Vitals } from "@/db/types"
+import { ApiError, api } from "@/api/client"
+import { getSession, saveSession } from "@/auth/session"
+import { signIn } from "@/test/renderRoute"
 import { keepMine, syncNow, takeServerCopy } from "./sync"
 
 function vitals(): Vitals {
@@ -373,5 +376,62 @@ describe("audit upload", () => {
     const body = JSON.parse(call[1].body as string)
     expect(body.events[0]).toMatchObject({ entity: "vitals", action: "create" })
     expect((await db.auditEvents.toArray()).every((e) => e.syncedAt)).toBe(true)
+  })
+})
+
+describe("demo sessions", () => {
+  it("never ask the server and keep everything on the phone", async () => {
+    saveSession({
+      token: "demo-chv-042",
+      expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+      user: {
+        id: "chv-042",
+        name: "Akosua Mensah",
+        role: "chv",
+        district: "Shai-Osudoku",
+      },
+    })
+    const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 401 }))
+    vi.stubGlobal("fetch", fetch)
+    await saveAndQueue("vitals", vitals())
+
+    expect(await syncNow()).toEqual({ sent: 0, failed: 0, conflicts: 0 })
+
+    expect(fetch).not.toHaveBeenCalled()
+    expect(await db.outbox.count()).toBe(1)
+    expect(getSession()).not.toBeNull()
+  })
+
+  it("are not signed out by a 401 from the server", async () => {
+    saveSession({
+      token: "demo-chv-042",
+      expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+      user: {
+        id: "chv-042",
+        name: "Akosua Mensah",
+        role: "chv",
+        district: "Shai-Osudoku",
+      },
+    })
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 401 }))
+    )
+
+    await expect(api("/patients")).rejects.toBeInstanceOf(ApiError)
+
+    expect(getSession()).not.toBeNull()
+  })
+
+  it("a real session is still signed out by a 401", async () => {
+    signIn("chv")
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 401 }))
+    )
+
+    await expect(api("/patients")).rejects.toBeInstanceOf(ApiError)
+
+    expect(getSession()).toBeNull()
   })
 })
