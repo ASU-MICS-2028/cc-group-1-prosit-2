@@ -490,5 +490,21 @@
     "daysAgo_other": "{{count}} days ago",
     "inDays_one": "in {{count}} day",
     "inDays_other": "in {{count}} days"
+  },
+  "toast": {
+    "label": "Notifications",
+    "dismiss": "Dismiss",
+    "saveFailed": "Couldn't save on this phone",
+    "saveFailedText": "What you entered is still here. Try again.",
+    "willSend": "It will be sent when you're back online.",
+    "patientUpdated": "Patient details saved",
+    "vitalsSaved": "Vitals saved",
+    "appointmentBooked": "Appointment booked",
+    "appointmentUpdated": "Appointment updated",
+    "appointmentStatus": "Appointment: {{status}}",
+    "photoUpdated": "Profile photo updated",
+    "photoRemoved": "Profile photo removed",
+    "synced": "Sent to the server",
+    "syncPartial": "Some changes weren't sent"
   }
 }

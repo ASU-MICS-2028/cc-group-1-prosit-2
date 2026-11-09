@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useLiveQuery } from "dexie-react-hooks"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { saved, saveFailed } from "@/lib/feedback"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { z } from "zod"
 import { DatePicker } from "@/components/form/DatePicker"
@@ -100,21 +101,26 @@ function AppointmentForm({ existing }: { existing?: Appointment }) {
   async function onSubmit(f: Form) {
     const now = new Date().toISOString()
     if (existing) {
-      await saveAndQueue(
-        "appointment",
-        {
-          ...existing,
-          type: f.type,
-          scheduledAt: new Date(f.scheduledAt).toISOString(),
-          facility: f.facility.trim(),
-          priority: f.priority,
-          reason: f.reason.trim(),
-          status: "scheduled",
-          updatedAt: now,
-        },
-        "update"
-      )
+      try {
+        await saveAndQueue(
+          "appointment",
+          {
+            ...existing,
+            type: f.type,
+            scheduledAt: new Date(f.scheduledAt).toISOString(),
+            facility: f.facility.trim(),
+            priority: f.priority,
+            reason: f.reason.trim(),
+            status: "scheduled",
+            updatedAt: now,
+          },
+          "update"
+        )
+      } catch (error) {
+        return saveFailed(error)
+      }
       navigate("/appointments", { replace: true })
+      saved(t("toast.appointmentUpdated"))
       return
     }
     const appointment: Appointment = {
@@ -134,8 +140,13 @@ function AppointmentForm({ existing }: { existing?: Appointment }) {
       updatedAt: now,
       version: 0,
     }
-    await saveAndQueue("appointment", appointment)
+    try {
+      await saveAndQueue("appointment", appointment)
+    } catch (error) {
+      return saveFailed(error)
+    }
     navigate(`/patients/${id}`, { replace: true })
+    saved(t("toast.appointmentBooked"))
   }
 
   return (
