@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 import { db } from "@/db/local"
@@ -85,8 +85,10 @@ describe("Home dashboard", () => {
     expect(
       await screen.findByText("1 patient needs referring today")
     ).toBeInTheDocument()
+    // The dashboard numbers load in their own query, a moment after the referral banner above: wait for them
+    // (a plain getBy here passed on a fast laptop and failed on slower CI runners).
     expect(
-      screen.getByRole("img", { name: "1 of 2 visits done" })
+      await screen.findByRole("img", { name: "1 of 2 visits done" })
     ).toBeInTheDocument()
     const highBp = screen.getByRole("heading", {
       name: "High blood pressure",
@@ -114,11 +116,18 @@ describe("Patient list", () => {
     expect(screen.getByText("3 patients on this phone")).toBeInTheDocument()
 
     await user.click(screen.getByRole("radio", { name: /Visit due/ }))
-    const due = await screen.findAllByRole("listitem")
-    expect(due.map((li) => within(li).getByText(/Test$/).textContent)).toEqual([
-      "Yaa Test", // overdue before today
-      "Esi Test",
-    ])
+    // The old, unfiltered list is still on screen for a moment after the click, so findAllBy would return it
+    // at once: wait until the list shows the filtered result.
+    await waitFor(() => {
+      const due = screen.getAllByRole("listitem")
+      expect(
+        due.map((li) => within(li).getByText(/Test$/).textContent)
+      ).toEqual([
+        "Yaa Test", // overdue before today
+        "Esi Test",
+      ])
+    })
+    const due = screen.getAllByRole("listitem")
     expect(within(due[0]).getByText("Visit overdue")).toBeInTheDocument()
   })
 })
