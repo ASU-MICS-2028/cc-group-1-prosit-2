@@ -39,7 +39,13 @@ export function CodeInput({
         autoFocus
         className="peer absolute inset-0 h-full w-full cursor-default opacity-0"
       />
-      <div aria-hidden className="flex gap-2">
+      <div
+        aria-hidden
+        className={cn(
+          "flex gap-2",
+          invalid && "animate-shake motion-reduce:animate-none"
+        )}
+      >
         {Array.from({ length }, (_, i) => (
           <span
             key={i}

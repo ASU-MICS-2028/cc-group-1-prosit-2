@@ -490,5 +490,21 @@
     "daysAgo_other": "kwanaki {{count}} da suka wuce",
     "inDays_one": "nan da kwana {{count}}",
     "inDays_other": "nan da kwanaki {{count}}"
+  },
+  "toast": {
+    "label": "Sanarwa",
+    "dismiss": "Rufe",
+    "saveFailed": "Ba a iya ajiyewa a wannan wayar ba",
+    "saveFailedText": "Abin da ka shigar yana nan. Sake gwadawa.",
+    "willSend": "Za a aika idan intanet ta dawo.",
+    "patientUpdated": "An ajiye bayanan mara lafiya",
+    "vitalsSaved": "An ajiye awo",
+    "appointmentBooked": "An tsara ziyara",
+    "appointmentUpdated": "An sabunta ziyara",
+    "appointmentStatus": "Ziyara: {{status}}",
+    "photoUpdated": "An canja hoto",
+    "photoRemoved": "An cire hoto",
+    "synced": "An aika zuwa sabar",
+    "syncPartial": "Ba a aika wasu canje-canje ba"
   }
 }

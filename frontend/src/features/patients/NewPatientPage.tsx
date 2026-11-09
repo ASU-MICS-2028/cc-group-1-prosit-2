@@ -8,6 +8,8 @@ import {
 import { useState } from "react"
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { saveFailed } from "@/lib/feedback"
+import { ErrorText } from "@/components/form/ErrorText"
 import { useNavigate } from "react-router-dom"
 import { z } from "zod"
 import { ChoiceTiles } from "@/components/form/ChoiceTiles"
@@ -139,6 +141,15 @@ export function Component() {
   async function onSubmit(v: Form) {
     const now = new Date().toISOString()
     const id = newId()
+    try {
+      await save(v, now, id)
+    } catch (error) {
+      return saveFailed(error)
+    }
+    navigate(`/patients/${id}/registered`, { replace: true })
+  }
+
+  async function save(v: Form, now: string, id: string) {
     const evidence = v.consentEvidence
       ? await saveMedia({
           blob: v.consentEvidence,
@@ -183,7 +194,6 @@ export function Component() {
       version: 0,
     }
     await saveAndQueue("patient", patient)
-    navigate(`/patients/${patient.id}/registered`, { replace: true })
   }
 
   const titles = [
@@ -309,12 +319,7 @@ export function Component() {
                       />
                     )}
                     {errors.consentEvidence ? (
-                      <p
-                        role="alert"
-                        className="text-xs font-medium text-destructive"
-                      >
-                        {err("consentEvidence")}
-                      </p>
+                      <ErrorText>{err("consentEvidence")}</ErrorText>
                     ) : null}
                   </div>
                 )}
@@ -344,14 +349,7 @@ export function Component() {
                 />
                 {t("newPatient.consentGiven")}
               </label>
-              {errors.consent ? (
-                <p
-                  role="alert"
-                  className="text-xs font-medium text-destructive"
-                >
-                  {err("consent")}
-                </p>
-              ) : null}
+              {errors.consent ? <ErrorText>{err("consent")}</ErrorText> : null}
             </>
           ) : null}
 

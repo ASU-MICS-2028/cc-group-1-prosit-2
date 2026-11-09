@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { saved, saveFailed } from "@/lib/feedback"
 import { useNavigate, useParams } from "react-router-dom"
 import { EmptyState, PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
@@ -61,29 +62,34 @@ function EditForm({ patient }: { patient: Patient }) {
       !known &&
       patient.birthDateEstimated &&
       Number(v.ageYears) === ageFrom(patient.dateOfBirth)
-    await saveAndQueue(
-      "patient",
-      {
-        ...patient,
-        givenName: v.givenName.trim(),
-        familyName: v.familyName.trim(),
-        sex: v.sex,
-        dateOfBirth: known
-          ? v.dateOfBirth!
-          : sameAge
-            ? patient.dateOfBirth
-            : estimatedBirthDate(Number(v.ageYears)),
-        birthDateEstimated: !known,
-        phone: v.phone || undefined,
-        nationalId: v.nationalId || undefined,
-        community: v.community.trim(),
-        district: v.district.trim(),
-        preferredLanguage: v.preferredLanguage,
-        updatedAt: new Date().toISOString(),
-      },
-      "update"
-    )
+    try {
+      await saveAndQueue(
+        "patient",
+        {
+          ...patient,
+          givenName: v.givenName.trim(),
+          familyName: v.familyName.trim(),
+          sex: v.sex,
+          dateOfBirth: known
+            ? v.dateOfBirth!
+            : sameAge
+              ? patient.dateOfBirth
+              : estimatedBirthDate(Number(v.ageYears)),
+          birthDateEstimated: !known,
+          phone: v.phone || undefined,
+          nationalId: v.nationalId || undefined,
+          community: v.community.trim(),
+          district: v.district.trim(),
+          preferredLanguage: v.preferredLanguage,
+          updatedAt: new Date().toISOString(),
+        },
+        "update"
+      )
+    } catch (error) {
+      return saveFailed(error)
+    }
     navigate(back, { replace: true })
+    saved(t("toast.patientUpdated"))
   }
 
   return (

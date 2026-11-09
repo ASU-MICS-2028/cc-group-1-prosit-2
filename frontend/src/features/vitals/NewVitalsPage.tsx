@@ -3,6 +3,7 @@ import { Ruler, TriangleAlert, X } from "@/components/icons"
 import { useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { saved, saveFailed } from "@/lib/feedback"
 import { useNavigate, useParams } from "react-router-dom"
 import { z } from "zod"
 import { DatePicker } from "@/components/form/DatePicker"
@@ -121,15 +122,19 @@ export function Component() {
       createdAt: now,
       version: 0,
     }
-    await saveAndQueue("vitals", vitals)
-    for (const blob of photos)
-      await saveMedia({
-        blob,
-        kind: "wound-photo",
-        patientId: id,
-        ownerEntity: "vitals",
-        ownerId: vitals.id,
-      })
+    try {
+      await saveAndQueue("vitals", vitals)
+      for (const blob of photos)
+        await saveMedia({
+          blob,
+          kind: "wound-photo",
+          patientId: id,
+          ownerEntity: "vitals",
+          ownerId: vitals.id,
+        })
+    } catch (error) {
+      return saveFailed(error)
+    }
     // Something needs a facility today: go straight to the referral prompt.
     const needsReferral = vitalsFlags(vitals).some((f) =>
       URGENT_FLAGS.includes(f)
@@ -137,6 +142,7 @@ export function Component() {
     navigate(needsReferral ? `/patients/${id}/refer` : `/patients/${id}`, {
       replace: true,
     })
+    saved(t("toast.vitalsSaved"))
   }
 
   const number = (key: keyof Form, label: string, unit: string, step = "1") => (

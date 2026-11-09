@@ -1,5 +1,8 @@
 import { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { toast } from "@/lib/toast"
+import { saveFailed } from "@/lib/feedback"
+import { ErrorText } from "@/components/form/ErrorText"
 import { useNavigate } from "react-router-dom"
 import { clearSession, useSession } from "@/auth/session"
 import { Dropdown } from "@/components/form/Dropdown"
@@ -38,6 +41,7 @@ export function Component() {
     setPhotoError(false)
     try {
       await saveProfilePhoto(session.user.id, file)
+      toast.success(t("toast.photoUpdated"))
     } catch {
       setPhotoError(true)
     }
@@ -72,7 +76,12 @@ export function Component() {
               <Button
                 size="lg"
                 variant="ghost"
-                onClick={() => void removeProfilePhoto(session.user.id)}
+                onClick={() =>
+                  void removeProfilePhoto(session.user.id).then(
+                    () => toast.success(t("toast.photoRemoved")),
+                    saveFailed
+                  )
+                }
               >
                 <X className="size-5" />
                 {t("profile.removePhoto")}
@@ -80,9 +89,7 @@ export function Component() {
             ) : null}
           </div>
           {photoError ? (
-            <p role="alert" className="mt-2 text-sm text-destructive">
-              {t("profile.photoError")}
-            </p>
+            <ErrorText className="mt-2">{t("profile.photoError")}</ErrorText>
           ) : (
             <p className="mt-2 text-xs text-muted-foreground">
               {t("profile.photoHint")}

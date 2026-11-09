@@ -1,5 +1,6 @@
 import type { IconComponent } from "@/components/icons"
 import { cn } from "@/lib/utils"
+import { ErrorText } from "./ErrorText"
 
 export interface Choice<T extends string> {
   value: T
@@ -69,15 +70,7 @@ export function ChoiceTiles<T extends string>({
           )
         })}
       </div>
-      {error ? (
-        <p
-          id={`${name}-error`}
-          role="alert"
-          className="text-xs font-medium text-destructive"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <ErrorText id={`${name}-error`}>{error}</ErrorText> : null}
     </fieldset>
   )
 }
