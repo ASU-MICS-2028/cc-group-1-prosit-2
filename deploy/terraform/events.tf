@@ -338,8 +338,8 @@ resource "aws_lambda_function" "event" {
   timeout          = 10
   memory_size      = 128
 
-  # Guard against a runaway loop or a flood: never more than 5 at once per function.
-  reserved_concurrent_executions = 5
+  # No reserved concurrency: this account's Lambda limit is 10, and AWS keeps 10 unreserved.
+  # The queue trigger's maximum_concurrency (below) caps each function at 5 at once instead.
 
   logging_config {
     log_format = "Text"
