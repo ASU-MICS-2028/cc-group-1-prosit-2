@@ -3,6 +3,7 @@ using Dapper;
 using HealthConnect.Data;
 using HealthConnect.Data.Persistence;
 using HealthConnect.RecordsService;
+using HealthConnect.RecordsService.Events;
 using HealthConnect.RecordsService.Features;
 using HealthConnect.RecordsService.Models;
 using Microsoft.EntityFrameworkCore;
@@ -85,6 +86,9 @@ public abstract class RecordsTestBase(RecordsDatabase database) : IAsyncLifetime
 
     protected FakeTimeProvider Time { get; } = new(Start);
 
+    /// <summary>The appointment events the endpoint published (Lab 7), in order.</summary>
+    protected RecordingAppointmentEvents Events { get; } = new();
+
     protected RoleSessions Sessions => Database.Sessions;
 
     public Task InitializeAsync() => Database.ResetAsync();
@@ -152,7 +156,7 @@ public abstract class RecordsTestBase(RecordsDatabase database) : IAsyncLifetime
         await ResultReader.RunAsync(await PutVitals.Handle(id, vitals, As(who), Sessions, Time, NullLogger<PutVitals>.Instance, CancellationToken.None));
 
     protected async Task<Reply> PutAppointmentAsync(Guid id, AppointmentDto appointment, Worker who) =>
-        await ResultReader.RunAsync(await PutAppointment.Handle(id, appointment, As(who), Sessions, Time, NullLogger<PutAppointment>.Instance, CancellationToken.None));
+        await ResultReader.RunAsync(await PutAppointment.Handle(id, appointment, As(who), Sessions, Time, NullLogger<PutAppointment>.Instance, Events, new AppointmentEventOptions("arn:test", "test"), CancellationToken.None));
 
     protected async Task<Reply> PullPatientsAsync(Worker who, DateTimeOffset? since = null) =>
         await ResultReader.RunAsync(await GetPatients.Handle(As(who), Sessions, CancellationToken.None, since));
@@ -184,5 +188,17 @@ public abstract class RecordsTestBase(RecordsDatabase database) : IAsyncLifetime
         var reply = await PutPatientAsync(id, Patient(id, district), who ?? RecordsDatabase.Chv);
         Assert.Equal(201, reply.Status);
         return id;
+    }
+}
+
+/// <summary>Keeps the published appointment events instead of sending them to SNS.</summary>
+public sealed class RecordingAppointmentEvents : IAppointmentEvents
+{
+    public List<AppointmentEvent> Published { get; } = [];
+
+    public Task PublishAsync(AppointmentEvent appointmentEvent, CancellationToken cancellationToken)
+    {
+        Published.Add(appointmentEvent);
+        return Task.CompletedTask;
     }
 }

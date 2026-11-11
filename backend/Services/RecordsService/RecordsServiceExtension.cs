@@ -1,13 +1,16 @@
 using Amazon;
 using Amazon.S3;
+using Amazon.SimpleNotificationService;
 using Dapper;
 using HealthConnect.Data;
 using HealthConnect.RecordsService.Demo;
+using HealthConnect.RecordsService.Events;
 using HealthConnect.RecordsService.Features;
 using HealthConnect.RecordsService.Media;
 using HealthConnect.SharedLibrary.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace HealthConnect.RecordsService;
 
@@ -26,6 +29,29 @@ public static class RecordsServiceExtension
             sp.GetRequiredService<IConfiguration>()["AWS_REGION"] is { Length: > 0 } region
                 ? new AmazonS3Client(RegionEndpoint.GetBySystemName(region))
                 : new AmazonS3Client())));
+
+        // Appointment events (Lab 7) go to the environment's SNS topic when the deploy names one; otherwise nowhere.
+        services.AddSingleton(sp =>
+        {
+            var configuration = sp.GetRequiredService<IConfiguration>();
+            return new AppointmentEventOptions(configuration["APPOINTMENT_TOPIC_ARN"], configuration["APP_ENV"] ?? "local");
+        });
+        services.AddSingleton<IAppointmentEvents>(sp =>
+        {
+            var options = sp.GetRequiredService<AppointmentEventOptions>();
+            if (string.IsNullOrWhiteSpace(options.TopicArn))
+            {
+                return new NoAppointmentEvents();
+            }
+
+            var region = sp.GetRequiredService<IConfiguration>()["AWS_REGION"];
+            return new SnsAppointmentEvents(
+                new Lazy<IAmazonSimpleNotificationService>(() => region is { Length: > 0 }
+                    ? new AmazonSimpleNotificationServiceClient(RegionEndpoint.GetBySystemName(region))
+                    : new AmazonSimpleNotificationServiceClient()),
+                options,
+                sp.GetRequiredService<ILogger<SnsAppointmentEvents>>());
+        });
 
         return services
             .AddFeature<PutPatient>()

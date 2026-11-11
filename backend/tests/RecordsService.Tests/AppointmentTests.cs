@@ -299,7 +299,8 @@ public sealed class AppointmentTests(RecordsDatabase database) : RecordsTestBase
         var off = await PutAppointmentAsync(id, Appointment(id, patient), Chv);
         var nobody = await ResultReader.RunAsync(await HealthConnect.RecordsService.Features.PutAppointment.Handle(
             id, Appointment(id, patient), new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity()), Sessions, Time,
-            Microsoft.Extensions.Logging.Abstractions.NullLogger<HealthConnect.RecordsService.Features.PutAppointment>.Instance, CancellationToken.None));
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<HealthConnect.RecordsService.Features.PutAppointment>.Instance,
+            Events, new HealthConnect.RecordsService.Events.AppointmentEventOptions(null, "test"), CancellationToken.None));
 
         Assert.Equal(401, off.Status);
         Assert.Equal(401, nobody.Status);
