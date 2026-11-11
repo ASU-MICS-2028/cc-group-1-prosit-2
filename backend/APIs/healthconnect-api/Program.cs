@@ -74,6 +74,9 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseAuthService();
 
+// The teleconsult call's signalling relay is a WebSocket (Features/Calls.cs). The pings keep it alive through the load balancer's idle timeout.
+app.UseWebSockets(new WebSocketOptions { KeepAliveInterval = TimeSpan.FromSeconds(15) });
+
 app.MapFeatures();
 
 // Development only: the contract at /openapi/v1.json and Swagger UI at /swagger to try every endpoint.

@@ -64,7 +64,13 @@ export default defineConfig({
   // `npm run dev`: send /api to the backend on this machine, the same path nginx forwards
   // on the server, so the app code is identical everywhere.
   server: {
-    proxy: { "/api": process.env.API_PROXY_TARGET ?? "http://localhost:8000" },
+    // ws: the teleconsult call's signalling relay is a WebSocket under /api/calls.
+    proxy: {
+      "/api": {
+        target: process.env.API_PROXY_TARGET ?? "http://localhost:8000",
+        ws: true,
+      },
+    },
   },
   test: {
     // The tests run the app in its offline demo mode; the ones that need the API stub fetch.

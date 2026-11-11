@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { Segmented } from "@/components/form/Segmented"
-import { Check, Clock, TriangleAlert } from "@/components/icons"
+import { Check, Clock, TriangleAlert, Video } from "@/components/icons"
 import { EmptyState, PageHeader } from "@/components/PageHeader"
 import { db } from "@/db/local"
 import type { Appointment, Patient } from "@/db/types"
@@ -125,6 +125,15 @@ function VisitCard({ a, overdue }: { a: Row; overdue: boolean }) {
           {overdue ? ` · ${t("appointments.overdueTag")}` : null}
         </p>
       </Link>
+      {open && a.type === "teleconsult" && a.referralStatus !== "declined" ? (
+        <Link
+          to={`/appointments/${a.id}/call`}
+          className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 text-sm font-semibold text-primary-foreground"
+        >
+          <Video className="size-5" aria-hidden />
+          {t("call.join")}
+        </Link>
+      ) : null}
       {open ? (
         <div className="mt-3 flex gap-2">
           <button

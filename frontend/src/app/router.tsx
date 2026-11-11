@@ -102,6 +102,12 @@ export const routes: RouteObject[] = [
         lazy: () => import("@/features/appointments/NewAppointmentPage"),
       },
       {
+        path: "appointments/:appointmentId/call",
+        loader: clinical,
+        handle: { hideBottomNav: true },
+        lazy: () => import("@/features/calls/CallPage"),
+      },
+      {
         path: "referrals",
         loader: requireRole("nurse", "doctor"),
         lazy: () => import("@/features/referrals/ReferralsPage"),

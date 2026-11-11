@@ -3,6 +3,7 @@ using Amazon.S3;
 using Amazon.SimpleNotificationService;
 using Dapper;
 using HealthConnect.Data;
+using HealthConnect.RecordsService.Calls;
 using HealthConnect.RecordsService.Demo;
 using HealthConnect.RecordsService.Events;
 using HealthConnect.RecordsService.Features;
@@ -53,6 +54,11 @@ public static class RecordsServiceExtension
                 sp.GetRequiredService<ILogger<SnsAppointmentEvents>>());
         });
 
+        // Teleconsult video calls (Lab 7 Part C): one-time tickets, the rooms, and the ICE servers handed to the app.
+        services.AddSingleton<CallTickets>();
+        services.AddSingleton<CallRooms>();
+        services.AddSingleton(sp => CallOptions.From(sp.GetRequiredService<IConfiguration>()));
+
         return services
             .AddFeature<PutPatient>()
             .AddFeature<GetPatients>()
@@ -64,6 +70,8 @@ public static class RecordsServiceExtension
             .AddFeature<GetAuditEvents>()
             .AddFeature<VerifyAuditEvents>()
             .AddFeature<PostMediaUploadUrl>()
-            .AddFeature<GetSurveillance>();
+            .AddFeature<GetSurveillance>()
+            .AddFeature<PostCallTicket>()
+            .AddFeature<CallSocket>();
     }
 }
