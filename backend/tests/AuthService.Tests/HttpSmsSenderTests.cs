@@ -178,6 +178,17 @@ public sealed class HttpSmsSenderTests
         Assert.IsType<LogOnlySmsSender>(SenderFromSecret(secretId, secretJson));
     }
 
+    [Fact]
+    public void A_secret_that_cannot_be_read_does_not_stop_the_api_texts_are_only_logged()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddSmsSecret("healthconnect/staging/sms", _ => throw new UnauthorizedAccessException("AccessDenied"))
+            .Build();
+        var services = new ServiceCollection().AddSingleton<IConfiguration>(configuration).AddLogging().AddSharedLibrary();
+
+        Assert.IsType<LogOnlySmsSender>(services.BuildServiceProvider().GetRequiredService<ISmsSender>());
+    }
+
     [Theory]
     [InlineData("not json")]
     [InlineData("""{"provider":"carrier-pigeon","apiKey":"secret-value"}""")]
