@@ -62,3 +62,17 @@ output "kms_key_arn" {
 output "github_deploy_role_arn" {
   value = aws_iam_role.github_deploy.arn
 }
+
+output "appointment_topic_arns" {
+  description = "Lab 7: where the API publishes appointment events, per environment."
+  value       = { for k, t in aws_sns_topic.appointment_events : k => t.arn }
+}
+
+output "event_queues" {
+  description = "Lab 7: each consumer's queue and dead-letter queue."
+  value       = { for k, q in aws_sqs_queue.events : k => { queue = q.url, dlq = aws_sqs_queue.events_dlq[k].url } }
+}
+
+output "event_functions" {
+  value = [for f in aws_lambda_function.event : f.function_name]
+}

@@ -1,11 +1,11 @@
 import { useLiveQuery } from "dexie-react-hooks"
-import { Check, CircleCheckBig, Siren, X } from "@/components/icons"
+import { Check, CircleCheckBig, Siren, Video, X } from "@/components/icons"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { useSession } from "@/auth/session"
 import { Card, EmptyState, Monogram, PageHeader } from "@/components/PageHeader"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { db, saveAndQueue } from "@/db/local"
 import type { Appointment, Priority, ReferralStatus } from "@/db/types"
 import { fullName } from "@/features/patients/usePatients"
@@ -162,14 +162,24 @@ export function Component() {
                     </Button>
                   </div>
                 ) : a.referralStatus === "accepted" ? (
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    className="w-full"
-                    onClick={() => void move(a, "seen")}
-                  >
-                    <CircleCheckBig aria-hidden /> {t("referrals.markSeen")}
-                  </Button>
+                  <div className="space-y-2">
+                    {a.type === "teleconsult" && a.status === "scheduled" ? (
+                      <Link
+                        to={`/appointments/${a.id}/call`}
+                        className={cn(buttonVariants({ size: "lg" }), "w-full")}
+                      >
+                        <Video aria-hidden /> {t("call.join")}
+                      </Link>
+                    ) : null}
+                    <Button
+                      size="lg"
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() => void move(a, "seen")}
+                    >
+                      <CircleCheckBig aria-hidden /> {t("referrals.markSeen")}
+                    </Button>
+                  </div>
                 ) : null}
               </Card>
             </li>
