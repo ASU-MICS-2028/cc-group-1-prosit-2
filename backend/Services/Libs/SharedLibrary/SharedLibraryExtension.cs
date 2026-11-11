@@ -13,15 +13,23 @@ public static class SharedLibraryExtension
     {
         // The clock is injected, so code that depends on time (a code that expires, a token that lapses) can be tested.
         services.TryAddSingleton(TimeProvider.System);
-        // Texts are only logged unless Sms:Provider says arkesel (and its key and sender name are set).
+        // Texts are only logged unless Sms:Provider says httpsms or arkesel (set from this environment's SMS secret, see
+        // SmsSecret) and that provider's settings are there.
         services.AddHttpClient(ArkeselSmsSender.Provider, client => client.Timeout = TimeSpan.FromSeconds(10));
+        services.AddHttpClient(HttpSmsSender.Provider, client => client.Timeout = TimeSpan.FromSeconds(10));
         services.TryAddSingleton<ISmsSender>(sp =>
-            string.Equals(sp.GetRequiredService<IConfiguration>()["Sms:Provider"], ArkeselSmsSender.Provider, StringComparison.OrdinalIgnoreCase)
-                ? new ArkeselSmsSender(
-                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(ArkeselSmsSender.Provider),
-                    sp.GetRequiredService<IConfiguration>(),
-                    sp.GetRequiredService<ILogger<ArkeselSmsSender>>())
-                : new LogOnlySmsSender(sp.GetRequiredService<IConfiguration>(), sp.GetRequiredService<ILogger<LogOnlySmsSender>>()));
+        {
+            var configuration = sp.GetRequiredService<IConfiguration>();
+            var http = sp.GetRequiredService<IHttpClientFactory>();
+            return configuration["Sms:Provider"]?.Trim().ToLowerInvariant() switch
+            {
+                ArkeselSmsSender.Provider => new ArkeselSmsSender(
+                    http.CreateClient(ArkeselSmsSender.Provider), configuration, sp.GetRequiredService<ILogger<ArkeselSmsSender>>()),
+                HttpSmsSender.Provider => new HttpSmsSender(
+                    http.CreateClient(HttpSmsSender.Provider), configuration, sp.GetRequiredService<ILogger<HttpSmsSender>>()),
+                _ => new LogOnlySmsSender(configuration, sp.GetRequiredService<ILogger<LogOnlySmsSender>>()),
+            };
+        });
         return services.AddHealthConnectPolicies();
     }
 }

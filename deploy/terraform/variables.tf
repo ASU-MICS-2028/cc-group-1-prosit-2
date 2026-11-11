@@ -81,30 +81,3 @@ variable "clinician_alert_emails" {
   default     = []
 }
 
-variable "sms_api_key_secret_arn" {
-  description = "Secrets Manager ARN holding the SMS credentials (see functions/src/sms.py for the format of each provider). Empty: reminders are only logged."
-  type        = string
-  default     = ""
-}
-
-variable "sms_provider" {
-  description = "Who sends real texts: httpsms (an Android phone with the httpSMS app, paid by its SIM) or arkesel (Ghanaian SMS gateway)."
-  type        = string
-  default     = "httpsms"
-  validation {
-    condition     = contains(["httpsms", "arkesel"], var.sms_provider)
-    error_message = "sms_provider must be httpsms or arkesel."
-  }
-}
-
-variable "sms_environments" {
-  description = "Environments that send real texts. The others only log, so staging tests never text a real number by accident."
-  type        = list(string)
-  default     = ["production"]
-}
-
-variable "sms_sender_id" {
-  description = "Sender name shown on reminder texts (Arkesel, at most 11 characters, registered with them first)."
-  type        = string
-  default     = "HlthConnect"
-}

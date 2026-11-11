@@ -73,7 +73,8 @@ def aws(monkeypatch):
     monkeypatch.setenv("SELF_ARN", "arn:aws:lambda:af-south-1:1:function:reminder")
     monkeypatch.setenv("SCHEDULER_ROLE_ARN", "arn:aws:iam::1:role/scheduler")
     monkeypatch.setenv("CLINICIAN_TOPIC_ARN", "arn:aws:sns:af-south-1:1:clinicians")
-    monkeypatch.delenv("SMS_PROVIDER", raising=False)
+    monkeypatch.delenv("SMS_SECRET_ID", raising=False)
+    monkeypatch.setattr(sms, "_settings", None)
     return fakes
 
 
@@ -218,18 +219,18 @@ class FakeProvider:
         return Response()
 
 
-def use_provider(aws, monkeypatch, name, secret, fake=None):
+def use_provider(aws, monkeypatch, secret, fake=None):
+    """Switch texts on with `secret` (a dict, stored as this environment's SMS secret)."""
     class Secrets:
         def get_secret_value(self, SecretId):
-            assert SecretId == "arn:secret"
-            return {"SecretString": secret}
+            assert SecretId == "healthconnect/staging/sms"
+            return {"SecretString": json.dumps(secret)}
 
     aws["secretsmanager"] = Secrets()
     fake = fake or FakeProvider()
     monkeypatch.setattr(sms, "_settings", None)
     monkeypatch.setattr(sms.urllib.request, "urlopen", fake)
-    monkeypatch.setenv("SMS_PROVIDER", name)
-    monkeypatch.setenv("SMS_SECRET_ARN", "arn:secret")
+    monkeypatch.setenv("SMS_SECRET_ID", "healthconnect/staging/sms")
     return fake
 
 
@@ -238,7 +239,7 @@ def send(e):
 
 
 def test_arkesel_send_uses_the_key_from_secrets_manager(aws, monkeypatch):
-    fake = use_provider(aws, monkeypatch, "arkesel", "test-key\n")
+    fake = use_provider(aws, monkeypatch, {"provider": "arkesel", "apiKey": "test-key", "senderId": "HlthConnect"})
     assert send(event())["result"] == "reminder_sent"
     [req] = fake.requests
     assert req["url"] == sms.ARKESEL_URL
@@ -248,8 +249,8 @@ def test_arkesel_send_uses_the_key_from_secrets_manager(aws, monkeypatch):
 
 def test_httpsms_sends_from_the_phone_number_with_the_text_encrypted(aws, monkeypatch, caplog):
     caplog.set_level("INFO")
-    secret = json.dumps({"apiKey": "hs-key", "from": "+233200000999", "encryptionKey": "phone passphrase"})
-    fake = use_provider(aws, monkeypatch, "httpsms", secret)
+    secret = {"provider": "httpsms", "apiKey": "hs-key", "from": "+233200000999", "encryptionKey": "phone passphrase"}
+    fake = use_provider(aws, monkeypatch, secret)
     e = event()
     assert send(e)["result"] == "reminder_sent"
     [req] = fake.requests
@@ -263,7 +264,7 @@ def test_httpsms_sends_from_the_phone_number_with_the_text_encrypted(aws, monkey
 
 
 def test_httpsms_without_an_encryption_key_sends_plain_text(aws, monkeypatch):
-    fake = use_provider(aws, monkeypatch, "httpsms", json.dumps({"apiKey": "k", "from": "+233200000999"}))
+    fake = use_provider(aws, monkeypatch, {"provider": "httpsms", "apiKey": "k", "from": "+233200000999"})
     e = event()
     send(e)
     assert fake.requests[0]["body"]["encrypted"] is False
@@ -272,21 +273,31 @@ def test_httpsms_without_an_encryption_key_sends_plain_text(aws, monkeypatch):
 
 @pytest.mark.parametrize("status, body", [(401, b""), (500, b"oops"), (200, b'{"status":"error","message":"no phone"}')])
 def test_a_refusal_fails_the_send_so_it_is_retried_without_leaking_anything(aws, monkeypatch, status, body):
-    use_provider(aws, monkeypatch, "httpsms", json.dumps({"apiKey": "hs-key", "from": "+233200000999"}), FakeProvider(status, body))
+    use_provider(aws, monkeypatch, {"provider": "httpsms", "apiKey": "hs-key", "from": "+233200000999"}, FakeProvider(status, body))
     with pytest.raises(sms.SmsError) as err:
         send(event())
     assert "hs-key" not in str(err.value) and "233241234567" not in str(err.value)
 
 
-def test_a_provider_without_its_secret_only_logs(aws, monkeypatch):
-    monkeypatch.setenv("SMS_PROVIDER", "httpsms")
-    monkeypatch.delenv("SMS_SECRET_ARN", raising=False)
-    monkeypatch.delenv("SMS_API_KEY_SECRET_ARN", raising=False)
+def test_no_secret_for_this_environment_only_logs(aws, monkeypatch):
+    class Secrets:
+        def get_secret_value(self, SecretId):
+            raise client_error("ResourceNotFoundException")
+
+    aws["secretsmanager"] = Secrets()
+    monkeypatch.setattr(sms, "_settings", None)
+    monkeypatch.setenv("SMS_SECRET_ID", "healthconnect/staging/sms")
+    assert send(event())["result"] == "reminder_logged"
+
+
+def test_no_secret_name_at_all_only_logs(aws, monkeypatch):
+    monkeypatch.setattr(sms, "_settings", None)
+    monkeypatch.delenv("SMS_SECRET_ID", raising=False)
     assert send(event())["result"] == "reminder_logged"
 
 
 def test_a_redriven_send_from_the_dead_letter_queue_is_sent(aws, monkeypatch):
-    fake = use_provider(aws, monkeypatch, "httpsms", json.dumps({"apiKey": "k", "from": "+233200000999"}))
+    fake = use_provider(aws, monkeypatch, {"provider": "httpsms", "apiKey": "k", "from": "+233200000999"})
     e = event()
     record = {"messageId": "m1", "body": json.dumps({"action": "send", "eventId": e["eventId"], "appointment": e["appointment"], "patient": e["patient"]})}
     assert appointment_reminder.handler({"Records": [record]}, None) == {"batchItemFailures": []}
@@ -294,7 +305,7 @@ def test_a_redriven_send_from_the_dead_letter_queue_is_sent(aws, monkeypatch):
 
 
 def test_a_redriven_send_for_a_visit_that_has_passed_is_dropped(aws, monkeypatch):
-    fake = use_provider(aws, monkeypatch, "httpsms", json.dumps({"apiKey": "k", "from": "+233200000999"}))
+    fake = use_provider(aws, monkeypatch, {"provider": "httpsms", "apiKey": "k", "from": "+233200000999"})
     e = event(hours_ahead=-2)
     record = {"messageId": "m1", "body": json.dumps({"action": "send", "appointment": e["appointment"], "patient": e["patient"]})}
     assert appointment_reminder.handler({"Records": [record]}, None) == {"batchItemFailures": []}

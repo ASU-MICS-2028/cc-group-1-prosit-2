@@ -40,6 +40,8 @@ services:
       PORT: "8080"
       # Lab 7: where appointment events go (set by remote-deploy.sh; empty = not published)
       APPOINTMENT_TOPIC_ARN: ${APPOINTMENT_TOPIC_ARN:-}
+      # Real sign-in texts once this secret exists (backend SmsSecret.cs); the keys stay in Secrets Manager
+      SMS_SECRET_ID: healthconnect/${APP_ENV}/sms
     expose: ["8080"]
     read_only: true
     tmpfs: [/tmp]

@@ -1,24 +1,28 @@
-"""Sending one text message. Three providers, chosen by SMS_PROVIDER:
+"""Sending one text message.
 
-* log (default): nothing is sent; the caller logs the reminder with the number masked.
-* arkesel: Arkesel's bulk SMS API (a Ghanaian gateway, sender name registered with them).
-* httpsms: httpSMS (httpsms.com), which sends the text from an Android phone running its app, so
-  a text costs what that phone's SIM bundle charges. The text is end-to-end encrypted with the
-  passphrase set in the phone's app, so httpSMS's servers only ever see the recipient number.
+Texts go out only when this environment's secret exists in Secrets Manager. Its name is
+SMS_SECRET_ID (healthconnect/<env>/sms); the API reads the same secret for sign-in codes. It is
+a JSON object; "provider" picks who sends:
 
-The credentials are one Secrets Manager secret (SMS_SECRET_ARN), read once per container:
-  arkesel: the API key as plain text, or {"apiKey": "..."}
-  httpsms: {"apiKey": "...", "from": "+233...", "encryptionKey": "..."}   (encryptionKey optional)
-A provider without its secret falls back to log, so a half-configured environment never fails
-the reminder. A provider that refuses or cannot be reached raises SmsError: the Lambda fails,
-Scheduler or SQS retries, and repeated failures land in the dead-letter queue with an alarm.
-Errors never contain the key, the text or the whole number.
+  {"provider": "httpsms", "apiKey": "...", "from": "+233...", "encryptionKey": "..."}
+      httpSMS (httpsms.com) sends from an Android phone running its app, so a text costs what that
+      phone's SIM bundle charges. With encryptionKey (the passphrase set in the phone's app) the
+      text is end-to-end encrypted: httpSMS's servers only see the recipient number.
+  {"provider": "arkesel", "apiKey": "...", "senderId": "HlthConnect"}
+      Arkesel, a Ghanaian bulk SMS gateway (sender name registered with them).
+
+No secret (or provider "log") means nothing is sent and the caller only logs the reminder, with
+the number masked. A provider that refuses or cannot be reached raises SmsError: the Lambda
+fails, Scheduler or SQS retries, and repeated failures land in the dead-letter queue with an
+alarm. Errors never contain the key, the text or the whole number.
 """
 
 import json
 import os
 import urllib.error
 import urllib.request
+
+from botocore.exceptions import ClientError
 
 from aes_cfb import httpsms_encrypt
 from common import client
@@ -34,41 +38,49 @@ class SmsError(Exception):
     pass
 
 
-def secret_arn():
-    return os.environ.get("SMS_SECRET_ARN") or os.environ.get("SMS_API_KEY_SECRET_ARN") or ""
-
-
-def provider():
-    chosen = os.environ.get("SMS_PROVIDER", "log").lower()
-    if chosen not in PROVIDERS:
-        raise SmsError(f"unknown SMS_PROVIDER {chosen!r}")
-    return chosen if chosen == "log" or secret_arn() else "log"
-
-
 def settings():
+    """This environment's SMS secret as a dict ({"provider": "log"} when there is none). Read once per container."""
     global _settings
     if _settings is None:
-        raw = client("secretsmanager").get_secret_value(SecretId=secret_arn())["SecretString"].strip()
-        _settings = json.loads(raw) if raw.startswith("{") else {"apiKey": raw}
+        secret_id = os.environ.get("SMS_SECRET_ID")
+        if not secret_id:
+            _settings = {"provider": "log"}
+        else:
+            try:
+                raw = client("secretsmanager").get_secret_value(SecretId=secret_id)["SecretString"]
+            except ClientError as err:
+                if err.response["Error"]["Code"] != "ResourceNotFoundException":
+                    raise
+                raw = '{"provider": "log"}'   # texts not switched on for this environment
+            try:
+                _settings = json.loads(raw)
+            except ValueError:
+                raise SmsError("SMS secret is not JSON") from None
+        provider = str(_settings.get("provider", "log")).lower()
+        if provider not in PROVIDERS:
+            raise SmsError(f"unknown SMS provider {provider!r}")
+        _settings["provider"] = provider
     return _settings
 
 
 def send(phone, text):
     """Send `text` to `phone` (E.164). Returns the provider used and its HTTP status (None when only logged)."""
-    chosen = provider()
-    if chosen == "log" or not phone:
-        return "log", None
-    if chosen == "arkesel":
-        return chosen, _post(
-            os.environ.get("SMS_URL", ARKESEL_URL),
-            {"api-key": settings()["apiKey"]},
-            {"sender": os.environ.get("SMS_SENDER_ID", "HealthConnect")[:11], "message": text, "recipients": [phone.lstrip("+")]},
-        )
     s = settings()
+    provider = s["provider"]
+    if provider == "log" or not phone:
+        return "log", None
+    if not s.get("apiKey"):
+        raise SmsError("SMS secret has no apiKey")
+    if provider == "arkesel":
+        return provider, _post(
+            os.environ.get("SMS_URL", ARKESEL_URL),
+            {"api-key": s["apiKey"]},
+            {"sender": s.get("senderId", "HlthConnect")[:11], "message": text, "recipients": [phone.lstrip("+")]},
+        )
     if not s.get("from"):
         raise SmsError("httpsms secret has no 'from' number")
     key = s.get("encryptionKey")
-    return chosen, _post(
+    return provider, _post(
         os.environ.get("SMS_URL", HTTPSMS_URL),
         {"x-api-key": s["apiKey"]},
         {"from": s["from"], "to": phone, "content": httpsms_encrypt(key, text) if key else text, "encrypted": bool(key)},
