@@ -80,4 +80,3 @@ variable "clinician_alert_emails" {
   type        = list(string)
   default     = []
 }
-
