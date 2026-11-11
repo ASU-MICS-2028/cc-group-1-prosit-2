@@ -113,7 +113,7 @@ edge(ssm, ec2, "run remote-deploy.sh", dashed=True)
 if not BEFORE:
     # ---- Lab 7: appointment events, two independent serverless consumers ----
     y0 = 940
-    group("Appointment events (serverless, Lab 7): the API publishes created / moved / cancelled; two consumers that independent of each other", "group_aws_cloud", 440, y0, 1080, 210, NEW, "#FFF0F5")
+    group("Appointment events (serverless, Lab 7): the API publishes created / moved / cancelled to two independent consumers", "group_aws_cloud", 440, y0, 1080, 210, NEW, "#FFF0F5")
     topic = icon("SNS topic<br><font style='font-size:10px'>appointment-events<br>KMS-encrypted</font>", "integ", "sns", 480, y0 + 70, 48)
     q1 = icon("SQS reminders<br><font style='font-size:10px'>+ DLQ after 3 tries</font>", "integ", "sqs", 640, y0 + 40, 44)
     q2 = icon("SQS specialist-notify<br><font style='font-size:10px'>referrals + teleconsults only</font>", "integ", "sqs", 640, y0 + 125, 44)
