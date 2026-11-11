@@ -17,6 +17,13 @@ cd "$DIR"
 set -a; source settings.env; set +a
 PROJECT="healthconnect-$ENV"
 
+# Lab 7: this environment's appointment-events topic (deploy/terraform/events.tf). Its name is
+# fixed, so the ARN only needs the account, which the instance metadata gives without any
+# extra permission.
+imds_token=$(curl -fsS -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 60")
+account=$(curl -fsS -H "X-aws-ec2-metadata-token: $imds_token" http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .accountId)
+export APPOINTMENT_TOPIC_ARN="arn:aws:sns:$AWS_REGION:$account:healthconnect-$ENV-appointment-events"
+
 echo "$COMPOSE_B64" | base64 -d > compose.yml
 
 aws ecr get-login-password --region "$AWS_REGION" \

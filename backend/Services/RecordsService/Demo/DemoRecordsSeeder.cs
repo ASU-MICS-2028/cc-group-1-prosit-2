@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using HealthConnect.Data;
 using HealthConnect.Data.Persistence;
+using HealthConnect.RecordsService.Events;
 using HealthConnect.RecordsService.Features;
 using HealthConnect.RecordsService.Models;
 using HealthConnect.SharedLibrary.Security;
@@ -28,6 +29,10 @@ public sealed partial class DemoRecordsSeeder(
 {
     public const string SettingName = "Demo:SampleData";
     public const int Weeks = 8;
+
+    // Invented patients must not get reminder texts or page a clinician: the demo publishes no appointment events.
+    private static readonly IAppointmentEvents NoEvents = new NoAppointmentEvents();
+    private static readonly AppointmentEventOptions NoEventOptions = new(null, "demo");
 
     private static readonly Seedling Chv = new("chv-042", "Akosua Mensah", "chv", "Shai-Osudoku");
     private static readonly Seedling Nurse = new("nurse-17", "Efua Asante", "nurse", "Shai-Osudoku");
@@ -197,7 +202,7 @@ public sealed partial class DemoRecordsSeeder(
                 CreatedAt: today.AddDays(Math.Min(days, 0) - 1),
                 UpdatedAt: today.AddDays(Math.Min(days, 0) - 1),
                 Version: 0);
-            var created = await Run(PutAppointment.Handle(id, appointment, Chv.Principal, sessions, time, NullLogger<PutAppointment>.Instance, cancellationToken));
+            var created = await Run(PutAppointment.Handle(id, appointment, Chv.Principal, sessions, time, NullLogger<PutAppointment>.Instance, NoEvents, NoEventOptions, cancellationToken));
             if (created != StatusCodes.Status201Created)
             {
                 continue;   // seeded before: leave it as the nurse and CHV have it now
@@ -209,7 +214,7 @@ public sealed partial class DemoRecordsSeeder(
             {
                 await Run(PutAppointment.Handle(
                     id, appointment with { ReferralStatus = answer, Version = version++ }, Nurse.Principal, sessions, time,
-                    NullLogger<PutAppointment>.Instance, cancellationToken));
+                    NullLogger<PutAppointment>.Instance, NoEvents, NoEventOptions, cancellationToken));
             }
         }
 

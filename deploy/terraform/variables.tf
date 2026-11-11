@@ -74,3 +74,21 @@ variable "github_repo_immutable" {
   type        = string
   default     = "ASU-MICS-2028@326597623/cc-group-1-prosit-2@1422335284"
 }
+
+variable "clinician_alert_emails" {
+  description = "Who gets the specialist-notify emails for new referrals and teleconsults (Lab 7). Each address confirms by email first."
+  type        = list(string)
+  default     = []
+}
+
+variable "sms_api_key_secret_arn" {
+  description = "Secrets Manager ARN holding the Arkesel API key. Empty: reminders are only logged (the lab's simulated SMS). Real texts go out from production only."
+  type        = string
+  default     = ""
+}
+
+variable "sms_sender_id" {
+  description = "Sender name shown on reminder texts (Arkesel, at most 11 characters, registered with them first)."
+  type        = string
+  default     = "HlthConnect"
+}
