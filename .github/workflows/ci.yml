@@ -128,6 +128,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend == 'true' && steps.exists.outputs.backend == 'true' }}
       docker: ${{ steps.filter.outputs.docker }}
       infra: ${{ steps.filter.outputs.infra }}
+      functions: ${{ steps.filter.outputs.functions }}
     steps:
       - uses: actions/checkout@v7
       - id: exists
@@ -152,7 +153,11 @@ jobs:
               - 'deploy/**'
             infra:
               - 'deploy/**'
+              - 'functions/**'
               - '.github/workflows/**'
+            functions:
+              - 'functions/**'
+              - '.github/workflows/ci.yml'
 
   # ---------------------------------------------------------------------------
   # Backend: C# API. Code style, build (warnings are errors), then every test project
@@ -351,12 +356,32 @@ jobs:
           trivyignores: .trivyignore
 
   # ---------------------------------------------------------------------------
+  # Serverless functions (Lab 7): the appointment reminder and specialist notify
+  # Lambdas. AWS is faked in the tests, so no account or credentials are needed.
+  # ---------------------------------------------------------------------------
+  functions:
+    name: Functions (Lambda tests)
+    needs: changes
+    if: needs.changes.outputs.functions == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functions
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest -v tests
+
+  # ---------------------------------------------------------------------------
   # The single required status check for branch protection
   # ---------------------------------------------------------------------------
   ci-passed:
     name: CI passed
     if: always()
-    needs: [branch-flow, pre-commit, secrets, changes, backend, frontend, docker, infra]
+    needs: [branch-flow, pre-commit, secrets, changes, backend, frontend, docker, infra, functions]
     runs-on: ubuntu-latest
     steps:
       - name: Verify every job passed or was skipped
