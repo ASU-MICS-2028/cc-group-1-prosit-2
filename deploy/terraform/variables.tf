@@ -80,15 +80,3 @@ variable "clinician_alert_emails" {
   type        = list(string)
   default     = []
 }
-
-variable "sms_api_key_secret_arn" {
-  description = "Secrets Manager ARN holding the Arkesel API key. Empty: reminders are only logged (the lab's simulated SMS). Real texts go out from production only."
-  type        = string
-  default     = ""
-}
-
-variable "sms_sender_id" {
-  description = "Sender name shown on reminder texts (Arkesel, at most 11 characters, registered with them first)."
-  type        = string
-  default     = "HlthConnect"
-}

@@ -61,6 +61,21 @@ gh variable set APP_URL --env production --body "$(terraform output -raw app_url
 
 **Alarm emails:** AWS sends one "Confirm subscription" email per address and region (Cape Town, plus N. Virginia for the CloudFront alarm). Click both, or no alerts arrive.
 
+## Switching on real texts (SMS)
+
+Until an environment's SMS secret exists, sign-in codes and appointment reminders are only logged (number masked). One secret per environment turns on both:
+
+1. Install the httpSMS app (https://httpsms.com) on a spare Android phone with a SIM that has an SMS bundle, sign in, and set an **encryption key** in the app's settings. Copy the API key from httpsms.com/settings.
+2. Create the secret (staging first; production when it works). Use the default `aws/secretsmanager` key.
+   ```bash
+   aws secretsmanager create-secret --region af-south-1 --name healthconnect/staging/sms \
+     --secret-string '{"provider":"httpsms","apiKey":"<api key>","from":"+233<phone number>","encryptionKey":"<same key as in the app>"}'
+   ```
+   For Arkesel instead: `{"provider":"arkesel","apiKey":"<key>","senderId":"HlthConnect"}`.
+3. Re-run the Deploy workflow for that environment (the API reads the secret at start-up). The reminder function picks it up within minutes, when its next container starts.
+
+With an encryption key, httpSMS's servers only see the phone numbers, never the code or the reminder. The phone must stay on, charged and online; texts it cannot send fail, are retried, and end in the reminders dead-letter queue (alarm). To switch texts off again, delete the secret and redeploy. Turn the demo sign-in (`Demo__Enabled`) off only once real codes arrive.
+
 ## Costs
 
 About **$2.25 a day** while running (ADR 0005 §6). A $20 monthly budget alerts at 50/80/100% on HealthConnect-tagged costs.

@@ -3,7 +3,7 @@
 #   API (EC2)  --publish-->  SNS topic  healthconnect-<env>-appointment-events
 #                               |-- SQS reminders  (+ DLQ)  --> Lambda appointment-reminder
 #                               |                                   `-> EventBridge Scheduler one-off schedule
-#                               |                                         `-> same Lambda, "send" -> SMS (Arkesel, or logged)
+#                               |                                         `-> same Lambda, "send" -> SMS (httpSMS or Arkesel, or logged)
 #                               `-- SQS specialist-notify (+ DLQ, referrals/teleconsults only)
 #                                                               --> Lambda specialist-notify --> SNS clinician alerts (email)
 #
@@ -77,6 +77,10 @@ resource "aws_sns_topic" "appointment_events" {
 }
 
 locals {
+  # Real texts are switched on per environment by creating the secret healthconnect/<env>/sms
+  # by hand (see functions/src/sms.py). Its keys never pass through Terraform state.
+  sms_secret_arn_prefix = "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:healthconnect"
+
   # consumer => SNS filter policy (null = every event)
   consumers = {
     reminders = null
@@ -301,11 +305,11 @@ data "aws_iam_policy_document" "function" {
   }
 
   dynamic "statement" {
-    for_each = each.value.name == "appointment-reminder" && var.sms_api_key_secret_arn != "" ? [1] : []
+    for_each = each.value.name == "appointment-reminder" ? [1] : []
     content {
-      sid       = "SmsApiKey"
+      sid       = "SmsCredentials"
       actions   = ["secretsmanager:GetSecretValue"]
-      resources = [var.sms_api_key_secret_arn]
+      resources = ["${local.sms_secret_arn_prefix}/${each.value.env}/sms-*"]
     }
   }
 
@@ -354,13 +358,12 @@ resource "aws_lambda_function" "event" {
         IDEMPOTENCY_TABLE = aws_dynamodb_table.processed_events[each.value.env].name
       },
       each.value.name == "appointment-reminder" ? {
-        SCHEDULE_GROUP         = aws_scheduler_schedule_group.reminders[each.value.env].name
-        SELF_ARN               = "arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:healthconnect-${each.value.env}-appointment-reminder"
-        SCHEDULER_ROLE_ARN     = aws_iam_role.reminder_scheduler[each.value.env].arn
-        EVENTS_KMS_KEY_ARN     = aws_kms_key.events.arn
-        SMS_PROVIDER           = var.sms_api_key_secret_arn != "" && each.value.env == "production" ? "arkesel" : "log"
-        SMS_API_KEY_SECRET_ARN = var.sms_api_key_secret_arn
-        SMS_SENDER_ID          = var.sms_sender_id
+        SCHEDULE_GROUP     = aws_scheduler_schedule_group.reminders[each.value.env].name
+        SELF_ARN           = "arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:healthconnect-${each.value.env}-appointment-reminder"
+        SCHEDULER_ROLE_ARN = aws_iam_role.reminder_scheduler[each.value.env].arn
+        EVENTS_KMS_KEY_ARN = aws_kms_key.events.arn
+        REMINDER_DLQ_ARN   = aws_sqs_queue.events_dlq["${each.value.env}/reminders"].arn
+        SMS_SECRET_ID      = "healthconnect/${each.value.env}/sms" # texts go out only once this secret exists
       } : {},
       each.value.name == "specialist-notify" ? {
         CLINICIAN_TOPIC_ARN = aws_sns_topic.clinician_alerts[each.value.env].arn
@@ -422,6 +425,21 @@ data "aws_iam_policy_document" "reminder_scheduler" {
   statement {
     actions   = ["kms:Decrypt"]
     resources = [aws_kms_key.events.arn]
+  }
+  statement {
+    sid       = "UndeliveredRemindersToDeadLetterQueue"
+    actions   = ["sqs:SendMessage"]
+    resources = [aws_sqs_queue.events_dlq["${each.key}/reminders"].arn]
+  }
+  statement {
+    sid       = "EncryptForDeadLetterQueue"
+    actions   = ["kms:GenerateDataKey"]
+    resources = [aws_kms_key.events.arn]
+    condition {
+      test     = "StringEquals"
+      variable = "kms:ViaService"
+      values   = ["sqs.${var.region}.amazonaws.com"]
+    }
   }
 }
 

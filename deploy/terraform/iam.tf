@@ -42,6 +42,16 @@ data "aws_iam_policy_document" "app" {
   }
 
   statement {
+    # Sign-in texts: each environment's SMS secret, created by hand when texts are switched on.
+    sid     = "HealthConnectSmsSecrets"
+    actions = ["secretsmanager:GetSecretValue"]
+    resources = [
+      for env in ["production", "staging"] :
+      "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:healthconnect/${env}/sms-*"
+    ]
+  }
+
+  statement {
     sid       = "HealthConnectKeyUseViaServicesOnly"
     actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
     resources = [aws_kms_key.data.arn]
