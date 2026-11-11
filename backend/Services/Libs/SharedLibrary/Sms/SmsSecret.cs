@@ -25,12 +25,27 @@ public static class SmsSecret
     /// <summary>Adds the secret <paramref name="secretId"/>, read by <paramref name="read"/> (null when it does not exist).</summary>
     public static IConfigurationBuilder AddSmsSecret(this IConfigurationBuilder builder, string? secretId, Func<string, string?> read)
     {
-        if (string.IsNullOrWhiteSpace(secretId) || read(secretId) is not { } json)
+        if (string.IsNullOrWhiteSpace(secretId))
         {
             return builder;
         }
 
-        return builder.AddInMemoryCollection(ToSettings(json));
+        string? json;
+        try
+        {
+            json = read(secretId);
+        }
+        catch (Exception problem) when (problem is not OutOfMemoryException)
+        {
+            // Not allowed to read it (permissions not applied yet), no network, ...: the API must still start. Texts stay
+            // logged-only, as with no secret, and this line in the log says why. The message never holds the secret.
+            Console.Error.WriteLine($"SMS secret {secretId} could not be read ({problem.GetType().Name}); texts are only logged.");
+            return builder;
+        }
+
+        // A secret that exists but is malformed still stops start-up (ToSettings throws): the deploy rolls back to the
+        // running release, and whoever created the secret sees it at once instead of codes silently not arriving.
+        return json is null ? builder : builder.AddInMemoryCollection(ToSettings(json));
     }
 
     /// <summary>The secret's JSON as Sms:* settings. Throws without echoing the secret when it is not what we expect.</summary>
