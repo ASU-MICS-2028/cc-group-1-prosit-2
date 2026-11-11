@@ -265,8 +265,9 @@ data "aws_iam_policy_document" "function" {
   }
 
   statement {
-    sid       = "UseEventsKey"
-    actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
+    sid = "UseEventsKey"
+    # The reminder also encrypts the schedules it creates with this key, which needs kms:Encrypt.
+    actions   = each.value.name == "appointment-reminder" ? ["kms:Decrypt", "kms:GenerateDataKey", "kms:Encrypt", "kms:DescribeKey"] : ["kms:Decrypt", "kms:GenerateDataKey"]
     resources = [aws_kms_key.events.arn]
   }
 
