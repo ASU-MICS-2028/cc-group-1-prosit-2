@@ -7,12 +7,16 @@ using HealthConnect.PlatformService;
 using HealthConnect.RecordsService;
 using HealthConnect.SharedLibrary;
 using HealthConnect.SharedLibrary.Features;
+using HealthConnect.SharedLibrary.Sms;
 using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Real texts (sign-in codes) only once this environment's SMS secret exists; see SmsSecret.
+builder.Configuration.AddSmsSecret();
 
 // Structured logs on stdout (Docker sends them to CloudWatch). Never log personal data: log ids only.
 builder.Host.UseSerilog((context, _, logger) =>

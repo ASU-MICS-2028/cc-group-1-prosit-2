@@ -8,31 +8,54 @@ Triggered two ways:
   from now is reminded straight away.
 * by that schedule when the time comes ({"action": "send", ...}): it sends the text.
 
-The text goes through Arkesel (a Ghanaian SMS gateway) when SMS_PROVIDER=arkesel and the API
-key is in Secrets Manager; otherwise it is only logged, which the lab allows for a sandbox.
+The text goes out through the provider in SMS_PROVIDER (Arkesel or httpSMS, see sms.py) when its
+credentials are in Secrets Manager; otherwise it is only logged, which the lab allows for a sandbox.
 """
 
 import json
 import os
-import urllib.request
 from datetime import datetime, timedelta, timezone
 
 from botocore.exceptions import ClientError
 
+import sms
 from common import client, each_message, ghana_time, log, masked, when
 
 CONSUMER = "appointment-reminder"
 REMIND_BEFORE = timedelta(hours=24)
 SHORT_NOTICE_BEFORE = timedelta(hours=1)
-ARKESEL_URL = "https://sms.arkesel.com/api/v2/sms/send"
-
-_api_key = None
 
 
 def handler(event, context):
     if event.get("action") == "send":
         return send_reminder(event)
-    return each_message(event, CONSUMER, on_event)
+    records = event.get("Records", [])
+    resends = [r for r in records if redriven_send(r.get("body"))]
+    result = each_message({"Records": [r for r in records if r not in resends]}, CONSUMER, on_event)
+    for record in resends:
+        try:
+            resend(redriven_send(record["body"]))
+        except Exception:  # noqa: BLE001 - retried, then back to the dead-letter queue
+            log.exception("%s failed to resend %s", CONSUMER, record.get("messageId"))
+            result["batchItemFailures"].append({"itemIdentifier": record.get("messageId")})
+    return result
+
+
+def redriven_send(body):
+    """A reminder that Scheduler could not deliver lands in the dead-letter queue as its own "send"
+    payload. Redriving that queue brings it back here; return it so it is sent, not rejected."""
+    try:
+        payload = json.loads(body)
+    except (TypeError, ValueError):
+        return None
+    return payload if isinstance(payload, dict) and payload.get("action") == "send" else None
+
+
+def resend(payload):
+    if when(payload["appointment"]["scheduledAt"]) <= datetime.now(timezone.utc):
+        log.info(json.dumps({"consumer": CONSUMER, "result": "resend_skipped_visit_passed", "appointmentId": payload["appointment"]["id"]}))
+        return
+    send_reminder(payload)
 
 
 def schedule_name(appointment_id):
@@ -94,6 +117,9 @@ def upsert_schedule(name, at, payload):
             "RetryPolicy": {"MaximumRetryAttempts": 3, "MaximumEventAgeInSeconds": 3600},
         },
     }
+    if os.environ.get("REMINDER_DLQ_ARN"):
+        # a reminder that still fails after the retries is kept (and alarms) instead of vanishing
+        args["Target"]["DeadLetterConfig"] = {"Arn": os.environ["REMINDER_DLQ_ARN"]}
     if os.environ.get("EVENTS_KMS_KEY_ARN"):
         args["KmsKeyArn"] = os.environ["EVENTS_KMS_KEY_ARN"]
     scheduler = client("scheduler")
@@ -125,13 +151,8 @@ def send_reminder(payload):
     appt = payload["appointment"]
     phone = (payload.get("patient") or {}).get("phone")
     text = reminder_text(appt)
-    provider = os.environ.get("SMS_PROVIDER", "log")
-    if provider == "arkesel" and os.environ.get("SMS_API_KEY_SECRET_ARN"):
-        status = send_arkesel(phone, text)
-        result = "reminder_sent"
-    else:
-        status = None
-        result = "reminder_logged"   # no SMS provider switched on: the lab's simulated reminder
+    provider, status = sms.send(phone, text)
+    result = "reminder_logged" if provider == "log" else "reminder_sent"   # log: the lab's simulated reminder
     log.info(json.dumps({
         "consumer": CONSUMER,
         "result": result,
@@ -143,27 +164,3 @@ def send_reminder(payload):
         "providerStatus": status,
     }))
     return {"statusCode": 200, "result": result}
-
-
-def api_key():
-    global _api_key
-    if _api_key is None:
-        secret = client("secretsmanager").get_secret_value(SecretId=os.environ["SMS_API_KEY_SECRET_ARN"])
-        _api_key = secret["SecretString"].strip()
-    return _api_key
-
-
-def send_arkesel(phone, text):
-    body = json.dumps({
-        "sender": os.environ.get("SMS_SENDER_ID", "HealthConnect")[:11],
-        "message": text,
-        "recipients": [phone.lstrip("+")],
-    }).encode()
-    request = urllib.request.Request(
-        os.environ.get("SMS_URL", ARKESEL_URL),
-        data=body,
-        method="POST",
-        headers={"api-key": api_key(), "Content-Type": "application/json", "Accept": "application/json"},
-    )
-    with urllib.request.urlopen(request, timeout=10) as response:   # noqa: S310 - fixed https URL
-        return response.status

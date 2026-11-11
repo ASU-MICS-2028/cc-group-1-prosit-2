@@ -47,9 +47,9 @@ Returns what the caller may see that changed after that moment, oldest first, at
 
 ## Files: `POST /api/media/{id}/upload-url` (chv, nurse, doctor)
 
-Body `{ kind, mime, size, sha256, patientId, ownerEntity, ownerId }`. The answer is `{ url, headers, expiresAt, key }`: a link valid for **5 minutes** that the phone `PUT`s the file to, straight to the private S3 bucket (encrypted with our KMS key; the file never passes through the API). The phone must send the `headers` exactly. Limits: at most **2 MB**; only audio, `image/png` and `image/jpeg`; recordings must be audio and signatures or photos images; the patient must be one the caller may write to. Asking again for the same file gives a fresh link; a different file under the same id is `409`. Without `MEDIA_BUCKET` set (a laptop) the answer is `503 {error:"media_unavailable"}`.
+Body `{ kind, mime, size, sha256, patientId, ownerEntity, ownerId }`. The answer is `{ url, headers, expiresAt, key }`: a link valid for **5 minutes** that the phone `PUT`s the file to, straight to the private S3 bucket (the file never passes through the API). The phone must send the `headers` exactly. Limits: at most **2 MB**; only audio, `image/png` and `image/jpeg`; recordings must be audio and signatures or photos images; the patient must be one the caller may write to. Asking again for the same file gives a fresh link; a different file under the same id is `409`. Without `MEDIA_BUCKET` set (a laptop) the answer is `503 {error:"media_unavailable"}`.
 
-**Needs a one-time change on AWS before browsers can upload:** the bucket has no CORS rule yet, so a browser will refuse the `PUT` (see the deploy notes).
+The bucket allows the `PUT` from the production and staging sites only (a CORS rule in `deploy/terraform/storage.tf`), and encrypts every upload with our own KMS key through the bucket's default, so the link itself names no encryption setting.
 
 ## District summary: `GET /api/surveillance/weekly` (district_officer, admin)
 
