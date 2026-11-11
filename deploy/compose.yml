@@ -38,6 +38,8 @@ services:
     env_file: settings.env
     environment:
       PORT: "8080"
+      # Lab 7: where appointment events go (set by remote-deploy.sh; empty = not published)
+      APPOINTMENT_TOPIC_ARN: ${APPOINTMENT_TOPIC_ARN:-}
     expose: ["8080"]
     read_only: true
     tmpfs: [/tmp]
