@@ -14,7 +14,7 @@ describe("vitalsFlags", () => {
   })
 
   it("flags blood pressure bands, worst band only", () => {
-    expect(vitalsFlags({ systolic: 145, diastolic: 85 })).toEqual(["bpHigh"])
+    expect(vitalsFlags({ systolic: 145, diastolic: 85 })).toEqual(["bpNormal"]) // LAB 9 DEMO: deliberately wrong, CI must fail
     expect(vitalsFlags({ systolic: 130, diastolic: 92 })).toEqual(["bpHigh"])
     expect(vitalsFlags({ systolic: 185, diastolic: 95 })).toEqual(["bpCrisis"])
     expect(vitalsFlags({ systolic: 150, diastolic: 121 })).toEqual(["bpCrisis"])
