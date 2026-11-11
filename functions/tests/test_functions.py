@@ -10,8 +10,10 @@ from botocore.exceptions import ClientError
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+import aes_cfb  # noqa: E402
 import appointment_reminder  # noqa: E402
 import common  # noqa: E402
+import sms  # noqa: E402
 import specialist_notify  # noqa: E402
 
 
@@ -189,37 +191,121 @@ def test_scheduled_send_logs_the_reminder(aws, caplog):
     assert "Dodowa Health Centre" in appointment_reminder.reminder_text(e["appointment"])
 
 
-def test_arkesel_send_uses_the_key_from_secrets_manager(aws, monkeypatch):
-    sent = {}
+class FakeProvider:
+    """Stands in for the SMS provider's web API: records the request, answers with `status` and `body`."""
 
-    class Secrets:
-        def get_secret_value(self, SecretId):
-            return {"SecretString": "test-key\n"}
+    def __init__(self, status=200, body=b'{"status":"success"}'):
+        self.status, self.body, self.requests = status, body, []
 
-    class Response:
-        status = 200
+    def __call__(self, request, timeout):
+        self.requests.append({"url": request.full_url, "headers": dict(request.header_items()), "body": json.loads(request.data)})
+        if self.status >= 400:
+            raise sms.urllib.error.HTTPError(request.full_url, self.status, "refused", {}, None)
+        provider = self
 
-        def __enter__(self):
-            return self
+        class Response:
+            status = provider.status
 
-        def __exit__(self, *_):
-            return False
+            def read(self):
+                return provider.body
 
-    def urlopen(request, timeout):
-        sent["headers"] = dict(request.header_items())
-        sent["body"] = json.loads(request.data)
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return False
+
         return Response()
 
+
+def use_provider(aws, monkeypatch, name, secret, fake=None):
+    class Secrets:
+        def get_secret_value(self, SecretId):
+            assert SecretId == "arn:secret"
+            return {"SecretString": secret}
+
     aws["secretsmanager"] = Secrets()
-    monkeypatch.setattr(appointment_reminder, "_api_key", None)
-    monkeypatch.setattr(appointment_reminder.urllib.request, "urlopen", urlopen)
-    monkeypatch.setenv("SMS_PROVIDER", "arkesel")
-    monkeypatch.setenv("SMS_API_KEY_SECRET_ARN", "arn:secret")
+    fake = fake or FakeProvider()
+    monkeypatch.setattr(sms, "_settings", None)
+    monkeypatch.setattr(sms.urllib.request, "urlopen", fake)
+    monkeypatch.setenv("SMS_PROVIDER", name)
+    monkeypatch.setenv("SMS_SECRET_ARN", "arn:secret")
+    return fake
+
+
+def send(e):
+    return appointment_reminder.send_reminder({"appointment": e["appointment"], "patient": e["patient"]})
+
+
+def test_arkesel_send_uses_the_key_from_secrets_manager(aws, monkeypatch):
+    fake = use_provider(aws, monkeypatch, "arkesel", "test-key\n")
+    assert send(event())["result"] == "reminder_sent"
+    [req] = fake.requests
+    assert req["url"] == sms.ARKESEL_URL
+    assert req["headers"]["Api-key"] == "test-key"
+    assert req["body"]["recipients"] == ["233241234567"]
+
+
+def test_httpsms_sends_from_the_phone_number_with_the_text_encrypted(aws, monkeypatch, caplog):
+    caplog.set_level("INFO")
+    secret = json.dumps({"apiKey": "hs-key", "from": "+233200000999", "encryptionKey": "phone passphrase"})
+    fake = use_provider(aws, monkeypatch, "httpsms", secret)
     e = event()
-    result = appointment_reminder.send_reminder({"appointment": e["appointment"], "patient": e["patient"]})
-    assert result["result"] == "reminder_sent"
-    assert sent["headers"]["Api-key"] == "test-key"
-    assert sent["body"]["recipients"] == ["233241234567"]
+    assert send(e)["result"] == "reminder_sent"
+    [req] = fake.requests
+    assert req["url"] == sms.HTTPSMS_URL
+    assert req["headers"]["X-api-key"] == "hs-key"
+    body = req["body"]
+    assert body["from"] == "+233200000999" and body["to"] == "+233241234567" and body["encrypted"] is True
+    assert "Dodowa" not in body["content"]                     # httpSMS's servers cannot read it
+    assert aes_cfb.httpsms_decrypt("phone passphrase", body["content"]) == appointment_reminder.reminder_text(e["appointment"])
+    assert "+233241234567" not in caplog.text and "hs-key" not in caplog.text
+
+
+def test_httpsms_without_an_encryption_key_sends_plain_text(aws, monkeypatch):
+    fake = use_provider(aws, monkeypatch, "httpsms", json.dumps({"apiKey": "k", "from": "+233200000999"}))
+    e = event()
+    send(e)
+    assert fake.requests[0]["body"]["encrypted"] is False
+    assert fake.requests[0]["body"]["content"] == appointment_reminder.reminder_text(e["appointment"])
+
+
+@pytest.mark.parametrize("status, body", [(401, b""), (500, b"oops"), (200, b'{"status":"error","message":"no phone"}')])
+def test_a_refusal_fails_the_send_so_it_is_retried_without_leaking_anything(aws, monkeypatch, status, body):
+    use_provider(aws, monkeypatch, "httpsms", json.dumps({"apiKey": "hs-key", "from": "+233200000999"}), FakeProvider(status, body))
+    with pytest.raises(sms.SmsError) as err:
+        send(event())
+    assert "hs-key" not in str(err.value) and "233241234567" not in str(err.value)
+
+
+def test_a_provider_without_its_secret_only_logs(aws, monkeypatch):
+    monkeypatch.setenv("SMS_PROVIDER", "httpsms")
+    monkeypatch.delenv("SMS_SECRET_ARN", raising=False)
+    monkeypatch.delenv("SMS_API_KEY_SECRET_ARN", raising=False)
+    assert send(event())["result"] == "reminder_logged"
+
+
+def test_a_redriven_send_from_the_dead_letter_queue_is_sent(aws, monkeypatch):
+    fake = use_provider(aws, monkeypatch, "httpsms", json.dumps({"apiKey": "k", "from": "+233200000999"}))
+    e = event()
+    record = {"messageId": "m1", "body": json.dumps({"action": "send", "eventId": e["eventId"], "appointment": e["appointment"], "patient": e["patient"]})}
+    assert appointment_reminder.handler({"Records": [record]}, None) == {"batchItemFailures": []}
+    assert len(fake.requests) == 1
+
+
+def test_a_redriven_send_for_a_visit_that_has_passed_is_dropped(aws, monkeypatch):
+    fake = use_provider(aws, monkeypatch, "httpsms", json.dumps({"apiKey": "k", "from": "+233200000999"}))
+    e = event(hours_ahead=-2)
+    record = {"messageId": "m1", "body": json.dumps({"action": "send", "appointment": e["appointment"], "patient": e["patient"]})}
+    assert appointment_reminder.handler({"Records": [record]}, None) == {"batchItemFailures": []}
+    assert fake.requests == []
+
+
+def test_schedule_failures_go_to_the_dead_letter_queue(aws, monkeypatch):
+    monkeypatch.setenv("REMINDER_DLQ_ARN", "arn:aws:sqs:af-south-1:1:reminders-dlq")
+    appointment_reminder.handler(sqs(event()), None)
+    [schedule] = aws["scheduler"].schedules.values()
+    assert schedule["Target"]["DeadLetterConfig"] == {"Arn": "arn:aws:sqs:af-south-1:1:reminders-dlq"}
 
 
 # --- specialist notify ---------------------------------------------------------------------
