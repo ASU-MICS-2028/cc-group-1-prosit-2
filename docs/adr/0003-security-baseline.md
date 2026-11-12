@@ -1,7 +1,8 @@
 # ADR 0003: Security baseline on AWS (Lab 6)
 
-- **Status:** Proposed (applied by the DevOps lead)
+- **Status:** Accepted (applied by the DevOps lead)
 - **Date:** 2026-10-26
+- **Update (Nov 2026):** The public load balancer was replaced by an internal one behind CloudFront VPC origins (ADR 0005).
 
 ## Context
 Health data is more sensitive than AgroConnect's farm records. Lab 6 asks for least-privilege IAM with allow and deny evidence, verified encryption at rest and in transit, a FHIR-aligned schema and audit logging. The infrastructure part (IAM, encryption, TLS) is the DevOps lead's. The schema and audit log belong to the database, backend and security owners.

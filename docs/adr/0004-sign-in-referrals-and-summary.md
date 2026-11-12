@@ -1,7 +1,8 @@
 # ADR 0004: Sign-in, referral status and the district summary
 
-- **Status:** Accepted (frontend); server side to match
+- **Status:** Accepted (frontend and server)
 - **Date:** 2026-10-27
+- **Update (Nov 2026):** The API implements `/auth/code`, `/auth/verify` and `/surveillance/weekly`; the app talks to the real API by default, and demo mode remains only for the five synthetic workers.
 
 ## Context
 Three screens were waiting on decisions owned by other people: how health workers sign in (backend and security), how a referral moves between a CHV and a clinician (backend), and what the district officer sees (data). With the feature freeze on Mon 2 Nov, the frontend made the calls, built them behind clean API seams, and records them here so the server side can match.
