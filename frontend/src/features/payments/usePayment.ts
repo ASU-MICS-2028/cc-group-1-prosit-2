@@ -7,30 +7,47 @@ import {
 import type { Appointment } from "@/db/types"
 import { useOnline } from "@/lib/useOnline"
 
-/** The fee for one visit, asked of the server when there is a signal. null: not asked (offline, demo, or no fee). */
+/** Why the fee isn't known: the visit hasn't reached the server yet, there's no signal, or the server didn't answer. */
+export type PaymentProblem = "unsynced" | "offline" | "error"
+
+/**
+ * The fee for one visit, asked of the server. Until the answer is in, nobody may assume there's no
+ * fee: the call button waits for it (an offline-booked visit the server doesn't have yet would
+ * otherwise look free).
+ */
 export function usePayment(a: Pick<Appointment, "id" | "type" | "status">) {
   const online = useOnline()
   const [payment, setPayment] = useState<PaymentStatus | null>(null)
+  const [failure, setFailure] = useState<"unsynced" | "error" | null>(null)
   const [version, setVersion] = useState(0)
-  const active =
-    a.type === "teleconsult" &&
-    a.status === "scheduled" &&
-    online &&
-    paymentsAvailable()
+  const wanted = a.type === "teleconsult" && a.status === "scheduled"
+  const available = paymentsAvailable()
 
   useEffect(() => {
-    if (!active) return
+    if (!wanted || !available || !online) return
     let current = true
-    // Not on the server yet (offline booking) or no signal: leave it unknown; the call page says why.
     paymentStatus(a.id).then(
-      (p) => current && setPayment(p),
-      () => undefined
+      (p) => {
+        if (!current) return
+        setPayment(p)
+        setFailure(null)
+      },
+      (e: { status?: number }) => {
+        if (current) setFailure(e.status === 404 ? "unsynced" : "error")
+      }
     )
     return () => {
       current = false
     }
-  }, [a.id, active, version])
+  }, [a.id, wanted, available, online, version])
 
   const refresh = useCallback(() => setVersion((v) => v + 1), [])
-  return { payment, refresh }
+  // The offline demo has no payments at all: treat it as known and free.
+  const problem: PaymentProblem | null = !available
+    ? null
+    : !online && !payment
+      ? "offline"
+      : failure
+  const known = !available || payment !== null
+  return { payment, known, problem, refresh }
 }

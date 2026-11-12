@@ -1,10 +1,12 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { cedis, mustPay, startCheckout } from "@/api/payments"
 import { useOnline } from "@/lib/useOnline"
 import { CircleCheckBig, Video } from "@/components/icons"
 import type { Appointment } from "@/db/types"
+import { callWindow } from "@/features/calls/callWindow"
+import { formatDateTime } from "@/lib/dates"
 import { cn } from "@/lib/utils"
 import { usePayment } from "./usePayment"
 
@@ -28,7 +30,14 @@ export function TeleconsultJoin({
 }) {
   const { t, i18n } = useTranslation()
   const online = useOnline()
-  const { payment } = usePayment(a)
+  const { payment, known, problem } = usePayment(a)
+  // Re-check the time every 20 s, so the button opens on its own when the window starts.
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 20_000)
+    return () => clearInterval(timer)
+  }, [])
+  const window_ = callWindow(a, now)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<PayError | null>(null)
 
@@ -55,12 +64,43 @@ export function TeleconsultJoin({
   }
 
   const amount = payment ? cedis(payment.amountPesewas, i18n.language) : ""
-  const join = (
-    <Link to={`/appointments/${a.id}/call`} className={className}>
-      <Video className="size-5" aria-hidden />
-      {t("call.join")}
-    </Link>
-  )
+  const join =
+    window_.state === "open" ? (
+      <Link to={`/appointments/${a.id}/call`} className={className}>
+        <Video className="size-5" aria-hidden />
+        {t("call.join")}
+      </Link>
+    ) : (
+      // Outside the booked time: shown, but can't be pressed.
+      <button
+        type="button"
+        disabled
+        aria-disabled
+        className={cn(className, "cursor-not-allowed opacity-50")}
+      >
+        <Video className="size-5" aria-hidden />
+        {window_.state === "early"
+          ? t("call.opensAt", {
+              when: formatDateTime(window_.opensAt.toISOString()),
+            })
+          : t("call.ended_window")}
+      </button>
+    )
+
+  // The fee isn't known yet: never show the call as free.
+  if (!known) {
+    return (
+      <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+        {problem === "unsynced"
+          ? t("payments.notSynced")
+          : problem === "offline"
+            ? t("payments.error_offline")
+            : problem === "error"
+              ? t("payments.cantCheckNow")
+              : t("payments.checkingFee")}
+      </p>
+    )
+  }
 
   if (!mustPay(payment)) {
     return (

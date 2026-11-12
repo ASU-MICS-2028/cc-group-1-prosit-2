@@ -927,6 +927,9 @@
           "402": {
             "description": "Payment Required"
           },
+          "409": {
+            "description": "Conflict"
+          },
           "404": {
             "description": "Not Found"
           },

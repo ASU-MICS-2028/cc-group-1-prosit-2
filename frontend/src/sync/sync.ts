@@ -69,7 +69,18 @@ async function send(): Promise<SyncResult> {
     try {
       await put(item, item.payload)
       result.sent++
-    } catch (error) {
+    } catch (first) {
+      let error = first
+      // A new patient typed in with another district: put it in the CHV's own and send it again.
+      if (await healDistrict(item, error)) {
+        try {
+          await put(item, item.payload)
+          result.sent++
+          continue
+        } catch (again) {
+          error = again
+        }
+      }
       const current = conflictCopy(error)
       if (current) {
         result.conflicts++
@@ -95,6 +106,34 @@ async function send(): Promise<SyncResult> {
     if (pulled) result.pulled = pulled
   }
   return result
+}
+
+/**
+ * Before the district was filled in for them, a CHV could type another district, which the server
+ * refuses for ever (403 wrong_district): the patient, and every reading and visit after it, stayed
+ * stuck. For a patient the server has never accepted, the district is the CHV's own, so it is
+ * corrected here, on the phone and in the queue, and sent again.
+ */
+async function healDistrict(
+  item: OutboxItem,
+  error: unknown
+): Promise<boolean> {
+  const session = getSession()
+  if (
+    !(error instanceof ApiError) ||
+    error.status !== 403 ||
+    !error.message.includes("wrong_district") ||
+    item.entity !== "patient" ||
+    session?.user.role !== "chv"
+  )
+    return false
+  const district = session.user.district
+  const payload = item.payload as AnyRecord & { district?: string }
+  if (!district || payload.district === district) return false
+  item.payload = { ...payload, district }
+  await db.outbox.update(item.seq!, { payload: item.payload })
+  await db.patients.update(item.entityId, { district })
+  return true
 }
 
 /** PUT one queued change; once the server has it, take its copy and version and drop the change from the queue. */
