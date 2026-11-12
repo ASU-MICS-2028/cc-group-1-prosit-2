@@ -300,7 +300,7 @@
     "changePhoto": "Change photo",
     "removePhoto": "Remove photo",
     "choosePhoto": "Choose a profile photo",
-    "photoHint": "Your photo stays on this phone.",
+    "photoHint": "Your photo shows on any phone you sign in on.",
     "photoError": "That picture couldn't be used. Try another one.",
     "theme": "Appearance",
     "theme_system": "Phone",

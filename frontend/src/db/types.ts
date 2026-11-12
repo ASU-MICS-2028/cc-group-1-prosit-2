@@ -177,9 +177,14 @@ export interface AuditEvent {
   syncedAt?: string
 }
 
-/** A health worker's profile photo: resized on the phone, stored on the phone only. */
+/**
+ * A health worker's profile photo: resized on the phone, kept here for offline use and on the
+ * server (/api/auth/me/photo) so it is the same on every phone they sign in on.
+ */
 export interface ProfilePhoto {
   userId: string
   photo: Blob
   updatedAt: string
+  /** set once the server has this photo */
+  syncedAt?: string
 }

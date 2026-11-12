@@ -202,12 +202,16 @@ public sealed class AuthServiceExtensionTests
         app.MapFeatures();
 
         var endpoints = ((IEndpointRouteBuilder)app).DataSources.SelectMany(s => s.Endpoints).OfType<RouteEndpoint>()
-            .ToDictionary(e => e.RoutePattern.RawText!);
-        Assert.Equal(["POST"], endpoints["/api/auth/code"].Metadata.GetMetadata<HttpMethodMetadata>()!.HttpMethods);
-        Assert.Equal(["POST"], endpoints["/api/auth/verify"].Metadata.GetMetadata<HttpMethodMetadata>()!.HttpMethods);
-        Assert.Equal(["GET"], endpoints["/api/auth/me"].Metadata.GetMetadata<HttpMethodMetadata>()!.HttpMethods);
-        Assert.NotNull(endpoints["/api/auth/code"].Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.IAllowAnonymous>());
-        Assert.NotNull(endpoints["/api/auth/verify"].Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.IAllowAnonymous>());
-        Assert.NotEmpty(endpoints["/api/auth/me"].Metadata.GetOrderedMetadata<Microsoft.AspNetCore.Authorization.IAuthorizeData>());
+            .GroupBy(e => e.RoutePattern.RawText!)
+            .ToDictionary(g => g.Key, g => g.ToList());
+        var photo = endpoints["/api/auth/me/photo"];
+        Assert.Equal(["DELETE", "GET", "PUT"], photo.SelectMany(e => e.Metadata.GetMetadata<HttpMethodMetadata>()!.HttpMethods).Order());
+        Assert.All(photo, e => Assert.NotEmpty(e.Metadata.GetOrderedMetadata<Microsoft.AspNetCore.Authorization.IAuthorizeData>()));
+        Assert.Equal(["POST"], endpoints["/api/auth/code"][0].Metadata.GetMetadata<HttpMethodMetadata>()!.HttpMethods);
+        Assert.Equal(["POST"], endpoints["/api/auth/verify"][0].Metadata.GetMetadata<HttpMethodMetadata>()!.HttpMethods);
+        Assert.Equal(["GET"], endpoints["/api/auth/me"][0].Metadata.GetMetadata<HttpMethodMetadata>()!.HttpMethods);
+        Assert.NotNull(endpoints["/api/auth/code"][0].Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.IAllowAnonymous>());
+        Assert.NotNull(endpoints["/api/auth/verify"][0].Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.IAllowAnonymous>());
+        Assert.NotEmpty(endpoints["/api/auth/me"][0].Metadata.GetOrderedMetadata<Microsoft.AspNetCore.Authorization.IAuthorizeData>());
     }
 }
