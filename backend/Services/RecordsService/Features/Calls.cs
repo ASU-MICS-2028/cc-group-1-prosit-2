@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using HealthConnect.Data;
 using HealthConnect.RecordsService.Calls;
+using HealthConnect.RecordsService.Models;
 using HealthConnect.RecordsService.Patients;
 using HealthConnect.RecordsService.Payments;
 using HealthConnect.RecordsService.Store;
@@ -37,6 +38,7 @@ public sealed class PostCallTicket : IFeature
             .Produces<CallTicketDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status402PaymentRequired)
+            .Produces(StatusCodes.Status409Conflict)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status422UnprocessableEntity);
 
@@ -49,6 +51,7 @@ public sealed class PostCallTicket : IFeature
         PaymentSettings payments,
         PaymentStore paid,
         PatientRecords patients,
+        TimeProvider time,
         CancellationToken cancellationToken)
     {
         // A worker who may see the visit, or the patient whose visit it is (they may call in from their own phone).
@@ -66,6 +69,20 @@ public sealed class PostCallTicket : IFeature
         if (appointment.Dto.Status != "scheduled" || appointment.Dto.ReferralStatus == "declined")
         {
             return ApiResults.Validation("appointmentId", "This teleconsultation is closed.");
+        }
+
+        // Only around the booked time: from a little before (people need a moment to get ready) until it has had time to run late.
+        // An emergency can start as soon as it's booked.
+        var (opens, closes) = CallWindow.For(appointment.Dto);
+        var now = time.GetUtcNow();
+        if (now < opens)
+        {
+            return ApiResults.Error(StatusCodes.Status409Conflict, "too_early");
+        }
+
+        if (now > closes)
+        {
+            return ApiResults.Error(StatusCodes.Status409Conflict, "too_late");
         }
 
         // The consultation fee comes first (emergencies never wait); only when payments are switched on for this environment.
@@ -226,4 +243,17 @@ public sealed partial class CallSocket : IFeature
 
     [LoggerMessage(Level = LogLevel.Information, Message = "{UserId} left the call for appointment {AppointmentId}")]
     private static partial void LogLeft(ILogger logger, string userId, Guid appointmentId);
+}
+
+/// <summary>
+/// When a teleconsult's call can be joined: from <see cref="Before"/> ahead of the booked time until <see cref="After"/> after it.
+/// An emergency can start at once. The app uses the same numbers to grey out the Join button.
+/// </summary>
+public static class CallWindow
+{
+    public static readonly TimeSpan Before = TimeSpan.FromMinutes(15);
+    public static readonly TimeSpan After = TimeSpan.FromHours(2);
+
+    public static (DateTimeOffset Opens, DateTimeOffset Closes) For(AppointmentDto appointment) =>
+        (appointment.Priority == "emergency" ? DateTimeOffset.MinValue : appointment.ScheduledAt - Before, appointment.ScheduledAt + After);
 }

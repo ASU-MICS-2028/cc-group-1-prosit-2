@@ -28,6 +28,7 @@ export type CallError =
   | "no_path"
   | "server"
   | "payment"
+  | "window"
 
 type Signal =
   | { type: "waiting" | "peer-left" | "full" }
@@ -193,11 +194,13 @@ export function useCall(appointmentId: string) {
         setError(
           status === 402
             ? "payment"
-            : status === 422
-              ? "closed"
-              : status === 403 || status === 404
-                ? "not_allowed"
-                : "server"
+            : status === 409
+              ? "window"
+              : status === 422
+                ? "closed"
+                : status === 403 || status === 404
+                  ? "not_allowed"
+                  : "server"
         )
         return
       }

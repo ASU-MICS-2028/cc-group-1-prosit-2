@@ -163,7 +163,7 @@ export function Component() {
                   {item.lastError === "conflict"
                     ? t("sync.conflict")
                     : item.lastError
-                      ? t("sync.failed")
+                      ? t(`sync.${whyFailed(item.lastError)}` as const)
                       : t("sync.queued")}
                 </span>
               </li>
@@ -173,4 +173,13 @@ export function Component() {
       )}
     </>
   )
+}
+
+/** A refusal in words: the raw error is the server's reply or the browser's network error. */
+function whyFailed(error: string) {
+  if (error.includes("wrong_district")) return "failed_district"
+  if (error.includes("not on the server yet")) return "failed_patient"
+  if (/Failed to fetch|NetworkError|Load failed/i.test(error))
+    return "failed_network"
+  return "failed"
 }

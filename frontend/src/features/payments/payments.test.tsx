@@ -30,7 +30,7 @@ const teleconsult: Appointment = {
   priority: "urgent",
   status: "scheduled",
   referralStatus: "accepted",
-  scheduledAt: new Date(Date.now() + 3600_000).toISOString(),
+  scheduledAt: new Date(Date.now() + 10 * 60_000).toISOString(), // inside the call window
   createdAt: now,
   updatedAt: now,
   version: 0,
@@ -175,5 +175,48 @@ describe("consultation fee", () => {
     expect(await screen.findByText("1 consultation paid")).toBeInTheDocument()
     expect(screen.getByText("Collected by Akosua Mensah")).toBeInTheDocument()
     expect(screen.queryByText(/Abena/)).not.toBeInTheDocument()
+  })
+
+  it("keeps the call closed until 15 minutes before the booked time, and after it has passed", async () => {
+    api("paid")
+    await db.patients.add(patient)
+    const later = {
+      ...teleconsult,
+      id: "22222222-2222-4222-8222-222222222222",
+      scheduledAt: new Date(Date.now() + 3 * 3600_000).toISOString(),
+    }
+    const gone = {
+      ...teleconsult,
+      id: "33333333-3333-4333-8333-333333333333",
+      scheduledAt: new Date(Date.now() - 3 * 3600_000).toISOString(),
+    }
+    await db.appointments.bulkAdd([later, gone])
+    renderRoute("/patients/p1")
+
+    const opens = await screen.findByRole("button", { name: /Call opens/ })
+    expect(opens).toBeDisabled()
+    expect(
+      screen.getByRole("button", { name: /call time has passed/ })
+    ).toBeDisabled()
+    expect(
+      screen.queryByRole("link", { name: /Join video call/ })
+    ).not.toBeInTheDocument()
+  })
+
+  it("never shows a visit the server doesn't have yet as free", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json({ error: "not_found" }, { status: 404 }))
+    )
+    await db.patients.add(patient)
+    await db.appointments.add(teleconsult)
+    renderRoute("/appointments")
+
+    expect(
+      await screen.findByText(/hasn't reached the server yet/)
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("link", { name: /Join video call/ })
+    ).not.toBeInTheDocument()
   })
 })

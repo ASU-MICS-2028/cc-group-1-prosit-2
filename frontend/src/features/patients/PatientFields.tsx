@@ -4,7 +4,9 @@ import {
   useFormState,
   useWatch,
 } from "react-hook-form"
+import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { useSession } from "@/auth/session"
 import { ChoiceTiles } from "@/components/form/ChoiceTiles"
 import { DatePicker } from "@/components/form/DatePicker"
 import { describe } from "@/components/form/describe"
@@ -139,8 +141,16 @@ export function PersonFields() {
 /** Where the patient lives and how to reach them. */
 export function PlaceFields() {
   const { t } = useTranslation()
-  const { register, control } = useFormContext<DetailsForm>()
+  const { register, control, setValue } = useFormContext<DetailsForm>()
   const err = useErr()
+  // A CHV registers patients in their own district only (the server and the database refuse any
+  // other): it is filled in and can't be changed, so a record can't get stuck unsent.
+  const session = useSession()
+  const ownDistrict =
+    session?.user.role === "chv" ? session.user.district : undefined
+  useEffect(() => {
+    if (ownDistrict) setValue("district", ownDistrict, { shouldValidate: true })
+  }, [ownDistrict, setValue])
   return (
     <>
       <Field
@@ -156,11 +166,15 @@ export function PlaceFields() {
       <Field
         id="district"
         label={t("patient.district")}
+        hint={ownDistrict ? t("newPatient.districtFixed") : undefined}
         error={err("district")}
       >
         <Input
           {...register("district")}
           {...describe("district", err("district"))}
+          readOnly={!!ownDistrict}
+          aria-readonly={!!ownDistrict}
+          className={ownDistrict ? "bg-muted" : undefined}
         />
       </Field>
       <Field

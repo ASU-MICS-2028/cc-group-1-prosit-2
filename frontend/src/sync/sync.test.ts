@@ -479,3 +479,51 @@ describe("pulling by role", () => {
     }
   )
 })
+
+describe("a patient typed in with another district", () => {
+  it("is moved to the CHV's own district and sent again, and the queue behind it goes too", async () => {
+    signIn("chv") // district Shai-Osudoku
+    const now = new Date().toISOString()
+    const p: Patient = {
+      id: newId(),
+      givenName: "Ama",
+      familyName: "Owusu",
+      sex: "female",
+      dateOfBirth: "1990-01-01",
+      birthDateEstimated: false,
+      community: "Dodowa",
+      district: "Dodowa", // the old free-text box
+      preferredLanguage: "tw",
+      consent: { given: true, method: "spoken", at: now },
+      createdAt: now,
+      updatedAt: now,
+      version: 0,
+    }
+    await saveAndQueue("patient", p)
+    const v = { ...vitals(), patientId: p.id }
+    await saveAndQueue("vitals", v)
+    const sent: { url: string; district?: string }[] = []
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        const body = init?.body ? JSON.parse(String(init.body)) : {}
+        if (init?.method === "PUT") sent.push({ url, district: body.district })
+        if (url.includes("/patients/") && body.district !== "Shai-Osudoku")
+          return Response.json({ error: "wrong_district" }, { status: 403 })
+        if (init?.method === "PUT") return new Response(null, { status: 204 })
+        return Response.json([])
+      })
+    )
+
+    const result = await syncNow()
+
+    expect(result.failed).toBe(0)
+    expect(await db.outbox.count()).toBe(0)
+    expect((await db.patients.get(p.id))?.district).toBe("Shai-Osudoku")
+    expect(sent.map((s) => s.district ?? "vitals")).toEqual([
+      "Dodowa",
+      "Shai-Osudoku",
+      "vitals",
+    ])
+  })
+})

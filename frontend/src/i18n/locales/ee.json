@@ -152,7 +152,8 @@
     "nationalIdWhy": "Mehiã o. Ɖeko na NHIS dodokpɔ.",
     "statementTitle": "Xlẽ esia na dɔnɔ la",
     "statement": "Míedi be míadzra wò lãmesẽ ŋuti nuŋlɔɖiwo ɖo fon sia dzi, eye míaɖo wo ɖe Ghana Health Service le mɔ dedie dzi, ale be wò lãmesẽdɔwɔlawo nate ŋu akpɔ wò ɖe ŋu. Wò lãmesẽdɔwɔlawo ɖeɖe koe akpɔe. Àte ŋu agblɔ be ao, eye àte ŋu agblɔ na mí be míadzudzɔ ɣesiaɣi. Èlɔ̃a?",
-    "statementVersion": "Lɔlɔ̃ ŋuti nyawo {{version}}"
+    "statementVersion": "Lɔlɔ̃ ŋuti nyawo {{version}}",
+    "districtFixed": "Patients are registered in your own district."
   },
   "consent": {
     "spoken": "Kple nu",
@@ -269,7 +270,10 @@
     "field_nationalId": "ID number",
     "field_community": "Community",
     "field_district": "District",
-    "field_preferredLanguage": "Language"
+    "field_preferredLanguage": "Language",
+    "failed_district": "Another district: fixing it and trying again",
+    "failed_patient": "Waiting for its patient to be sent first",
+    "failed_network": "No connection: will try again"
   },
   "surveillance": {
     "title": "Nutome ƒe kpuie",
@@ -554,7 +558,10 @@
     "error_server": "Could not reach the call server. Try again in a moment.",
     "demo": "Video calls need a real sign-in. Demo accounts work offline only.",
     "tapForSound": "Tap to turn on the sound",
-    "error_payment": "The consultation fee isn't paid yet. The CHV can collect it from Visits."
+    "error_payment": "The consultation fee isn't paid yet. The CHV can collect it from Visits.",
+    "opensAt": "Call opens {{when}}",
+    "ended_window": "This call time has passed",
+    "error_window": "This call isn't open now. It opens 15 minutes before the booked time and closes 2 hours after."
   },
   "payments": {
     "title": "Payments",
@@ -601,7 +608,10 @@
     "status_unpaid": "Not paid",
     "status_exempt": "No fee",
     "status_not_required": "No fee",
-    "paidByPatient": "Paid by the patient"
+    "paidByPatient": "Paid by the patient",
+    "notSynced": "This visit hasn't reached the server yet. Once it syncs, the fee and the call appear here.",
+    "cantCheckNow": "The fee couldn't be checked just now. Pull down to refresh, or try again in a minute.",
+    "checkingFee": "Checking the consultation fee…"
   },
   "my": {
     "title": "My health",
