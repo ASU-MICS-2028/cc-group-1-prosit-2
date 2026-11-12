@@ -97,6 +97,45 @@ function VideoView({
   )
 }
 
+/**
+ * The other side's voice, in its own audio element. Phone browsers may refuse to start sound on
+ * their own (autoplay rules) and do it silently: the picture plays and the voice doesn't. The
+ * picture is muted so it always plays, and if the voice is refused the person gets a button.
+ */
+function RemoteSound({ stream }: { stream: MediaStream | null }) {
+  const { t } = useTranslation()
+  const ref = useRef<HTMLAudioElement>(null)
+  const [blocked, setBlocked] = useState(false)
+  const play = () =>
+    ref.current
+      ?.play()
+      .then(() => setBlocked(false))
+      .catch(() => setBlocked(true))
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    el.srcObject = stream
+    if (!stream) return
+    el.play()
+      .then(() => setBlocked(false))
+      .catch(() => setBlocked(true))
+  }, [stream])
+  return (
+    <>
+      <audio ref={ref} autoPlay data-testid="remote-sound" />
+      {blocked ? (
+        <button
+          type="button"
+          onClick={() => void play()}
+          className="absolute inset-x-0 bottom-20 z-10 mx-auto w-fit rounded-full bg-white px-5 py-3 text-sm font-semibold text-neutral-900 shadow-lg"
+        >
+          {t("call.tapForSound")}
+        </button>
+      ) : null}
+    </>
+  )
+}
+
 function CallSession({
   appointmentId,
   subtitle,
@@ -130,12 +169,14 @@ function CallSession({
       <div className="relative overflow-hidden rounded-2xl bg-neutral-900 text-white aspect-[3/4] sm:aspect-video">
         <VideoView
           stream={call.remote}
+          muted
           label={t("call.title")}
           className={cn(
             "absolute inset-0 size-full object-cover",
             !call.remote && "hidden"
           )}
         />
+        <RemoteSound stream={call.remote} />
         {!call.remote ? (
           <div className="absolute inset-0 grid place-items-center p-6 text-center">
             <div>
