@@ -20,7 +20,19 @@ export function AppPrompts({ pathname }: { pathname: string }) {
     offlineReady: [offlineReady, setOfflineReady],
     updateServiceWorker,
     // Register now: React mounts after the page's "load" event, which the default waits for.
-  } = useRegisterSW({ immediate: true })
+  } = useRegisterSW({
+    immediate: true,
+    // Look for a new version whenever the app is opened again and every half hour, not only when
+    // the browser decides to (which can take a day on a phone that's never closed).
+    onRegisteredSW(_url, registration) {
+      if (!registration) return
+      const check = () => void registration.update().catch(() => undefined)
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") check()
+      })
+      setInterval(check, 30 * 60_000)
+    },
+  })
   const { canInstall, install, dismiss } = useInstallPrompt()
   const quiet = QUIET.test(pathname)
 

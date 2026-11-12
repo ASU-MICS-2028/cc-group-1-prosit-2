@@ -10,6 +10,8 @@ const BRAND = "#0066ff"
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Shown on Profile next to "Get the latest version", so two phones can compare versions.
+  define: { __APP_BUILT_AT__: JSON.stringify(new Date().toISOString()) },
   plugins: [
     react(),
     // React Compiler: auto-memoizes components so we don't hand-write useMemo/useCallback

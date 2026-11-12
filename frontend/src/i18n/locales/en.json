@@ -130,7 +130,8 @@
     "witness": "Witness: {{name}}",
     "fileWaiting": "Waiting to upload",
     "fileSent": "Uploaded",
-    "noEvidence": "No recording: a witness confirmed it."
+    "noEvidence": "No recording: a witness confirmed it.",
+    "openVisit": "Open"
   },
   "newPatient": {
     "title": "Register a patient",
@@ -309,7 +310,10 @@
     "theme": "Appearance",
     "theme_system": "Phone",
     "theme_light": "Light",
-    "theme_dark": "Dark"
+    "theme_dark": "Dark",
+    "update": "Get the latest version",
+    "updating": "Getting the latest version…",
+    "version": "This version: {{when}}"
   },
   "pwa": {
     "updateTitle": "A new version is ready",
@@ -359,7 +363,8 @@
     "tip1": "Explain to the patient why they need to go today, in their language.",
     "tip2": "If they cannot travel, call the facility and tell the nurse on duty.",
     "book": "Book the referral",
-    "later": "Not now"
+    "later": "Not now",
+    "teleconsult": "Book a video consultation instead"
   },
   "chart": {
     "title": "Blood pressure",

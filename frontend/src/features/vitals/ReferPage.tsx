@@ -46,6 +46,9 @@ export function Component() {
     priority: urgent.length ? "urgent" : "routine",
     reason: `${reasons.join(", ")}. ${readings}`,
   })
+  // The same request as a video call with a doctor, for when the patient can't travel.
+  const teleconsult = new URLSearchParams(referral)
+  teleconsult.set("type", "teleconsult")
 
   return (
     <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-md flex-col gap-5">
@@ -95,6 +98,16 @@ export function Component() {
           className={cn(buttonVariants({ size: "xl" }), "w-full")}
         >
           {t("refer.book")}
+        </Link>
+        <Link
+          to={`/patients/${id}/appointments/new?${teleconsult}`}
+          replace
+          className={cn(
+            buttonVariants({ size: "xl", variant: "secondary" }),
+            "w-full"
+          )}
+        >
+          {t("refer.teleconsult")}
         </Link>
         <Link
           to={`/patients/${id}`}

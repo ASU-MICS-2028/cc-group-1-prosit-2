@@ -130,7 +130,8 @@
     "witness": "Shaida: {{name}}",
     "fileWaiting": "Yana jiran a tura",
     "fileSent": "An tura",
-    "noEvidence": "Babu naɗi: wani shaida ya tabbatar."
+    "noEvidence": "Babu naɗi: wani shaida ya tabbatar.",
+    "openVisit": "Open"
   },
   "newPatient": {
     "title": "Yi wa mara lafiya rajista",
@@ -309,7 +310,10 @@
     "theme": "Kamanni",
     "theme_system": "Waya",
     "theme_light": "Haske",
-    "theme_dark": "Duhu"
+    "theme_dark": "Duhu",
+    "update": "Get the latest version",
+    "updating": "Getting the latest version…",
+    "version": "This version: {{when}}"
   },
   "pwa": {
     "updateTitle": "Sabon sigar ya shirya",
@@ -359,7 +363,8 @@
     "tip1": "Ka bayyana wa mara lafiyar a harshensa dalilin da ya sa dole ya tafi yau.",
     "tip2": "Idan ba zai iya tafiya ba, ka kira asibitin ka gaya wa ma'aikaciyar jinya da ke bakin aiki.",
     "book": "Tsara turawar",
-    "later": "Ba yanzu ba"
+    "later": "Ba yanzu ba",
+    "teleconsult": "Book a video consultation instead"
   },
   "chart": {
     "title": "Hawan jini",

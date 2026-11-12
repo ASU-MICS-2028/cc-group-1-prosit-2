@@ -130,7 +130,8 @@
     "witness": "Ɖaseɖila: {{name}}",
     "fileWaiting": "Ele lalam be woaɖoe ɖa",
     "fileSent": "Woɖoe ɖa",
-    "noEvidence": "Womexɔe ɖe gbe me o: ɖaseɖila aɖe ɖi ɖase."
+    "noEvidence": "Womexɔe ɖe gbe me o: ɖaseɖila aɖe ɖi ɖase.",
+    "openVisit": "Open"
   },
   "newPatient": {
     "title": "Ŋlɔ dɔnɔ ƒe ŋkɔ",
@@ -309,7 +310,10 @@
     "theme": "Ale si wòdze",
     "theme_system": "Fon la",
     "theme_light": "Kekeli",
-    "theme_dark": "Viviti"
+    "theme_dark": "Viviti",
+    "update": "Get the latest version",
+    "updating": "Getting the latest version…",
+    "version": "This version: {{when}}"
   },
   "pwa": {
     "updateTitle": "Nɔnɔme yeye ɖe le klalo",
@@ -359,7 +363,8 @@
     "tip1": "Ɖe nusita wòle be wòayi egbe la gɔme na dɔnɔ la le eƒe gbe me.",
     "tip2": "Ne mate ŋu azɔ mɔ o la, yɔ dɔyɔƒe la eye nàgblɔe na dɔyɔla si le dɔ dzi.",
     "book": "Ɖo ɖoɖo la",
-    "later": "Menye fifia o"
+    "later": "Menye fifia o",
+    "teleconsult": "Book a video consultation instead"
   },
   "chart": {
     "title": "Ʋuƒoƒo",
