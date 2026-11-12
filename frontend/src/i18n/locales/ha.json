@@ -217,7 +217,9 @@
     "reason": "Dalili",
     "save": "Tsara",
     "editTitle": "Canja ziyarar",
-    "saveChanges": "Ajiye canje-canje"
+    "saveChanges": "Ajiye canje-canje",
+    "fromReadings": "An saita zuwa {{priority}} daga awo na ƙarshe.",
+    "belowReadings": "Awo na ƙarshe yana buƙatar {{priority}}. Kada ka rage shi sai dai idan ma'aikaciyar jinya ko likita ya gaya maka."
   },
   "appointmentType": {
     "follow_up": "Ziyarar bibiya",

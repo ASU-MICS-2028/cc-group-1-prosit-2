@@ -217,7 +217,9 @@
     "reason": "Nea enti",
     "save": "Hyɛ da",
     "editTitle": "Sesa nsrahwɛ no",
-    "saveChanges": "Kora nsakraeɛ no"
+    "saveChanges": "Kora nsakraeɛ no",
+    "fromReadings": "Nsusuiɛ a ɛtwa toɔ no ama yɛde ato {{priority}}.",
+    "belowReadings": "Nsusuiɛ a ɛtwa toɔ no kyerɛ sɛ ɛyɛ {{priority}}. Sɛ nɛɛse anaa dɔkota anka a, nsi no fam."
   },
   "appointmentType": {
     "follow_up": "Nsrahwɛ bio",

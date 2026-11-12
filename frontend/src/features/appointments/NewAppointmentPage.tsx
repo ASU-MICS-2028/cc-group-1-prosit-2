@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useLiveQuery } from "dexie-react-hooks"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { saved, saveFailed } from "@/lib/feedback"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
@@ -16,6 +16,12 @@ import { db, newId, saveAndQueue } from "@/db/local"
 import { toLocalInput } from "@/lib/dates"
 import { APPOINTMENT_TYPES, type Appointment } from "@/db/types"
 import { fullName, usePatient } from "@/features/patients/usePatients"
+import {
+  belowReadings,
+  higherPriority,
+  priorityFromReadings,
+} from "@/lib/vitals"
+import type { Priority } from "@/db/types"
 
 const schema = z.object({
   type: z.enum(APPOINTMENT_TYPES),
@@ -36,7 +42,7 @@ type Form = z.input<typeof schema>
  * With an appointment id in the address it changes that booking instead (reschedule).
  */
 export function Component() {
-  const { appointmentId } = useParams()
+  const { id = "", appointmentId } = useParams()
   const existing = useLiveQuery(
     async () =>
       appointmentId
@@ -44,11 +50,27 @@ export function Component() {
         : null,
     [appointmentId]
   )
-  if (existing === undefined) return null
-  return <AppointmentForm existing={existing ?? undefined} />
+  // The priority the patient's latest reading calls for (automatic case prioritisation).
+  const readings = useLiveQuery(
+    async () =>
+      priorityFromReadings(
+        (await db.vitals.where("patientId").equals(id).sortBy("takenAt")).at(-1)
+      ),
+    [id]
+  )
+  if (existing === undefined || readings === undefined) return null
+  return (
+    <AppointmentForm existing={existing ?? undefined} readings={readings} />
+  )
 }
 
-function AppointmentForm({ existing }: { existing?: Appointment }) {
+function AppointmentForm({
+  existing,
+  readings,
+}: {
+  existing?: Appointment
+  readings: Priority
+}) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id = "" } = useParams()
@@ -84,10 +106,14 @@ function AppointmentForm({ existing }: { existing?: Appointment }) {
         }
       : {
           type: pick("type", APPOINTMENT_TYPES, "follow_up"),
-          priority: pick(
-            "priority",
-            ["routine", "urgent", "emergency"] as const,
-            "routine"
+          // Never below what the latest reading calls for; the CHV can raise it.
+          priority: higherPriority(
+            pick(
+              "priority",
+              ["routine", "urgent", "emergency"] as const,
+              "routine"
+            ),
+            readings
           ),
           facility: "",
           reason: query.get("reason") ?? "",
@@ -217,31 +243,34 @@ function AppointmentForm({ existing }: { existing?: Appointment }) {
             {...describe("facility", err("facility"))}
           />
         </Field>
-        <Controller
-          control={control}
-          name="priority"
-          render={({ field }) => (
-            <Segmented
-              name="priority"
-              legend={t("newAppointment.priority")}
-              value={field.value}
-              onChange={field.onChange}
-              tone={(p) =>
-                p === "emergency"
-                  ? "destructive"
-                  : p === "urgent"
-                    ? "warning"
-                    : "primary"
-              }
-              options={(["routine", "urgent", "emergency"] as const).map(
-                (p) => ({
-                  value: p,
-                  label: t(`priority.${p}`),
-                })
-              )}
-            />
-          )}
-        />
+        <div className="space-y-2">
+          <Controller
+            control={control}
+            name="priority"
+            render={({ field }) => (
+              <Segmented
+                name="priority"
+                legend={t("newAppointment.priority")}
+                value={field.value}
+                onChange={field.onChange}
+                tone={(p) =>
+                  p === "emergency"
+                    ? "destructive"
+                    : p === "urgent"
+                      ? "warning"
+                      : "primary"
+                }
+                options={(["routine", "urgent", "emergency"] as const).map(
+                  (p) => ({
+                    value: p,
+                    label: t(`priority.${p}`),
+                  })
+                )}
+              />
+            )}
+          />
+          <PriorityHint control={control} readings={readings} />
+        </div>
         <Field
           id="reason"
           label={t("newAppointment.reason")}
@@ -264,5 +293,36 @@ function AppointmentForm({ existing }: { existing?: Appointment }) {
         </Button>
       </form>
     </div>
+  )
+}
+
+/**
+ * Says why the priority was set (the latest reading) and warns when the CHV lowers it below what
+ * the reading calls for, so a crisis is not sent as routine by a slip of the finger.
+ */
+function PriorityHint({
+  control,
+  readings,
+}: {
+  control: import("react-hook-form").Control<Form>
+  readings: Priority
+}) {
+  const { t } = useTranslation()
+  const chosen = useWatch({ control, name: "priority" })
+  if (readings === "routine") return null
+  if (belowReadings(chosen, readings))
+    return (
+      <p role="alert" className="text-sm font-semibold text-destructive">
+        {t("newAppointment.belowReadings", {
+          priority: t(`priority.${readings}`),
+        })}
+      </p>
+    )
+  return (
+    <p className="text-sm text-muted-foreground">
+      {t("newAppointment.fromReadings", {
+        priority: t(`priority.${readings}`),
+      })}
+    </p>
   )
 }

@@ -217,7 +217,9 @@
     "reason": "Susu",
     "save": "Ɖoe",
     "editTitle": "Trɔ sasrãkpɔ la",
-    "saveChanges": "Dzra tɔtrɔwo ɖo"
+    "saveChanges": "Dzra tɔtrɔwo ɖo",
+    "fromReadings": "Dzidzeme mamlɛtɔwo na wɔe be wòanye {{priority}}.",
+    "belowReadings": "Dzidzeme mamlɛtɔwo bia {{priority}}. Megaɖii ɖe anyi o negbe lãmesẽ dɔwɔla alo dɔkta gblɔe na wò ko."
   },
   "appointmentType": {
     "follow_up": "Gbugbɔgasra",

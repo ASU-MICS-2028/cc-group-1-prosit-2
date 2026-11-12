@@ -2,6 +2,7 @@ using System.Web;
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
+using HealthConnect.RecordsService.Events;
 using HealthConnect.RecordsService.Features;
 using HealthConnect.RecordsService.Media;
 using HealthConnect.RecordsService.Models;
@@ -41,7 +42,7 @@ public sealed class ResultsAndPrescriptionsTests(RecordsDatabase database) : Rec
         Version: version);
 
     private async Task<Reply> PutResultAsync(Guid id, TestResultDto r, Worker who) =>
-        await ResultReader.RunAsync(await PutTestResult.Handle(id, r, As(who), Sessions, Time, NullLogger<PutTestResult>.Instance, CancellationToken.None));
+        await ResultReader.RunAsync(await PutTestResult.Handle(id, r, As(who), Sessions, Time, NullLogger<PutTestResult>.Instance, Events, new AppointmentEventOptions("arn:test", "test"), CancellationToken.None));
 
     [Fact]
     public async Task An_x_ray_is_sent_out_then_its_result_is_added_when_the_patient_comes_back()
@@ -130,7 +131,7 @@ public sealed class ResultsAndPrescriptionsTests(RecordsDatabase database) : Rec
         Version: version);
 
     private async Task<Reply> PutRxAsync(Guid id, PrescriptionDto r, Worker who) =>
-        await ResultReader.RunAsync(await PutPrescription.Handle(id, r, As(who), Sessions, Time, NullLogger<PutPrescription>.Instance, CancellationToken.None));
+        await ResultReader.RunAsync(await PutPrescription.Handle(id, r, As(who), Sessions, Time, NullLogger<PutPrescription>.Instance, Events, new AppointmentEventOptions("arn:test", "test"), CancellationToken.None));
 
     [Fact]
     public void The_code_is_made_from_the_id()
@@ -277,5 +278,42 @@ public sealed class ResultsAndPrescriptionsTests(RecordsDatabase database) : Rec
 
         Assert.Equal(404, link.Status);
         Assert.Equal(0, list.Body.GetArrayLength());
+    }
+
+    // ------------------------------------------------------------------ events for texts and alerts
+
+    [Fact]
+    public async Task A_new_prescription_is_published_with_its_code_and_the_patients_phone_but_not_their_name()
+    {
+        var patient = Guid.NewGuid();
+        Assert.Equal(201, (await PutPatientAsync(patient, Patient(patient) with { Phone = "+233200009999" }, Chv)).Status);
+        var id = Guid.NewGuid();
+
+        await PutRxAsync(id, Rx(id, patient), Doctor);
+        await PutRxAsync(id, Rx(id, patient, "dispensed", 1, "Dodowa Community Pharmacy"), Chv);
+
+        var published = Assert.Single(Events.PublishedCare);
+        Assert.Equal(CareEventTypes.PrescriptionCreated, published.Type);
+        Assert.Equal(PutPrescription.CodeFor(id), published.Prescription!.Code);
+        Assert.Equal("+233200009999", published.Patient.Phone);
+        Assert.Equal("tw", published.Patient.PreferredLanguage);
+    }
+
+    [Fact]
+    public async Task An_abnormal_result_alerts_once_and_a_normal_or_waiting_one_does_not()
+    {
+        var patient = await SavedPatientAsync();
+        var xray = Guid.NewGuid();
+        var rdt = Guid.NewGuid();
+
+        await PutResultAsync(xray, Result(xray, patient), Chv);                                                   // sent out: nothing yet
+        await PutResultAsync(xray, Result(xray, patient, "resulted", version: 1, result: "Opacity"), Chv);         // back, not normal
+        await PutResultAsync(xray, Result(xray, patient, "resulted", version: 2, result: "Right lower lobe opacity"), Chv);   // reworded
+        await PutResultAsync(rdt, Result(rdt, patient, "resulted", "rapid", "Malaria RDT") with { Flag = "normal" }, Chv);
+
+        var alert = Assert.Single(Events.PublishedCare);
+        Assert.Equal(CareEventTypes.ResultAbnormal, alert.Type);
+        Assert.Equal("Chest X-ray", alert.Result!.Test);
+        Assert.Null(alert.Patient.Phone);   // the clinicians open the app; the alert names no one
     }
 }

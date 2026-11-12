@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Dapper;
 using HealthConnect.Data;
+using HealthConnect.RecordsService.Events;
 using HealthConnect.RecordsService.Models;
 using HealthConnect.SharedLibrary.Features;
 using HealthConnect.SharedLibrary.Http;
@@ -124,6 +125,8 @@ public sealed partial class PutTestResult : IFeature
         RoleSessions sessions,
         TimeProvider time,
         ILogger<PutTestResult> logger,
+        IAppointmentEvents events,
+        AppointmentEventOptions eventOptions,
         CancellationToken cancellationToken)
     {
         var errors = Check(id, result, time.GetUtcNow());
@@ -162,6 +165,7 @@ public sealed partial class PutTestResult : IFeature
                     var created = (await TestResultStore.FindAsync(session, id, cancellationToken))!;
                     await session.CommitAsync(cancellationToken);
                     LogSaved(logger, user.Id, id, result.Status);
+                    await AlertIfAbnormalAsync(null, created);
                     return Results.Json(created, statusCode: StatusCodes.Status201Created);
                 }
 
@@ -188,6 +192,7 @@ public sealed partial class PutTestResult : IFeature
                 var updated = (await TestResultStore.FindAsync(session, id, cancellationToken))!;
                 await session.CommitAsync(cancellationToken);
                 LogSaved(logger, user.Id, id, result.Status);
+                await AlertIfAbnormalAsync(existing, updated);
                 return Results.Ok(updated);
             }
             catch (PostgresException refusal) when (refusal.SqlState == PostgresErrorCodes.UniqueViolation)
@@ -201,7 +206,16 @@ public sealed partial class PutTestResult : IFeature
         }
 
         return ApiResults.Error(StatusCodes.Status409Conflict, "conflict");
+
+        // A result that has just become "not normal" is worth a clinician's look (functions/src/specialist_notify.py). After the
+        // commit, never failing the save, and only once: correcting the wording of an abnormal result does not alert again.
+        Task AlertIfAbnormalAsync(TestResultDto? before, TestResultDto saved) =>
+            IsAbnormalResult(saved) && !(before is not null && IsAbnormalResult(before))
+                ? events.PublishAsync(CareEvent.ForAbnormalResult(saved, eventOptions.Environment, time.GetUtcNow()), cancellationToken)
+                : Task.CompletedTask;
     }
+
+    private static bool IsAbnormalResult(TestResultDto r) => r.Status == "resulted" && r.Flag == "abnormal";
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Test result {ResultId} saved as {Status} by {UserId}")]
     private static partial void LogSaved(ILogger logger, string userId, Guid resultId, string status);

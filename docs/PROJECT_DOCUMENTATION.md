@@ -693,6 +693,27 @@ Both the .NET 10 API (for sign-in codes) and the Python `appointment-reminder` L
 
 Because the AWS Lambda Python 3.12 runtime does not include `cryptography` or `pycryptodome` by default, `functions/src/aes_cfb.py` implements AES-256 key expansion, `SubBytes`, `ShiftRows`, `MixColumns`, and 128-bit CFB mode in pure Python (~100 lines, zero third-party binary dependencies) and verifies it in `functions/tests/test_aes_cfb.py` against official **FIPS-197** and **NIST SP 800-38A** test vectors.
 
+### 7.5 Every Text and Alert the Consumers Send
+
+| Event (`eventType`) | Published when | `appointment-reminder` (patient SMS) | `specialist-notify` (clinician alert) |
+|---|---|---|---|
+| `appointment.created` / `rescheduled` | A visit is booked or moved | Schedules the reminder 24 h before (1 h at short notice; at once if sooner) | Referrals and teleconsults only: "new/moved {priority} referral" email. An **emergency** also starts an escalation timer (`esc-<id>`, `escalate_after_minutes`, default 30) |
+| `appointment.cancelled` / `updated` | Cancelled, done, missed, other facility | Deletes or moves the reminder | Cancelled: email, and the escalation timer is stopped |
+| `appointment.referral_answered` | A nurse or doctor accepts or declines | Texts the patient the answer; a declined referral's reminder is dropped | Stops the escalation timer |
+| *(escalation timer fires)* | Emergency still unanswered | – | "URGENT - UNANSWERED emergency referral (30 min)" alert |
+| `prescription.created` | A doctor writes a prescription | Texts the patient the code (`RX-XXXX-XXXX`) to show at a pharmacy | – |
+| `result.abnormal` | A test is saved as resulted and not normal (once) | – | "Chest X-ray result not normal" alert; no patient name or number |
+
+Patient texts use the language on the record (`functions/src/messages.py`: English checked; Twi, Ewe and Hausa drafts for a native speaker to review; Dagbani falls back to English). Texts with Twi or Ewe letters (ɛ, ɔ, ƒ, ʋ) are sent as Unicode SMS, 70 characters per part instead of 160, so they cost two to three parts on the sending phone's bundle.
+
+Nothing is texted until `healthconnect/<env>/sms` exists (7.4); nothing is emailed until `clinician_alert_emails` lists an address that confirmed its subscription. To check what a consumer did, search its log group for the `result` field, for example:
+
+```bash
+aws logs filter-log-events --region af-south-1 --log-group-name /aws/lambda/healthconnect-staging-appointment-reminder --filter-pattern '"reminder_"'
+```
+
+`reminder_sent` / `accepted_sent` / `prescription_sent` mean a text went out; `*_logged` means no SMS secret (log only); `no_phone` means the patient has no number on record.
+
 ---
 
 ## 8. Real-Time Teleconsultation Video and Audio Calls

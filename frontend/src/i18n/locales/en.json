@@ -217,7 +217,9 @@
     "reason": "Reason",
     "save": "Book",
     "editTitle": "Change the visit",
-    "saveChanges": "Save changes"
+    "saveChanges": "Save changes",
+    "fromReadings": "Set to {{priority}} from the latest readings.",
+    "belowReadings": "The latest readings call for {{priority}}. Lower it only if a nurse or doctor told you to."
   },
   "appointmentType": {
     "follow_up": "Follow-up",

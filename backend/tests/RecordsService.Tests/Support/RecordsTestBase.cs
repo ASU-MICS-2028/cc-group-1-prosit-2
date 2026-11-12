@@ -211,9 +211,17 @@ public sealed class RecordingAppointmentEvents : IAppointmentEvents
 {
     public List<AppointmentEvent> Published { get; } = [];
 
+    public List<CareEvent> PublishedCare { get; } = [];
+
     public Task PublishAsync(AppointmentEvent appointmentEvent, CancellationToken cancellationToken)
     {
         Published.Add(appointmentEvent);
+        return Task.CompletedTask;
+    }
+
+    public Task PublishAsync(CareEvent careEvent, CancellationToken cancellationToken)
+    {
+        PublishedCare.Add(careEvent);
         return Task.CompletedTask;
     }
 }

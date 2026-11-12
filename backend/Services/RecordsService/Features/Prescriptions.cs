@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Dapper;
 using HealthConnect.Data;
+using HealthConnect.RecordsService.Events;
 using HealthConnect.RecordsService.Models;
 using HealthConnect.SharedLibrary.Features;
 using HealthConnect.SharedLibrary.Http;
@@ -150,6 +151,8 @@ public sealed partial class PutPrescription : IFeature
         RoleSessions sessions,
         TimeProvider time,
         ILogger<PutPrescription> logger,
+        IAppointmentEvents events,
+        AppointmentEventOptions eventOptions,
         CancellationToken cancellationToken)
     {
         var errors = Check(id, prescription, time.GetUtcNow());
@@ -197,8 +200,15 @@ public sealed partial class PutPrescription : IFeature
 
                     await PrescriptionStore.InsertAsync(session, id, patientInternalId.Value, prescription, cancellationToken);
                     var created = (await PrescriptionStore.FindAsync(session, id, cancellationToken))!;
+                    var contact = await session.Connection.QuerySingleAsync<(string? Phone, string? Language)>(new CommandDefinition(
+                        "SELECT phone, preferred_language FROM patients WHERE id = @id", new { id = patientInternalId.Value },
+                        session.Transaction, cancellationToken: cancellationToken));
                     await session.CommitAsync(cancellationToken);
                     LogSaved(logger, user.Id, id, "active");
+
+                    // After the commit, and never failing the save: the patient gets the code by SMS (functions/src/appointment_reminder.py).
+                    await events.PublishAsync(
+                        CareEvent.ForPrescription(created, contact.Phone, contact.Language, eventOptions.Environment, time.GetUtcNow()), cancellationToken);
                     return Results.Json(created, statusCode: StatusCodes.Status201Created);
                 }
 
