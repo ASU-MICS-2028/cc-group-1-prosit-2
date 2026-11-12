@@ -47,6 +47,14 @@ const schema = z
     path: ["diastolic"],
     message: "errors.bothBp",
   })
+  // The server refuses a reading the other way round (80/120), so it would never be sent.
+  .refine(
+    (v) =>
+      v.systolic === "" ||
+      v.diastolic === "" ||
+      Number(v.systolic) > Number(v.diastolic),
+    { path: ["systolic"], message: "errors.bpOrder" }
+  )
   .refine(
     (v) =>
       [v.systolic, v.temperatureC, v.pulse, v.weightKg, v.heightCm].some(

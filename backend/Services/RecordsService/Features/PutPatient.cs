@@ -53,6 +53,8 @@ public sealed partial class PutPatient : IFeature
         var (errors, phone) = PatientValidator.Check(id, patient, now);
         if (errors.Count > 0)
         {
+            // Which fields, never their values: enough to see why a phone keeps failing without logging health data.
+            LogInvalid(logger, id, string.Join(",", errors.Keys));
             return ApiResults.Validation(errors);
         }
 
@@ -155,4 +157,7 @@ public sealed partial class PutPatient : IFeature
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Patient save refused for {UserId} on {PatientId}: {Reason}")]
     private static partial void LogRefused(ILogger logger, string userId, Guid patientId, string reason);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Patient {Id} refused as invalid: {Fields}")]
+    private static partial void LogInvalid(ILogger logger, Guid id, string fields);
 }

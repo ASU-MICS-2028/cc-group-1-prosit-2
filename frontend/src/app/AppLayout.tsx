@@ -5,6 +5,8 @@ import { useSession } from "@/auth/session"
 import { OfflineBanner } from "@/components/OfflineBanner"
 import { cn } from "@/lib/utils"
 import { syncNow } from "@/sync/sync"
+import { useLiveQuery } from "dexie-react-hooks"
+import { db } from "@/db/local"
 import { Loading } from "./Loading"
 import { navFor, type NavItem } from "./navItems"
 import { useHideBottomNav } from "./useHideBottomNav"
@@ -12,6 +14,8 @@ import { BrandLockup } from "@/components/Brand"
 
 /** Sync on our own: when the app opens and whenever the network comes back. */
 function useAutoSync(enabled: boolean) {
+  // How many changes are waiting: it goes up the moment anything is saved on this phone.
+  const waiting = useLiveQuery(() => db.outbox.count(), [])
   useEffect(() => {
     if (!enabled) return
     // A failure is fine here: the queue stays and the Sync page shows what is waiting.
@@ -20,6 +24,20 @@ function useAutoSync(enabled: boolean) {
     window.addEventListener("online", quietly)
     return () => window.removeEventListener("online", quietly)
   }, [enabled])
+  // Send new changes a moment after they're saved (so a form's several records go together), and
+  // keep trying every minute while anything is still waiting.
+  useEffect(() => {
+    if (!enabled || !waiting) return
+    const quietly = () => {
+      if (navigator.onLine) void syncNow().catch(() => {})
+    }
+    const soon = setTimeout(quietly, 1500)
+    const retry = setInterval(quietly, 60_000)
+    return () => {
+      clearTimeout(soon)
+      clearInterval(retry)
+    }
+  }, [enabled, waiting])
 }
 
 /** The pill behind a tab's icon (Figma "Bottom Navigation"): blue when active, orange for Add. */

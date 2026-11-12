@@ -273,7 +273,14 @@
     "field_preferredLanguage": "Language",
     "failed_district": "Another district: fixing it and trying again",
     "failed_patient": "Waiting for its patient to be sent first",
-    "failed_network": "No connection: will try again"
+    "failed_network": "No connection: will try again",
+    "serverSays": "The server refused it: “{{reason}}”",
+    "discard_vitals": "Discard this reading",
+    "discard_patient": "Discard this patient",
+    "discard_appointment": "Discard this visit",
+    "discardYes": "Yes, discard it",
+    "discardNo": "Keep it",
+    "orphan": "Its patient never reached the server and isn't waiting to be sent, so this can't be sent either."
   },
   "surveillance": {
     "title": "Nutome ƒe kpuie",
@@ -342,7 +349,8 @@
     "bothBp": "Ŋlɔ BP xexlẽdzesi eveawo siaa.",
     "oneVital": "Ŋlɔ dzidzeme ɖeka ya teti.",
     "future": "Tia ɣeyiɣi si gbɔna.",
-    "evidence": "Xɔ dɔnɔ la ƒe lɔlɔ̃ ɖe gbe me, de asi alo ɖe eƒe foto gbã."
+    "evidence": "Xɔ dɔnɔ la ƒe lɔlɔ̃ ɖe gbe me, de asi alo ɖe eƒe foto gbã.",
+    "bpOrder": "The top number must be higher than the bottom number."
   },
   "notFound": {
     "text": "Axa sia meli o.",

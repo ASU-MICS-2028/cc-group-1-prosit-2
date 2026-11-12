@@ -58,6 +58,8 @@ public sealed partial class PutAppointment : IFeature
         var errors = AppointmentValidator.Check(id, appointment, time.GetUtcNow());
         if (errors.Count > 0)
         {
+            // Which fields, never their values: enough to see why a phone keeps failing without logging health data.
+            LogInvalid(logger, id, string.Join(",", errors.Keys));
             return ApiResults.Validation(errors);
         }
 
@@ -187,4 +189,7 @@ public sealed partial class PutAppointment : IFeature
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Appointment {AppointmentId} {What} by {UserId} (referral status {ReferralStatus})")]
     private static partial void LogSaved(ILogger logger, string userId, Guid appointmentId, string what, string? referralStatus);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Appointment {Id} refused as invalid: {Fields}")]
+    private static partial void LogInvalid(ILogger logger, Guid id, string fields);
 }
