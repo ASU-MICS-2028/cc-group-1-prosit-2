@@ -2,21 +2,15 @@ import { useLiveQuery } from "dexie-react-hooks"
 import type { EntityTable } from "dexie"
 import { ApiError, api } from "@/api/client"
 import { getSession, isDemoSession } from "@/auth/session"
-import { auditEvent, db } from "@/db/local"
-import type {
-  Appointment,
-  Entity,
-  OutboxItem,
-  Patient,
-  Vitals,
-} from "@/db/types"
-
-type AnyRecord = Patient | Vitals | Appointment
+import { auditEvent, db, recordTable } from "@/db/local"
+import type { AnyRecord, Entity, Media, OutboxItem, Vitals } from "@/db/types"
 
 const PATH: Record<Entity, string> = {
   patient: "/patients",
   vitals: "/vitals",
   appointment: "/appointments",
+  result: "/results",
+  prescription: "/prescriptions",
 }
 
 export interface SyncResult {
@@ -30,12 +24,7 @@ export interface SyncResult {
 }
 
 function table(entity: Entity) {
-  const tables = {
-    patient: db.patients,
-    vitals: db.vitals,
-    appointment: db.appointments,
-  }
-  return tables[entity] as unknown as EntityTable<AnyRecord, "id">
+  return recordTable[entity] as unknown as EntityTable<AnyRecord, "id">
 }
 
 let running: Promise<SyncResult> | null = null
@@ -263,6 +252,8 @@ const PULL: {
   { entity: "patient", cursor: "updatedAt" },
   { entity: "appointment", cursor: "updatedAt" },
   { entity: "vitals", cursor: "createdAt" },
+  { entity: "result", cursor: "updatedAt" },
+  { entity: "prescription", cursor: "updatedAt" },
 ]
 const PAGE = 500
 
@@ -279,11 +270,11 @@ function clean<T>(value: T): T {
   return value
 }
 
-function cursorKey(entity: Entity) {
+function cursorKey(entity: Entity | "media") {
   return `hc.pulled.${getSession()?.user.id ?? "anon"}.${entity}`
 }
 
-function readCursor(entity: Entity): string | null {
+function readCursor(entity: Entity | "media"): string | null {
   try {
     return localStorage.getItem(cursorKey(entity))
   } catch {
@@ -291,7 +282,7 @@ function readCursor(entity: Entity): string | null {
   }
 }
 
-function writeCursor(entity: Entity, value: string) {
+function writeCursor(entity: Entity | "media", value: string) {
   try {
     localStorage.setItem(cursorKey(entity), value)
   } catch {
@@ -330,7 +321,42 @@ async function pull(): Promise<number> {
       return merged // offline, signed out, or not allowed: the next sync tries again
     }
   }
+  try {
+    merged += await pullMedia()
+  } catch {
+    // offline, or an older server without the list: photos come next time
+  }
   return merged
+}
+
+/**
+ * Learns about photos other workers took (a wound, a lab slip, an X-ray film) so this phone can
+ * show them. Only the description is kept; the picture is read with a short-lived link when it is
+ * shown (lib/media.ts usePhotoUrl).
+ *   GET /api/media?updatedSince=<time>  -> [{ id, patientId, ownerEntity, ownerId, kind, ... }]
+ */
+async function pullMedia(): Promise<number> {
+  let added = 0
+  for (;;) {
+    const since = readCursor("media")
+    const rows =
+      (await api<Omit<Media, "blob" | "attempts">[] | undefined>(
+        `/media${since ? `?updatedSince=${encodeURIComponent(since)}` : ""}`
+      )) ?? []
+    for (const row of rows) {
+      if (await db.media.get(row.id)) continue // this phone took it, or already knows it
+      await db.media.put({
+        ...clean(row),
+        remote: true,
+        attempts: 0,
+        uploadedAt: row.createdAt,
+      })
+      added++
+    }
+    const last = rows.at(-1)
+    if (last?.createdAt) writeCursor("media", last.createdAt)
+    if (rows.length < PAGE) return added
+  }
 }
 
 async function merge(entity: Entity, row: AnyRecord): Promise<number> {
@@ -379,7 +405,9 @@ async function uploadAudit() {
  */
 async function upload(): Promise<number> {
   let uploaded = 0
-  const waiting = await db.media.filter((m) => !m.uploadedAt).toArray()
+  const waiting = await db.media
+    .filter((m) => !m.uploadedAt && !m.remote && !!m.blob)
+    .toArray()
   for (const m of waiting) {
     try {
       const { url, headers } = await api<{
@@ -418,7 +446,10 @@ async function upload(): Promise<number> {
 
 /** Files still waiting to upload, kept up to date. */
 export function usePendingMedia(): number | undefined {
-  return useLiveQuery(() => db.media.filter((m) => !m.uploadedAt).count(), [])
+  return useLiveQuery(
+    () => db.media.filter((m) => !m.uploadedAt && !m.remote).count(),
+    []
+  )
 }
 
 /** The changes still waiting, kept up to date. */

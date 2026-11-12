@@ -11,10 +11,15 @@ export function PhotoStrip({
   photos,
   onChange,
   max = 3,
+  longestSide,
+  maxSizeMB,
 }: {
   photos: Blob[]
   onChange: (photos: Blob[]) => void
   max?: number
+  /** a lab slip or an X-ray film needs more detail than a wound photo */
+  longestSide?: number
+  maxSizeMB?: number
 }) {
   const { t } = useTranslation()
   const input = useRef<HTMLInputElement>(null)
@@ -26,7 +31,7 @@ export function PhotoStrip({
     if (!file) return
     setBusy(true)
     try {
-      onChange([...photos, await compressPhoto(file)])
+      onChange([...photos, await compressPhoto(file, longestSide, maxSizeMB)])
     } finally {
       setBusy(false)
     }

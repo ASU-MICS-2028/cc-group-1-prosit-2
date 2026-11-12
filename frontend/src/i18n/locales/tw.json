@@ -6,7 +6,8 @@
     "choose": "Paw…",
     "next": "Toa so",
     "stepOf": "Anammɔn {{step}} wɔ {{total}} mu",
-    "draft": "Nkyerɛaseɛ a ɛnwieeɛ"
+    "draft": "Nkyerɛaseɛ a ɛnwieeɛ",
+    "cancel": "Gyae"
   },
   "nav": {
     "label": "Menu titiriw",
@@ -239,7 +240,9 @@
   "entity": {
     "patient": "Ɔyarefoɔ",
     "vitals": "Nsusuiɛ",
-    "appointment": "Nsrahwɛ"
+    "appointment": "Nsrahwɛ",
+    "result": "Nsɔhwɛ",
+    "prescription": "Nnuro krataa"
   },
   "sync": {
     "title": "Soma",
@@ -448,7 +451,8 @@
     "photoN": "Mfonini {{n}}",
     "removePhoto": "Yi {{label}} fi hɔ",
     "dictate": "Kasa kyerɛw nsɛm",
-    "listening": "Ɛretie… mia na ɛngyae"
+    "listening": "Ɛretie… mia na ɛngyae",
+    "photoOffline": "Ɛwɔ server no so. Fa intanɛt bra na hwɛ."
   },
   "editPatient": {
     "title": "Sesa nsɛm no",
@@ -485,7 +489,9 @@
     "serverIntact_other": "Checked: {{count}} entries, none changed.",
     "serverBroken": "Warning: entry {{id}} does not match the chain. The log may have been changed.",
     "serverOffline": "Connect to the internet to read the server's log.",
-    "serverEmpty": "The server has no entries yet."
+    "serverEmpty": "The server has no entries yet.",
+    "what_result": "nsɔhwɛ mmuaeɛ bi",
+    "what_prescription": "nnuro krataa bi"
   },
   "time": {
     "justNow": "seesei ara",
@@ -652,5 +658,134 @@
     "role_doctor": "Doctor",
     "role_district_officer": "District officer",
     "role_admin": "Admin"
+  },
+  "results": {
+    "title": "Nsɔhwɛ ne X-ray",
+    "add": "Fa nsɔhwɛ ka ho",
+    "empty": "Nsɔhwɛ biara nni hɔ. Fa nsɔhwɛ ntɛm a woyɛɛ ka ho, anaa soma ɔyarefoɔ no kɔ lab anaa X-ray.",
+    "newTitle": "Fa nsɔhwɛ ka ho",
+    "answerTitle": "Nsɔhwɛ no mmuaeɛ aba",
+    "whatKind": "Nsɔhwɛ bɛn na ɛyɛ?",
+    "category": {
+      "rapid": "Nsɔhwɛ ntɛm a wɔyɛɛ wɔ ha",
+      "lab": "Lab nsɔhwɛ",
+      "imaging": "X-ray anaa scan"
+    },
+    "categoryHint": {
+      "rapid": "Malaria RDT, mogya mu asikyire, Hb, nyinsɛn nsɔhwɛ: mmuaeɛ no aba seesei ara.",
+      "lab": "Ɛhia lab: apɔmuden fie anaa ayaresabea.",
+      "imaging": "Ɛhia X-ray anaa ultrasound mfidie, ɛtaa wɔ mansin ayaresabea."
+    },
+    "whereNow": "Ɛwɔ he seesei?",
+    "sendOut": "Soma no kɔ nsɔhwɛ",
+    "sendOutHint": "Mfidie no nni ha. Ɔyarefoɔ no bɛkɔ baabi a ɛwɔ.",
+    "backNow": "Nsɔhwɛ no mmuaeɛ aba",
+    "backNowHint": "Ɔyarefoɔ no de krataa, amaneɛbɔ anaa film no aba.",
+    "test": "Nsɔhwɛ",
+    "facility": "Ayaresabea",
+    "facilityHintSend": "Baabi a ɛbɛn ha a wotumi yɛ. Ka kyerɛ ɔyarefoɔ no sɛ ɔmfa krataa anaa film no mmra.",
+    "facilityHintDone": "Baabi a wɔyɛeɛ.",
+    "facilityNeeded": "Ka baabi a ɔyarefoɔ no nkɔ nsɔhwɛ no.",
+    "sendOutNext": "Sɛ ɔyarefoɔ no de mmuaeɛ no ba a, bue nsɔhwɛ yi bio na paw \"Nsɔhwɛ no mmuaeɛ aba\" na fa ka ho, na twa krataa anaa film no mfonini.",
+    "result": "Mmuaeɛ",
+    "resultHint": {
+      "rapid": "Sɛ nhwɛsoɔ: Positive, 7.8 mmol/L, Hb 9.5 g/dL.",
+      "lab": "Kyerɛw deɛ ɛwɔ krataa no so, anaa asɛm titiriw no.",
+      "imaging": "Kyerɛw amaneɛbɔ no awieeɛ, sɛ ɛwɔ hɔ a."
+    },
+    "flagLegend": "Ɛyɛ papa?",
+    "flag": {
+      "normal": "Ɛyɛ papa",
+      "abnormal": "Ɛnyɛ papa: ɛhia sɛ wɔhwɛ bio"
+    },
+    "photos": "Krataa, amaneɛbɔ anaa film no mfonini",
+    "photosHint": "Twa krataa no nyinaa mfonini, ma ɛnna fam, wɔ hann pa mu, na dɔkota atumi akenkan.",
+    "photosHintImaging": "Kura X-ray film no kyerɛ mfɛnsere a hann wɔ mu anaa ewiem na twa mfonini no tee. Twa amaneɛbɔ a wɔakyerɛw no nso mfonini.",
+    "saveRequest": "Kora na soma ɔyarefoɔ no",
+    "saveResult": "Kora mmuaeɛ no",
+    "requestSaved": "Wɔakora nsɔhwɛ abisadeɛ no",
+    "resultSaved": "Wɔakora mmuaeɛ no",
+    "status": {
+      "requested": "Retwɛn mmuaeɛ",
+      "resulted": "Mmuaeɛ",
+      "cancelled": "Wɔagyae"
+    },
+    "sentOn": "Wɔsomaa no {{date}}"
+  },
+  "prescriptions": {
+    "title": "Nnuro a wɔakyerɛw",
+    "prescribe": "Kyerɛw nnuro",
+    "empty": "Nnuro biara nni hɔ a wɔakyerɛw.",
+    "newTitle": "Nnuro foforɔ",
+    "medicineN": "Aduro {{n}}",
+    "remove": "Yi fi hɔ",
+    "medicine": "Aduro ne ne ahoɔden",
+    "dose": "Dodoɔ",
+    "dosePlaceholder": "pɛpɛ 1",
+    "days": "Nna",
+    "frequency": "Mpɛn ahe",
+    "freq": {
+      "once": "Prɛko pɛ",
+      "daily": "Da koro prɛko",
+      "twice": "Da koro mprɛnu",
+      "three": "Da koro mprɛsa",
+      "four": "Da koro mprɛnan",
+      "night": "Anadwo",
+      "needed": "Sɛ ɛho hia a"
+    },
+    "instructions": "Akwankyerɛ",
+    "instructionsPlaceholder": "Edidi akyi",
+    "addMedicine": "Fa aduro foforɔ ka ho",
+    "forVisit": "Nsrahwɛ bɛn ho",
+    "noVisit": "Ɛnka nsrahwɛ biara ho",
+    "save": "Kora nnuro no",
+    "saved": "Wɔakora nnuro {{code}}",
+    "needOne": "Fa aduro baako pɛ ka ho.",
+    "needDetails": "Aduro biara hia dodoɔ, mpɛn ahe, ne nna ahe (1 kɔsi 365).",
+    "status": {
+      "active": "Wɔmmaa no nnuro no ɛ",
+      "dispensed": "Wɔde ama",
+      "cancelled": "Wɔagyae"
+    },
+    "forDays_one": "nna {{count}}",
+    "forDays_other": "nna {{count}}",
+    "dispensedAt": "{{pharmacy}} na ɔde maeɛ · {{date}}",
+    "whichPharmacy": "Nnuro dwam anaa apɔmuden fie bɛn na ɛde maeɛ?",
+    "confirmDispensed": "Kora",
+    "markDispensed": "Wɔde ama",
+    "share": "Soma kɔ nnuro dwam",
+    "cancel": "Gyae",
+    "dispensedSaved": "Wɔakyerɛw sɛ wɔde ama",
+    "cancelledSaved": "Wɔagyae nnuro no",
+    "copied": "Wɔayɛ nnuro no ho mfonini. Fa hyɛ SMS anaa WhatsApp mu.",
+    "shareHeading": "HealthConnect nnuro krataa",
+    "patient": "Ɔyarefoɔ",
+    "by": "Deɛ ɔkyerɛwee"
+  },
+  "forecast": {
+    "title": "Nnawɔtwe a ɛdi so: atiridii ho nkɔmhyɛ",
+    "intro": "Ayarefoɔ a wɔwɔ atiridii a yɛhwɛ kwan wɔ nnawɔtwe a ɛdi so, firi mansin biara nnawɔtwe 8 a atwam. Fa yɛ nhyehyɛeɛ ma malaria nsɔhwɛ ne nnuro.",
+    "trend": {
+      "rising": "Ɛrekɔ soro",
+      "steady": "Ɛgyina hɔ",
+      "falling": "Ɛresiane"
+    },
+    "expected_one": "Bɛyɛ ɔyarefoɔ {{count}}",
+    "expected_other": "Bɛyɛ ayarefoɔ {{count}}",
+    "range": "Ebia {{low}} kɔsi {{high}} · firi nnawɔtwe {{weeks}}",
+    "stock_one": "Siesie: malaria RDT {{count}} ne paracetamol ma ɔyarefoɔ {{count}}.",
+    "stock_other": "Siesie: malaria RDT {{count}} ne paracetamol ma ayarefoɔ {{count}}.",
+    "method": "Akontabuo kwan tiawa (Holt's method) a ɛhwɛ nnawɔtwe biara nkontabuo: ɛyɛ akwankyerɛ ma nhyehyɛeɛ, ɛnyɛ nokwasɛm a ɛnsesa. Nnawɔtwe a ayarefoɔ nnu 5 no, yɛmfa nni dwuma."
+  },
+  "education": {
+    "title": "Apɔmuden ho nkyerɛkyerɛ",
+    "intro": "Apɔmuden ho adesua tiawa a wobɛkenkan, anaa wobɛbɔ no dendeenden ama ɔyarefoɔ anaa abusua.",
+    "homeHint": "Malaria, mogya mmoroso, nyinsɛn, ORS ne nea ɛkeka ho",
+    "goNow": "Kɔ ayaresabea seesei ara sɛ",
+    "play": "Bɔ {{title}}",
+    "stop": "Gyae {{title}}",
+    "source": "Ɛfiri: {{source}}",
+    "noVoice": "Fon yi ntumi nkenkan dendeenden. Kenkan nsɛm no kyerɛ ɔyarefoɔ no.",
+    "englishOnly": "Seesei adesua no wɔ Borɔfo kasa mu. Yɛde Twi, Ewe, Hausa ne Dagbani nnyegyeeɛ bɛka ho sɛ kasa no wuranom hwɛ wie a."
   }
 }

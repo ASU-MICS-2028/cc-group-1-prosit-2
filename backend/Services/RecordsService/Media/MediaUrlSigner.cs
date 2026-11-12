@@ -14,6 +14,9 @@ public interface IMediaUrlSigner
 {
     /// <summary>A link that allows one PUT of exactly this content type and checksum to exactly this key.</summary>
     SignedUpload Sign(string bucket, string key, string mime, string sha256Hex, DateTimeOffset now, TimeSpan validFor);
+
+    /// <summary>A link that allows reading exactly this key until it expires.</summary>
+    string SignDownload(string bucket, string key, DateTimeOffset now, TimeSpan validFor);
 }
 
 /// <summary>Signs with the server's own AWS identity (the task role on AWS). Signing happens in this process; nothing is sent to AWS.</summary>
@@ -52,4 +55,13 @@ public sealed class S3MediaUrlSigner(Lazy<IAmazonS3> s3) : IMediaUrlSigner
             },
             expires);
     }
+
+    public string SignDownload(string bucket, string key, DateTimeOffset now, TimeSpan validFor) =>
+        s3.Value.GetPreSignedURL(new GetPreSignedUrlRequest
+        {
+            BucketName = bucket,
+            Key = key,
+            Verb = HttpVerb.GET,
+            Expires = now.Add(validFor).UtcDateTime,
+        });
 }

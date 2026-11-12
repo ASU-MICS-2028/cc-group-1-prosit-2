@@ -6,7 +6,8 @@
     "choose": "Zaɓa…",
     "next": "Gaba",
     "stepOf": "Mataki {{step}} cikin {{total}}",
-    "draft": "Fassarar farko"
+    "draft": "Fassarar farko",
+    "cancel": "Soke"
   },
   "nav": {
     "label": "Babban menu",
@@ -239,7 +240,9 @@
   "entity": {
     "patient": "Mara lafiya",
     "vitals": "Awo",
-    "appointment": "Ziyara"
+    "appointment": "Ziyara",
+    "result": "Gwaji",
+    "prescription": "Takardar magani"
   },
   "sync": {
     "title": "Aikawa",
@@ -448,7 +451,8 @@
     "photoN": "Hoto {{n}}",
     "removePhoto": "Cire {{label}}",
     "dictate": "Faɗi bayanai",
-    "listening": "Ana saurare… taɓa don tsayawa"
+    "listening": "Ana saurare… taɓa don tsayawa",
+    "photoOffline": "Yana kan server. Haɗa intanet don ganinsa."
   },
   "editPatient": {
     "title": "Gyara bayanai",
@@ -485,7 +489,9 @@
     "serverIntact_other": "Checked: {{count}} entries, none changed.",
     "serverBroken": "Warning: entry {{id}} does not match the chain. The log may have been changed.",
     "serverOffline": "Connect to the internet to read the server's log.",
-    "serverEmpty": "The server has no entries yet."
+    "serverEmpty": "The server has no entries yet.",
+    "what_result": "sakamakon gwaji",
+    "what_prescription": "takardar magani"
   },
   "time": {
     "justNow": "yanzun nan",
@@ -652,5 +658,134 @@
     "role_doctor": "Doctor",
     "role_district_officer": "District officer",
     "role_admin": "Admin"
+  },
+  "results": {
+    "title": "Gwaje-gwaje da X-ray",
+    "add": "Ƙara gwaji",
+    "empty": "Babu gwaji tukuna. Ƙara gwajin gaggawa da ka yi, ko tura majiyyaci zuwa lab ko X-ray.",
+    "newTitle": "Ƙara gwaji",
+    "answerTitle": "Sakamakon ya dawo",
+    "whatKind": "Wane irin gwaji ne?",
+    "category": {
+      "rapid": "Gwajin gaggawa da aka yi a nan",
+      "lab": "Gwajin lab",
+      "imaging": "X-ray ko scan"
+    },
+    "categoryHint": {
+      "rapid": "Malaria RDT, sukari a jini, Hb, gwajin ciki: an san sakamakon yanzu.",
+      "lab": "Yana buƙatar lab: cibiyar lafiya ko asibiti.",
+      "imaging": "Yana buƙatar injin X-ray ko ultrasound, galibi a asibitin gunduma."
+    },
+    "whereNow": "Ina yake yanzu?",
+    "sendOut": "Tura shi gwaji",
+    "sendOutHint": "Babu injin a nan. Majiyyaci zai je wurin da yake da shi.",
+    "backNow": "Sakamakon ya dawo",
+    "backNowHint": "Majiyyaci ya kawo takarda, rahoto ko film ɗin.",
+    "test": "Gwaji",
+    "facility": "Cibiyar lafiya",
+    "facilityHintSend": "Wuri mafi kusa da zai iya yi. Gaya wa majiyyaci ya dawo da takarda ko film ɗin.",
+    "facilityHintDone": "Inda aka yi.",
+    "facilityNeeded": "Faɗi inda majiyyaci zai je don gwajin.",
+    "sendOutNext": "Idan majiyyaci ya dawo da sakamakon, sake buɗe wannan gwajin ka zaɓi \"Sakamakon ya dawo\" don ƙara shi, ka ɗauki hoton takarda ko film ɗin.",
+    "result": "Sakamako",
+    "resultHint": {
+      "rapid": "Misali: Positive, 7.8 mmol/L, Hb 9.5 g/dL.",
+      "lab": "Rubuta abin da ke kan takardar, ko babban abin da aka gano.",
+      "imaging": "Rubuta ƙarshen rahoton, idan akwai."
+    },
+    "flagLegend": "Yana daidai?",
+    "flag": {
+      "normal": "Daidai ne",
+      "abnormal": "Ba daidai ba: yana buƙatar bibiya"
+    },
+    "photos": "Hotunan takarda, rahoto ko film",
+    "photosHint": "Ɗauki hoton dukan takardar, a shimfiɗe, a cikin haske mai kyau, don likita ya iya karantawa.",
+    "photosHintImaging": "Riƙe film ɗin X-ray a gaban taga mai haske ko sama ka ɗauki hoto kai tsaye. Ɗauki hoton rubutaccen rahoton ma.",
+    "saveRequest": "Ajiye ka tura majiyyaci",
+    "saveResult": "Ajiye sakamako",
+    "requestSaved": "An ajiye buƙatar gwaji",
+    "resultSaved": "An ajiye sakamako",
+    "status": {
+      "requested": "Ana jiran sakamako",
+      "resulted": "Sakamako",
+      "cancelled": "An soke"
+    },
+    "sentOn": "An tura {{date}}"
+  },
+  "prescriptions": {
+    "title": "Takardun magani",
+    "prescribe": "Rubuta magani",
+    "empty": "Babu takardar magani tukuna.",
+    "newTitle": "Sabuwar takardar magani",
+    "medicineN": "Magani {{n}}",
+    "remove": "Cire",
+    "medicine": "Magani da ƙarfinsa",
+    "dose": "Adadi",
+    "dosePlaceholder": "ƙwaya 1",
+    "days": "Kwanaki",
+    "frequency": "Sau nawa",
+    "freq": {
+      "once": "Sau ɗaya kawai",
+      "daily": "Sau ɗaya a rana",
+      "twice": "Sau biyu a rana",
+      "three": "Sau uku a rana",
+      "four": "Sau huɗu a rana",
+      "night": "Da dare",
+      "needed": "Idan ana buƙata"
+    },
+    "instructions": "Umarni",
+    "instructionsPlaceholder": "Bayan cin abinci",
+    "addMedicine": "Ƙara wani magani",
+    "forVisit": "Don wace ziyara",
+    "noVisit": "Ba a haɗa da ziyara ba",
+    "save": "Ajiye takardar magani",
+    "saved": "An ajiye takardar magani {{code}}",
+    "needOne": "Ƙara magani ɗaya aƙalla.",
+    "needDetails": "Kowane magani yana buƙatar adadi, sau nawa, da kwanaki nawa (1 zuwa 365).",
+    "status": {
+      "active": "Ba a bayar ba tukuna",
+      "dispensed": "An bayar",
+      "cancelled": "An soke"
+    },
+    "forDays_one": "na kwana {{count}}",
+    "forDays_other": "na kwanaki {{count}}",
+    "dispensedAt": "{{pharmacy}} ya bayar · {{date}}",
+    "whichPharmacy": "Wane kantin magani ko cibiyar lafiya ya bayar?",
+    "confirmDispensed": "Ajiye",
+    "markDispensed": "An bayar",
+    "share": "Tura zuwa kantin magani",
+    "cancel": "Soke",
+    "dispensedSaved": "An rubuta cewa an bayar",
+    "cancelledSaved": "An soke takardar magani",
+    "copied": "An kwafi takardar magani. Liƙa a SMS ko WhatsApp.",
+    "shareHeading": "Takardar magani ta HealthConnect",
+    "patient": "Majiyyaci",
+    "by": "Wanda ya rubuta"
+  },
+  "forecast": {
+    "title": "Mako mai zuwa: hasashen zazzaɓi",
+    "intro": "Marasa lafiya masu zazzaɓi da ake tsammani a mako mai zuwa, daga makonni 8 da suka wuce na kowace gunduma. Yi amfani da shi don shirya gwajin malaria da magunguna.",
+    "trend": {
+      "rising": "Yana ƙaruwa",
+      "steady": "Daidai",
+      "falling": "Yana raguwa"
+    },
+    "expected_one": "Kusan majiyyaci {{count}}",
+    "expected_other": "Kusan marasa lafiya {{count}}",
+    "range": "Wataƙila {{low}} zuwa {{high}} · daga makonni {{weeks}}",
+    "stock_one": "Shirya: malaria RDT {{count}} da paracetamol don majiyyaci {{count}}.",
+    "stock_other": "Shirya: malaria RDT {{count}} da paracetamol don marasa lafiya {{count}}.",
+    "method": "Hanyar lissafi mai sauƙi (Holt's method) a kan ƙididdigar kowane mako: jagora ne don tsari, ba tabbaci ba. Ba a amfani da makonnin da marasa lafiya ba su kai 5 ba."
+  },
+  "education": {
+    "title": "Ilimin lafiya",
+    "intro": "Gajerun darussan lafiya don karantawa, ko kunnawa da ƙarfi ga majiyyaci ko iyali.",
+    "homeHint": "Malaria, hawan jini, ciki, ORS da sauransu",
+    "goNow": "Je cibiyar lafiya yanzu idan akwai",
+    "play": "Kunna {{title}}",
+    "stop": "Dakatar da {{title}}",
+    "source": "Tushe: {{source}}",
+    "noVoice": "Wannan wayar ba za ta iya karantawa da ƙarfi ba. Karanta rubutun ga majiyyaci.",
+    "englishOnly": "A yanzu darussan suna cikin Turanci. Za a ƙara rikodin Twi, Ewe, Hausa da Dagbani bayan masu magana da harsunan sun duba su."
   }
 }
