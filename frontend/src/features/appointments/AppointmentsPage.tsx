@@ -4,11 +4,13 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { Segmented } from "@/components/form/Segmented"
-import { Check, Clock, TriangleAlert, Video } from "@/components/icons"
+import { useSession } from "@/auth/session"
+import { Check, Clock, TriangleAlert } from "@/components/icons"
 import { EmptyState, PageHeader } from "@/components/PageHeader"
 import { db } from "@/db/local"
 import type { Appointment, Patient } from "@/db/types"
 import { fullName } from "@/features/patients/usePatients"
+import { TeleconsultJoin } from "@/features/payments/TeleconsultJoin"
 import { formatDateTime } from "@/lib/dates"
 import { cn } from "@/lib/utils"
 import { setAppointmentStatus } from "./appointmentActions"
@@ -75,6 +77,7 @@ export function Component() {
 
 function VisitCard({ a, overdue }: { a: Row; overdue: boolean }) {
   const { t } = useTranslation()
+  const session = useSession()
   const open = a.status === "scheduled"
   return (
     <li className="rounded-xl bg-card p-4 text-sm shadow-card">
@@ -126,13 +129,13 @@ function VisitCard({ a, overdue }: { a: Row; overdue: boolean }) {
         </p>
       </Link>
       {open && a.type === "teleconsult" && a.referralStatus !== "declined" ? (
-        <Link
-          to={`/appointments/${a.id}/call`}
-          className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 text-sm font-semibold text-primary-foreground"
-        >
-          <Video className="size-5" aria-hidden />
-          {t("call.join")}
-        </Link>
+        <div className="mt-3">
+          <TeleconsultJoin
+            a={a}
+            canCollect={session?.user.role === "chv"}
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 text-sm font-semibold text-primary-foreground"
+          />
+        </div>
       ) : null}
       {open ? (
         <div className="mt-3 flex gap-2">

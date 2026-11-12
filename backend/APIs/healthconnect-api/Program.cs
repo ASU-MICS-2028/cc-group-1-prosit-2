@@ -5,6 +5,7 @@ using HealthConnect.AuthService;
 using HealthConnect.Data;
 using HealthConnect.PlatformService;
 using HealthConnect.RecordsService;
+using HealthConnect.RecordsService.Payments;
 using HealthConnect.SharedLibrary;
 using HealthConnect.SharedLibrary.Features;
 using HealthConnect.SharedLibrary.Sms;
@@ -17,6 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Real texts (sign-in codes) only once this environment's SMS secret exists; see SmsSecret.
 builder.Configuration.AddSmsSecret();
+builder.Configuration.AddPaystackSecret();
 
 // Structured logs on stdout (Docker sends them to CloudWatch). Never log personal data: log ids only.
 builder.Host.UseSerilog((context, _, logger) =>

@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks"
-import { Check, CircleCheckBig, Siren, Video, X } from "@/components/icons"
+import { Check, CircleCheckBig, Siren, X } from "@/components/icons"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
@@ -9,6 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { db, saveAndQueue } from "@/db/local"
 import type { Appointment, Priority, ReferralStatus } from "@/db/types"
 import { fullName } from "@/features/patients/usePatients"
+import { TeleconsultJoin } from "@/features/payments/TeleconsultJoin"
 import { formatDateTime } from "@/lib/dates"
 import { cn } from "@/lib/utils"
 import { ReferralStatusChip } from "./ReferralStatusChip"
@@ -164,12 +165,11 @@ export function Component() {
                 ) : a.referralStatus === "accepted" ? (
                   <div className="space-y-2">
                     {a.type === "teleconsult" && a.status === "scheduled" ? (
-                      <Link
-                        to={`/appointments/${a.id}/call`}
+                      <TeleconsultJoin
+                        a={a}
+                        canCollect={false}
                         className={cn(buttonVariants({ size: "lg" }), "w-full")}
-                      >
-                        <Video aria-hidden /> {t("call.join")}
-                      </Link>
+                      />
                     ) : null}
                     <Button
                       size="lg"

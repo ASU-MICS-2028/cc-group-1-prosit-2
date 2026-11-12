@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using HealthConnect.Data;
 using HealthConnect.RecordsService.Calls;
+using HealthConnect.RecordsService.Payments;
 using HealthConnect.RecordsService.Store;
 using HealthConnect.SharedLibrary.Features;
 using HealthConnect.SharedLibrary.Http;
@@ -34,6 +35,7 @@ public sealed class PostCallTicket : IFeature
             .RequireAuthorization(AuthPolicies.Clinical)
             .Produces<CallTicketDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status402PaymentRequired)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status422UnprocessableEntity);
 
@@ -43,6 +45,8 @@ public sealed class PostCallTicket : IFeature
         RoleSessions sessions,
         CallTickets tickets,
         CallOptions options,
+        PaymentSettings payments,
+        PaymentStore paid,
         CancellationToken cancellationToken)
     {
         if (CurrentUser.From(principal) is not { } user)
@@ -79,6 +83,12 @@ public sealed class PostCallTicket : IFeature
         if (appointment.Dto.Status != "scheduled" || appointment.Dto.ReferralStatus == "declined")
         {
             return ApiResults.Validation("appointmentId", "This teleconsultation is closed.");
+        }
+
+        // The consultation fee comes first (emergencies never wait); only when payments are switched on for this environment.
+        if (payments.Enabled && PaymentRules.MustPay(appointment.Dto) && !await paid.IsPaidAsync(appointmentId, cancellationToken))
+        {
+            return ApiResults.Error(StatusCodes.Status402PaymentRequired, "payment_required");
         }
 
         var (ticket, expires) = tickets.Issue(user, appointmentId);

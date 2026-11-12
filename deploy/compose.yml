@@ -42,6 +42,8 @@ services:
       APPOINTMENT_TOPIC_ARN: ${APPOINTMENT_TOPIC_ARN:-}
       # Real sign-in texts once this secret exists (backend SmsSecret.cs); the keys stay in Secrets Manager
       SMS_SECRET_ID: healthconnect/${APP_ENV}/sms
+      # Consultation fees by mobile money once this secret exists (RecordsService PaystackSecret)
+      PAYSTACK_SECRET_ID: healthconnect/${APP_ENV}/paystack
       # Video-call relay (set by remote-deploy.sh from Secrets Manager; empty = STUN only)
       TURN_URLS: ${TURN_URLS:-}
       TURN_SECRET: ${TURN_SECRET:-}
