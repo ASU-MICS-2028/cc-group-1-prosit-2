@@ -1,7 +1,8 @@
 # ADR 0001: Frontend stack, offline storage and branch flow
 
-- **Status:** Proposed (to confirm Tue 27 Oct)
+- **Status:** Accepted
 - **Date:** 2026-10-26
+- **Update (Nov 2026):** Twi, Ewe and Hausa now ship as draft translations awaiting native-speaker review; Dagbani is still to come. The demo sign-in was replaced by the real API sign-in (ADR 0004).
 
 ## Context
 CHVs work in rural Ghana on cheap Android phones and paid 2G/3G data, often for days without signal. The app must install from a web address, open offline and keep every record until it reaches the server. We have one week. The team built the same kind of app for Prosit 1 (AgroConnect).

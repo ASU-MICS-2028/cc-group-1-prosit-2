@@ -23,11 +23,13 @@ All cloud resources run in AWS account `659500703236` in the **Africa (Cape Town
 | **Staging** | `https://dwaho59wvxpxe.cloudfront.net` | `development` | Automatic on every merge to `development` | `8081` | `healthconnect_staging` |
 | **Local Development** | `http://localhost:5173` (UI) / `http://localhost:8000` (API) | Working branch | `npm run dev` / `dotnet run` | `5173` / `8000` | `healthconnect` (`localhost:5433`) |
 
+**Repository and presentation:** the source, infrastructure code and documentation are at <https://github.com/ASU-MICS-2028/cc-group-1-prosit-2>. The team's presentation slides are in the repository at [`docs/presentation/HealthConnect_Ghana_Presentation.pptx`](https://github.com/ASU-MICS-2028/cc-group-1-prosit-2/blob/development/docs/presentation/HealthConnect_Ghana_Presentation.pptx).
+
 ### 1.3 Scope and Boundaries
 
 - **Synthetic Data Only:** Every patient, vital sign reading, appointment, referral, and health worker account in the repository and live databases is synthetic. Seeded patient surnames end in `-Demo`, and demo health worker phone numbers use the reserved range `+233200000101` to `+233200000105`.
 - **Regulatory Alignment:** Data collection, consent evidence, statistical suppression, and audit trails are engineered around **Ghana's Data Protection Act, 2012 (Act 843)** and **HL7 FHIR R4** resource shapes. The system does not claim formal HIPAA certification or clinical device validation.
-- **External Integrations:** SMS delivery supports live gateways (**httpSMS** with end-to-end AES-256-CFB encryption and **Arkesel** bulk SMS) alongside a safe log-only mode when no SMS secret is provisioned. National Health Insurance Scheme (NHIS) eligibility checks, hospital EHR interoperability, pharmacy dispensing, and mobile-money billing are outside the scope of this build.
+- **External Integrations:** SMS delivery supports live gateways (**httpSMS**, with optional end-to-end AES-256-CFB message encryption when an `encryptionKey` is set, and **Arkesel** bulk SMS) alongside a safe log-only mode when no SMS secret is provisioned. Teleconsultation fees are paid by **mobile money through Paystack** (GHS 20 per teleconsult, emergencies exempt; switched on per environment by the `healthconnect/<env>/paystack` secret). National Health Insurance Scheme (NHIS) eligibility checks, hospital EHR interoperability, and pharmacy stock systems are outside the scope of this build; prescriptions carry a code (`RX-XXXX-XXXX`) that a pharmacy reads, and a worker records when it was dispensed.
 
 ---
 
@@ -54,10 +56,12 @@ flowchart LR
             RDS[("RDS PostgreSQL 17<br/>(db.t4g.micro, gp3 20 GB)<br/>KMS Encrypted, rds.force_ssl=1")]
         end
         S3GW["S3 Gateway VPC Endpoint"]
+        TURN["TURN relay: coturn<br/>(t4g.micro, public subnet, Elastic IP)<br/>UDP/TCP 3478 + UDP 49160-49999"]
     end
 
     S3[("S3 Media Bucket<br/>(Private, SSE-KMS, Versioned)")]
-    SM["AWS Secrets Manager<br/>(RDS Password + SMS Secret)"]
+    SM["AWS Secrets Manager<br/>(RDS Password, SMS, Paystack, TURN)"]
+    DR[("eu-west-1 (Ireland)<br/>Replicated RDS Backups<br/>alias/healthconnect-dr-backups")]
     SNS["SNS Appointment Events<br/>(KMS Encrypted)"]
     SQS1["SQS Reminders + DLQ"]
     SQS2["SQS Specialist Notify + DLQ"]
@@ -80,6 +84,8 @@ flowchart LR
     L1 --> DDB
     L2 --> DDB
     L2 --> ClinSNS
+    Phone <-.->|WebRTC media when no direct path| TURN
+    RDS -.->|Automated backups copied| DR
 ```
 
 ### 2.1 Network Topology (`deploy/terraform/network.tf`, `nat.tf`)
@@ -88,6 +94,7 @@ flowchart LR
 - **Public Subnets (`10.30.0.0/24`, `10.30.1.0/24`):** Do not auto-assign public IPs (`map_public_ip_on_launch = false`). Host only the `fck-nat` network address translation instance (`t4g.nano`, module `RaJiska/fck-nat/aws ~> 1.3` with `ha_mode = true` in a self-healing Auto Scaling Group of 1). Using `fck-nat` costs ~$0.13/day instead of ~$43/month plus per-GB charges for a managed AWS NAT Gateway.
 - **Private App Subnets (`10.30.10.0/24`, `10.30.11.0/24`):** Host the internal Application Load Balancer and the `healthconnect-app` EC2 server. Outbound internet traffic (ECR image pulls, OS updates, AWS APIs, SMS gateways) routes through `fck-nat`, while all S3 traffic routes free of charge over the private **S3 Gateway VPC Endpoint** (`com.amazonaws.af-south-1.s3`).
 - **Private Database Subnets (`10.30.20.0/24`, `10.30.21.0/24`):** Host the RDS PostgreSQL 17 instance. The `healthconnect-db` route table contains only the local VPC route—there is no route to the Internet Gateway or `fck-nat`.
+- **TURN Relay (`deploy/terraform/turn.tf`):** One `t4g.micro` Graviton instance in a public subnet with an Elastic IP, shared by production and staging, runs **coturn** as a container. Phones on mobile data in Ghana sit behind carrier-grade NAT, so two of them usually cannot reach each other directly; the relay carries the call's audio and video only when no direct path exists. It uses the TURN REST scheme (`use-auth-secret`): the API gives every call ticket its own short-lived relay login (4 hours) made from a shared secret in Secrets Manager (`healthconnect/turn`), so nothing is stored on the relay and a copied login expires. Cost: ~$7.88/month for the instance plus $3.65/month for the public IPv4, and data out only for relayed calls.
 
 ### 2.2 Security Groups (`deploy/terraform/network.tf`)
 
@@ -96,6 +103,7 @@ flowchart LR
 | `healthconnect-alb` | TCP `80` from AWS-managed prefix list `com.amazonaws.global.cloudfront.origin-facing` only | TCP `80` (production) and TCP `8081` (staging) to `healthconnect-app` |
 | `healthconnect-app` | TCP `80` and TCP `8081` from `healthconnect-alb` only (no port 22 / SSH) | TCP `443` to `0.0.0.0/0` (HTTPS for AWS APIs, OS packages, SMS) and TCP `5432` to `healthconnect-db` |
 | `healthconnect-db` | TCP `5432` from `healthconnect-app` only | None |
+| `healthconnect-turn` | UDP and TCP `3478` (STUN/TURN) and UDP `49160–49999` (relayed media) from anywhere | All (relayed media back to the phones, package and image downloads) |
 
 ### 2.3 Edge Delivery and Internal Load Balancing (`cloudfront.tf`, `alb.tf`)
 
@@ -184,13 +192,15 @@ When the file is captured on the phone, `src/lib/media.ts` computes its **SHA-25
 | Key Alias | Resource | Purpose & Access Control |
 |---|---|---|
 | `alias/healthconnect-data` | `aws_kms_key.data` | Encrypts RDS storage & snapshots, RDS master secret in Secrets Manager, S3 media bucket (`SSE-KMS` with Bucket Keys), and the EC2 root EBS volume. Annual automatic rotation enabled; 7-day deletion window. The `healthconnect-app` IAM role may call `kms:Decrypt` and `kms:GenerateDataKey` on this key **only** when `kms:ViaService` is `secretsmanager.af-south-1.amazonaws.com` or `s3.af-south-1.amazonaws.com`. |
+| `alias/healthconnect-dr-backups` (eu-west-1) | `dr.tf` | Re-encrypts the RDS automated backups copied to Ireland for cross-region disaster recovery. |
 | `alias/healthconnect-events` | `aws_kms_key.events` | Encrypts SNS appointment-event and clinician-alert topics, SQS consumer queues and dead-letter queues, EventBridge Scheduler reminder schedules, and DynamoDB `processed-events` tables. Key policy grants `sns.amazonaws.com` `kms:GenerateDataKey*` and `kms:Decrypt` scoped to the AWS account. |
 
 ### 3.4 Least-Privilege IAM Roles (`deploy/terraform/iam.tf`, `events.tf`, `schedule.tf`)
 
 1. **`healthconnect-app` (EC2 Instance Profile):**
    - `secretsmanager:GetSecretValue`, `DescribeSecret` on the single RDS master secret ARN.
-   - `secretsmanager:GetSecretValue` on `arn:aws:secretsmanager:af-south-1:659500703236:secret:healthconnect/{production,staging}/sms-*`.
+   - `secretsmanager:GetSecretValue` on `arn:aws:secretsmanager:af-south-1:659500703236:secret:healthconnect/{production,staging}/sms-*` and `healthconnect/{production,staging}/paystack-*`.
+   - `secretsmanager:GetSecretValue` on `healthconnect/turn-*` (the TURN relay's shared secret, to make each call ticket its own relay login).
    - `kms:Decrypt`, `kms:GenerateDataKey` on `alias/healthconnect-data` conditioned on `kms:ViaService` (`secretsmanager` or `s3`).
    - `s3:GetObject`, `s3:PutObject` on `arn:aws:s3:::healthconnect-group1-media-659500703236/*` (no `s3:DeleteObject`, no `s3:ListBucket`, no `s3:ListAllMyBuckets`).
    - `ecr:BatchGetImage`, `GetDownloadUrlForLayer`, `BatchCheckLayerAvailability` on the two HealthConnect ECR repositories, plus `ecr:GetAuthorizationToken`.
@@ -223,7 +233,7 @@ When the file is captured on the phone, `src/lib/media.ts` computes its **SHA-25
 
 ## 4. Database Design, FHIR R4 Alignment, and RBAC
 
-The PostgreSQL 17 schema is defined through six additive, idempotent SQL migrations in `backend/Services/Libs/Data/Migrations/Sql/`, applied automatically on API startup by `DatabaseMigrator.cs`. While migrations are running, `MigrationsHealthCheck` reports `Unhealthy` (`503` on `/health`), preventing the deployment script from marking a release healthy until all migrations succeed.
+The PostgreSQL 17 schema is defined through ten additive, idempotent SQL migrations (`0000`–`0009`) in `backend/Services/Libs/Data/Migrations/Sql/`, applied automatically on API startup by `DatabaseMigrator.cs`. While migrations are running, `MigrationsHealthCheck` reports `Unhealthy` (`503` on `/health`), preventing the deployment script from marking a release healthy until all migrations succeed.
 
 ### 4.1 Migration History
 
@@ -235,6 +245,10 @@ The PostgreSQL 17 schema is defined through six additive, idempotent SQL migrati
 | `20261109000003_SignIn` | `0003_sign_in.sql` | Adds `users.demo` boolean and creates `auth_keys` (stores the 32-byte HMAC signing key, revoking all grants from non-owner roles). |
 | `20261109000004_AuditEvents` | `0004_audit_events.sql` | Adds `client_event_id` (unique index for idempotent uploads), `patient_uuid`, `entity`, `entity_id`, `detail`, and `client_at` to `access_log`. |
 | `20261109000005_AuditChainOrder` | `0005_audit_chain_order.sql` | Refines `access_log_chain()` so `NEW.id := nextval(...)` is assigned *after* acquiring `pg_advisory_xact_lock(843)`, guaranteeing that `id` sequence order matches lock acquisition order and commit order under concurrent writers. |
+| `20261112000006_UserPhotos` | `0006_user_photos.sql` | Creates `user_photos`: one small JPEG per worker (the database refuses more than 128 KB), so a profile photo follows the worker to any phone. Read and written only by the API's own login for the signed-in worker's own row; no database role gets a grant. |
+| `20261112000007_Payments` | `0007_payments.sql` | Creates `payments` for teleconsultation fees paid by mobile money through Paystack (reference, appointment, district, amount in pesewas, GHS only, status `pending`/`paid`/`failed`/`abandoned`, channel, Paystack transaction id). Revokes every grant from the four database roles; only the API's own login reads and writes it. |
+| `20261112000008_PatientAccounts` | `0008_patient_accounts.sql` | Adds the `patient` role to `users` (a patient account is the phone number a CHV registered on one or more patient records) and `users.added_by` for workers added from the Health workers page. |
+| `20261112000009_ResultsAndPrescriptions` | `0009_results_and_prescriptions.sql` | Creates `test_results` (rapid, lab and imaging tests: requested → resulted or cancelled, flagged normal/abnormal) and `prescriptions` (code `RX-XXXX-XXXX`, medicines as a JSON array, active → dispensed or cancelled), both with the same district Row-Level Security as the other clinical tables. |
 
 ### 4.2 Entity-Relationship Diagram and Table Specifications
 
@@ -248,6 +262,12 @@ erDiagram
     patients ||--o{ media : "has"
     vitals ||--o{ observations : "groups"
     observation_codes ||--o{ observations : "codes"
+    patients ||--o{ test_results : "has"
+    patients ||--o{ prescriptions : "has"
+    appointments ||--o{ prescriptions : "from"
+    appointments ||--o{ payments : "fee for"
+    users ||--o{ payments : "started"
+    users ||--o| user_photos : "has"
 
     patients {
         serial id PK
@@ -372,10 +392,11 @@ erDiagram
         text id PK
         text phone UK "E.164 +233XXXXXXXXX"
         text name
-        text role "chv | nurse | doctor | district_officer | admin"
+        text role "chv | nurse | doctor | district_officer | admin | patient"
         text district
         boolean active
         boolean demo
+        text added_by
         timestamptz created_at
     }
     login_codes {
@@ -387,7 +408,59 @@ erDiagram
         int attempts
         timestamptz used_at
     }
+    auth_keys {
+        bytea signing_key "HMAC key, >= 32 bytes"
+        timestamptz created_at
+    }
+    user_photos {
+        text user_id PK "FK users.id"
+        bytea photo "JPEG, 1 B .. 128 KB"
+        timestamptz updated_at
+    }
+    payments {
+        text reference PK "hc-..."
+        uuid appointment_id FK
+        text district
+        int amount_pesewas "> 0"
+        text currency "GHS"
+        text status "pending | paid | failed | abandoned"
+        text channel "mobile_money | card"
+        bigint provider_id "Paystack transaction id"
+        text created_by FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz paid_at
+    }
+    test_results {
+        uuid id PK "Client-generated UUID"
+        int patient_id FK
+        text category "rapid | lab | imaging"
+        text test
+        text status "requested | resulted | cancelled"
+        text facility
+        text result
+        text flag "normal | abnormal"
+        text notes
+        timestamptz requested_at
+        timestamptz resulted_at
+        int version
+    }
+    prescriptions {
+        uuid id PK "Client-generated UUID"
+        int patient_id FK
+        uuid appointment_id FK
+        text code UK "RX-XXXX-XXXX"
+        jsonb items "1 .. 10 medicines"
+        text status "active | dispensed | cancelled"
+        text prescribed_by
+        text prescriber
+        timestamptz prescribed_at
+        text dispensed_by
+        timestamptz dispensed_at
+    }
 ```
+
+The database has **16 tables** and the `surveillance_weekly` view. Figure 4 shows every table and the 14 foreign-key relationships; `auth_keys`, `login_codes` and `access_log` stand alone on purpose (`access_log.patient_id` is unconstrained so an audit entry survives a deleted or unknown patient).
 
 ### 4.3 FHIR R4 Alignment and Coded Terminology
 
@@ -400,6 +473,8 @@ erDiagram
 | `vitals` | Visit Observation Group | Groups the `observations` captured from one form submission under the phone's `vitals.id` (`UUID`) and stores `taken_at` and `notes`. |
 | `appointments` | `Appointment` & `ServiceRequest` | Stores clinic visits (`follow_up`, `antenatal`, `postnatal`) and referrals/teleconsults (`referral`, `teleconsult`), where `referral_status` (`requested`, `accepted`, `declined`, `seen`) maps to `ServiceRequest.status`. |
 | `media` | `Media` / `DocumentReference` | Stores metadata, S3 key, byte size, MIME type, and SHA-256 hash for files uploaded to S3. |
+| `test_results` | `DiagnosticReport` / `ServiceRequest` | A requested test maps to `ServiceRequest`; once resulted, to `DiagnosticReport` with `flag` as the interpretation. |
+| `prescriptions` | `MedicationRequest` | `items` are the dosage lines; `status` `active`/`dispensed`/`cancelled` maps to `MedicationRequest.status` (`active`/`completed`/`cancelled`). |
 | `access_log` | `AuditEvent` | Records `accessed_by` (`agent.who`), `role` (`agent.role`), `action`, `outcome`, `purpose_of_use` (HL7 v3 `TREAT`, `PUBHLTH`, `HOPERAT`), `source_ip`, timestamps, and cryptographic hash chain fields. |
 
 #### Coded Vital Signs (`observation_codes`)
@@ -455,7 +530,7 @@ The backend (`backend/`) is an **ASP.NET Core 10 (`net10.0`, C#)** solution (`He
 
 ### 5.1 Complete HTTP & WebSocket API Reference
 
-All endpoints (except `/health`, `/api/auth/code`, `/api/auth/verify`, and the WebSocket `/api/calls/{id}/ws` which authenticates via a 1-minute single-use ticket) require `Authorization: Bearer <jwt>`. The caller's identity, role, and district are extracted exclusively from the verified JWT claims (`sub`, `name`, `role`, `district`).
+All endpoints (except `/health`, `/api/auth/code`, `/api/auth/verify`, the Paystack webhook, and the WebSocket `/api/calls/{id}/ws` which authenticates via a 1-minute single-use ticket) require `Authorization: Bearer <jwt>`. The caller's identity, role, and district are extracted exclusively from the verified JWT claims (`sub`, `name`, `role`, `district`).
 
 | Method & Path | Auth Policy | Request Body / Query | Responses & Behaviour |
 |---|---|---|---|
@@ -476,6 +551,21 @@ All endpoints (except `/health`, `/api/auth/code`, `/api/auth/verify`, and the W
 | `GET /api/surveillance/weekly` | `Summary` (`district_officer`, `admin`) | None | Queries `surveillance_weekly` and returns `[{ district, week, patients_seen, patients_high_bp, patients_fever, suppressed }]`. Any row with `< 5` patients has `null` counts and `suppressed: true`. |
 | `POST /api/calls/{appointmentId:guid}/ticket` | `Clinical` | None | Verifies the caller can access `appointmentId`, `type == "teleconsult"`, `status == "scheduled"`, and `referralStatus != "declined"`. Issues a 1-minute single-use ticket: `{ ticket, expiresAt, socketPath, iceServers }`. |
 | `GET /api/calls/{appointmentId:guid}/ws?ticket=` | Single-use ticket | WebSocket upgrade | Redeems ticket, joins 2-person room in `CallRooms`, and relays WebRTC signalling JSON (`offer`, `answer`, `candidate`, `hangup`, `media` up to 64 KB) between the CHV and clinician. |
+| `GET`, `PUT`, `DELETE /api/auth/me/photo` | `SignedIn` | JPEG (`PUT`) | The signed-in worker's own profile photo (`user_photos`), so it is the same on every phone. |
+| `GET /api/workers` | `ManageWorkers` (`district_officer`, `admin`) | None | The health workers the caller manages: the officer's own district, or every district for the admin. |
+| `POST /api/workers` | `ManageWorkers` | `{ name, phone, role, district }` | Adds a CHV, nurse or doctor, who can then sign in with a code sent to that phone. An officer's new workers are always in the officer's district. `409` when the number is already someone's. |
+| `PATCH /api/workers/{id}` | `ManageWorkers` | `{ name?, role?, active? }` | Renames, changes the role of, or switches off a worker the caller manages. A switched-off worker is signed out at their next request. Nobody changes their own account. |
+| `GET /api/my/health` | `Patient` | None | A signed-in patient's own records: who is registered with their phone (a household may share one), their visits and latest readings. Read-only. |
+| `PUT /api/results/{id:guid}` | `Clinical` | Test result (`category`, `test`, `status`, `result`, `flag`, …) | Saves a requested or resulted test. Requested can become resulted or cancelled; an abnormal result publishes a `result.abnormal` event (clinician alert). |
+| `GET /api/results?updatedSince=` | `Clinical` | Optional `updatedSince` | Tests saved or changed since the cursor, within the caller's district rules. |
+| `PUT /api/prescriptions/{id:guid}` | `Clinical` (writing/cancelling: `doctor` only) | Prescription (`items`, `notes`, `status`, …) | A doctor writes or cancels; any clinical worker records it as dispensed with the pharmacy's name. Medicines never change once saved. Publishes `prescription.created` (the patient is texted the code). |
+| `GET /api/prescriptions?updatedSince=` | `Clinical` | Optional `updatedSince` | Prescriptions written or changed since the cursor. |
+| `GET /api/media?updatedSince=` | `Clinical` | Optional `updatedSince` | Descriptions of shared photos (wound, lab slip, X-ray film) so a nurse or doctor sees what the CHV saw. Consent evidence is not listed. |
+| `GET /api/media/{id:guid}/download-url` | `Clinical` | None | A 5-minute link to read one shared photo, only if the caller may see its patient (`404` otherwise). |
+| `GET /api/payments/{appointmentId:guid}` | `ClinicalOrPatient` | None | The visit's fee and status (`not_required`, `exempt`, `unpaid`, `pending`, `paid`, `failed`, `abandoned`). A pending payment is checked with Paystack on the spot. |
+| `POST /api/payments/{appointmentId:guid}/checkout` | `ClinicalOrPatient` | `{ callbackUrl }` | Starts a mobile-money payment of the teleconsult fee (GHS 20) and returns Paystack's checkout page. `409` already paid · `422` no fee, exempt (emergency) or closed · `503` payments not switched on · `502` Paystack down. A teleconsult call ticket is refused with `402` until the fee is paid. |
+| `POST /api/payments/paystack/webhook` | Anonymous (signed) | Paystack event | Accepted only with a valid `x-paystack-signature`, and the amount and currency must match what was asked for. |
+| `GET /api/payments` | `Summary` (`district_officer`, `admin`) | None | Fees collected, newest first: the officer's district or, for the auditor, every district. Visits are described by facility and time only, never by patient. |
 
 ---
 
@@ -522,10 +612,17 @@ Every route checks authentication and role permissions via loader guards (`src/a
 | `/patients/:id/refer` | `ReferPage` | `chv`, `nurse`, `doctor` | Yes | Triggered automatically when a new vitals reading has an urgent flag (`bpCrisis`, `highFever`, `lowTemp`). Pre-fills a referral booking with priority `urgent` and the flagged measurements, plus a direct `tel:` link to call the facility. |
 | `/patients/:id/appointments/new` & `.../edit` | `NewAppointmentPage` | `chv`, `nurse`, `doctor` | Yes | Book or reschedule a `follow_up`, `antenatal`, `postnatal`, `referral`, or `teleconsult` with date/time picker, facility, priority, and reason. |
 | `/appointments` | `AppointmentsPage` | `chv`, `nurse`, `doctor` | Yes | Tabbed visit manager (`Upcoming`, `Overdue`, `Past`) with one-tap actions (`Done`, `Reschedule`, `Patient didn't come`, `Cancel visit`, and `Join video call` for scheduled teleconsults). |
-| `/appointments/:appointmentId/call` | `CallPage` | `chv`, `nurse`, `doctor` | Online only (WebRTC) | Two-way low-bandwidth WebRTC video/audio consultation with mic/camera toggles, audio-only mode, and live WebRTC network statistics. |
+| `/appointments/:appointmentId/call` | `CallPage` | `chv`, `nurse`, `doctor`, `patient` | Online only (WebRTC) | Two-way low-bandwidth WebRTC video/audio consultation with mic/camera toggles, audio-only mode, and live WebRTC network statistics. Opens only at the booked time, and only once the teleconsult fee is paid (emergencies exempt); relayed through the TURN server when the phones cannot connect directly. |
+| `/appointments/:appointmentId/payment` | `PaymentReturnPage` | `chv`, `nurse`, `doctor`, `patient` | Online only | Where Paystack sends the payer back after mobile-money checkout; shows whether the fee is paid. |
+| `/patients/:id/results/new` & `/patients/:id/results/:resultId` | `NewResultPage` | `chv`, `nurse`, `doctor` | Yes | Request a rapid, lab or imaging test, or record its result (with a photo of the slip or film) and flag it normal or abnormal. |
+| `/patients/:id/prescriptions/new` | `NewPrescriptionPage` | `doctor` | Yes | Write a prescription (up to 10 medicines); the patient is texted its `RX-XXXX-XXXX` code for the pharmacy. |
+| `/my` | `MyHealthPage` | `patient` | Yes (last copy) | A signed-in patient's own records: household members on their phone, visits, latest readings, and teleconsults to join or pay for. |
 | `/referrals` | `ReferralsPage` | `nurse`, `doctor` | Yes (queues offline) | Clinician referral inbox sorted by priority (`emergency` -> `urgent` -> `routine`) and time, with `To do` and `Done` tabs and actions to `Accept`, `Decline`, or `Mark as seen`. |
 | `/surveillance` | `SurveillancePage` | `district_officer`, `admin` | Online (cached demo fallback in demo mode) | Anonymised district surveillance dashboard: `Week` / `Month` tabs, headline cards with period-over-period diffs, bar charts for patients seen and fever cases, `<5` privacy suppression, and automatic fever outbreak alert banners. |
 | `/audit` | `AuditPage` | `admin` | Local log offline + Server log online | Auditor activity console showing today's views/changes/refusals, searchable local device events, and live server `access_log` entries with one-click hash-chain integrity verification (`ServerLog.tsx`). |
+| `/workers` | `WorkersPage` | `district_officer`, `admin` | Online | Add health workers, change their role, or switch them off (the officer manages their own district; the admin every district). |
+| `/payments` | `PaymentsPage` | `district_officer`, `admin` | Online | Teleconsultation fees collected through Paystack, described by facility and time only. |
+| `/learn` | `EducationPage` | Everyone signed in | Yes | Health education content in the patient's language. |
 | `/sync` | `SyncPage` | Everyone | Yes | Outbox queue inspector, pending media file counter, manual **Sync now** trigger, and interactive side-by-side conflict resolution cards for patient records. |
 | `/profile` | `ProfilePage` | Everyone | Yes | Worker profile card, local profile photo upload, language switcher, appearance toggle (`Phone`, `Light`, `Dark`), and sign-out. |
 
@@ -838,6 +935,8 @@ All container logs stream to CloudWatch Logs group `/healthconnect/app` (30-day 
 
 - **Recovery Point Objective (RPO):** **5 minutes** on server-side data via RDS continuous WAL archiving and 7-day Point-In-Time Recovery (PITR), plus **0 data loss on unsynced field records** because phones retain every record in IndexedDB until the server confirms receipt.
 - **Recovery Time Objective (RTO):** **~30 minutes** (database PITR restore time plus updating `DB_HOST` in `/opt/healthconnect/<env>/settings.env` via SSM and re-running the Deploy workflow).
+- **Cross-Region Copy (`deploy/terraform/dr.tf`):** Every automated backup is copied to **eu-west-1 (Ireland)** and encrypted there with a separate key (`alias/healthconnect-dr-backups`), so any second of the last 7 days can be restored in Ireland if Cape Town is unavailable. The full Ireland rebuild is written in `docs/runbooks/disaster-recovery.md` but has not been rehearsed end to end.
+- **Measured Drill (12 Nov 2026):** Production was restored to its latest restorable point (about 3.5 minutes behind live) as a separate private instance in the same subnets and security group, without touching production. It was `available` in **about 12 minutes** (06:37 to 06:49 UTC) and then deleted. The ~30-minute RTO above adds the switch-over and redeploy to that.
 - **Automated Restore Drill (`deploy/ops/restore-drill.sh`):** Restores `healthconnect-db` to 5 minutes ago into a private `db.t4g.micro` instance (`healthconnect-db-drill-<timestamp>`) inside the same private DB subnet group and security group, waits for `db-instance-available`, prints the exact elapsed minutes and seconds, verifies encryption and private-only access, and deletes the temporary drill instance on exit.
 
 ### 11.3 Load Testing (`deploy/ops/load-test.js`)
@@ -864,7 +963,7 @@ Both the frontend and backend enforce a minimum **70% line coverage gate** in CI
 
 | Layer & Suite | Location | What It Verifies |
 |---|---|---|
-| **Database & RLS Integration Tests** | `backend/tests/Data.Tests/` | Runs against a real PostgreSQL 17 container (`Testcontainers.PostgreSql`): verifies all 6 SQL migrations (`MigrationTests`), upgrade from the first Lab 6 draft (`FirstDraftUpgradeTests`), non-superuser RDS-like login behavior (`RdsLikeLoginTests`), `RoleSession` role switching (`RoleSessionTests`), district Row-Level Security isolation across all four roles (`RowLevelSecurityTests`), LOINC/UCUM plausibility and consent triggers (`ClinicalRulesTests`), `access_log` append-only triggers and concurrent hash-chain integrity (`AuditLogTests`), `surveillance_weekly` `<5` small-cell suppression (`SurveillanceViewTests`), sample seed loading (`SampleDataTests`), Secrets Manager password rotation (`SecretsManagerSecretReaderTests`), and health checks (`DatabaseHealthCheckTests`). |
+| **Database & RLS Integration Tests** | `backend/tests/Data.Tests/` | Runs against a real PostgreSQL 17 container (`Testcontainers.PostgreSql`): verifies all 10 SQL migrations (`MigrationTests`), upgrade from the first Lab 6 draft (`FirstDraftUpgradeTests`), non-superuser RDS-like login behavior (`RdsLikeLoginTests`), `RoleSession` role switching (`RoleSessionTests`), district Row-Level Security isolation across all four roles (`RowLevelSecurityTests`), LOINC/UCUM plausibility and consent triggers (`ClinicalRulesTests`), `access_log` append-only triggers and concurrent hash-chain integrity (`AuditLogTests`), `surveillance_weekly` `<5` small-cell suppression (`SurveillanceViewTests`), sample seed loading (`SampleDataTests`), Secrets Manager password rotation (`SecretsManagerSecretReaderTests`), and health checks (`DatabaseHealthCheckTests`). |
 | **Auth Service Tests** | `backend/tests/AuthService.Tests/` | Tests `POST /api/auth/code`, `POST /api/auth/verify`, and `GET /api/auth/me`: Ghana phone number parsing/masking, 30s cooldown and 6/hour rate limits, 5-attempt lockout, 10-minute code expiry, single-use atomic consumption, demo worker `123456` restriction, `sign-in` audit entries, `ArkeselSmsSender`, and `HttpSmsSender` (including AES-256-CFB round-trip encryption/decryption). |
 | **Records Service Tests** | `backend/tests/RecordsService.Tests/` | Tests patient creation/updates/version conflicts (`PatientTests`), coded vitals creation and immutability (`VitalsTests`), appointments and clinician referral state machine (`AppointmentTests`), SNS `AppointmentEvent` publishing (`AppointmentEventTests`), S3 presigned upload URLs and SHA-256/MIME/size checks (`MediaTests`), client audit upload and chain verification (`AuditTests`), weekly surveillance (`SurveillanceTests`), WebRTC call tickets and 2-person rooms (`CallTests`), and idempotent demo seeding (`DemoRecordsSeederTests`). |
 | **End-to-End API & WebSocket Tests** | `backend/tests/Api.Tests/` | Starts the full ASP.NET Core pipeline in memory (`WebApplicationFactory<Program>`) against PostgreSQL: tests full sign-in flows (`SignInFlowTests`), clinical sync flows (`RecordsFlowTests`), live WebSocket signalling between two call participants (`CallSocketTests`), `/health` (`HealthEndpointTests`), and verifies that the committed `docs/openapi/healthconnect.json` matches the live API contract (`ApiContractTests`). |
@@ -878,9 +977,9 @@ Both the frontend and backend enforce a minimum **70% line coverage gate** in CI
 | Area | Current Implementation | Production Requirement |
 |---|---|---|
 | **High Availability (99.7% Uptime Target)** | Single `t4g.small` EC2 instance and single-AZ `db.t4g.micro` RDS instance to stay within the course budget (~$2.25/day). | Place 2+ `t4g.small` instances in an Auto Scaling Group across `af-south-1a` and `af-south-1b` behind the existing ALB target groups, enable `multi_az = true` on RDS PostgreSQL, and move `CallRooms` WebSocket state to Redis or API Gateway WebSockets so call participants can land on different instances. |
+| **Teleconsultation Relay** | One coturn TURN relay (`t4g.micro`, Elastic IP) in `af-south-1`, shared by production and staging; calls fall back to it when the phones cannot connect directly. Losing it stops relayed calls until it is back, never data. | A second relay in another Availability Zone (both listed in `TURN_URLS`), or a managed TURN service. |
 | **Environment Isolation** | Production (`:80`, `healthconnect`) and staging (`:8081`, `healthconnect_staging`) run as separate Docker Compose projects on the same EC2 and RDS instances (with container memory limits of 128 MB / 512 MB). | Separate AWS accounts (or dedicated EC2 and RDS instances per environment) so load tests on staging cannot contend for CPU or database I/O with production. |
 | **Origin Transport (CloudFront $\rightarrow$ ALB)** | Viewers connect to CloudFront over HTTPS (`TLSv1.2` / `TLSv1.3`), and CloudFront reaches the internal ALB over AWS's privateVPC Origin network on HTTP port 80. | Register a custom domain name, provision an AWS Certificate Manager (ACM) certificate in `af-south-1` and `us-east-1`, enforce `TLSv1.2_2021` minimum at the edge, and enable HTTPS `:443` on the internal ALB listener. |
-| **WebRTC NAT Traversal on Mobile Carrier Networks** | Uses public Google STUN servers (`stun.l.google.com:19302`) by default; supports TURN via `TURN_URLS`, `TURN_USERNAME`, and `TURN_CREDENTIAL` environment variables when configured. | Deploy a `coturn` relay or managed TURN service in `af-south-1` so teleconsultations connect reliably when both phones sit behind symmetric mobile carrier NATs (CGNAT). |
 | **Local Language Translations & Dictation** | English is complete; Twi (`tw`), Ewe (`ee`), and Hausa (`ha`) ship with a *Draft translation* badge; Dagbani (`dag`) is marked *Coming soon*; voice-to-text dictation uses the browser's on-device English speech engine. | Native-speaker clinical review of all Twi, Ewe, Hausa, and Dagbani strings (prioritising consent statement `v1` and referral instructions) and on-device ASR models for Ghanaian languages. |
 | **Client-Side Storage Encryption** | Offline records in IndexedDB rely on the Android device's OS screen lock and full-disk encryption. | Encrypt sensitive IndexedDB fields at rest with a Web Crypto `AES-GCM` key derived from a worker-specific device PIN. |
 | **Database Service Login** | The API connects to RDS as the table-owning `healthconnect` login and drops privileges per transaction via `SET LOCAL ROLE`. | Create a dedicated non-owner login (`healthconnect_api`) with `NOLOGIN` role memberships only, separating DDL migration credentials from runtime API credentials. |
