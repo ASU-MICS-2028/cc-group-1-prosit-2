@@ -16,6 +16,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<LoginCode> LoginCodes => Set<LoginCode>();
 
+    public DbSet<UserPhoto> UserPhotos => Set<UserPhoto>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AppUser>(user =>
@@ -29,6 +31,12 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             code.ToTable("login_codes", table => table.ExcludeFromMigrations());
             code.HasKey(c => c.Id);
             code.Property(c => c.Id).ValueGeneratedOnAdd();
+        });
+
+        modelBuilder.Entity<UserPhoto>(photo =>
+        {
+            photo.ToTable("user_photos", table => table.ExcludeFromMigrations());
+            photo.HasKey(p => p.UserId);
         });
 
         UseSnakeCaseColumnNames(modelBuilder);
