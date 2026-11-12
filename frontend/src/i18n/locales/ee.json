@@ -285,7 +285,9 @@
     "discard_appointment": "Discard this visit",
     "discardYes": "Yes, discard it",
     "discardNo": "Keep it",
-    "orphan": "Its patient never reached the server and isn't waiting to be sent, so this can't be sent either."
+    "orphan": "Its patient never reached the server and isn't waiting to be sent, so this can't be sent either.",
+    "discard_result": "Discard this result",
+    "discard_prescription": "Discard this prescription"
   },
   "surveillance": {
     "title": "Nutome ƒe kpuie",

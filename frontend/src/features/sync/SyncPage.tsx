@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "@/lib/toast"
 import { EmptyState, PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
-import { db } from "@/db/local"
+import { db, recordTable } from "@/db/local"
 import { useOnline } from "@/lib/useOnline"
 import type { OutboxItem, Patient } from "@/db/types"
 import {
@@ -267,15 +267,7 @@ function serverReason(error: string): string | null {
 /** Drops a change the server will never accept: from the queue, and the record from this phone if it never reached the server. */
 async function discard(item: OutboxItem) {
   await db.outbox.delete(item.seq!)
-  if (item.op === "create") {
-    const table =
-      item.entity === "patient"
-        ? db.patients
-        : item.entity === "vitals"
-          ? db.vitals
-          : db.appointments
-    await table.delete(item.entityId)
-  }
+  if (item.op === "create") await recordTable[item.entity].delete(item.entityId)
 }
 
 /** A reading or visit whose patient the server doesn't have and that isn't waiting to be sent either. */
