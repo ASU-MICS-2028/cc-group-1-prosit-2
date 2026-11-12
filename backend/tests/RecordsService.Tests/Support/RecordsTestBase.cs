@@ -6,6 +6,7 @@ using HealthConnect.RecordsService;
 using HealthConnect.RecordsService.Events;
 using HealthConnect.RecordsService.Features;
 using HealthConnect.RecordsService.Models;
+using HealthConnect.RecordsService.Payments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
@@ -41,6 +42,9 @@ public sealed class RecordsDatabase : IAsyncLifetime
 
     /// <summary>One shared connection pool for the whole test run (a pool per test would use up the server's connections).</summary>
     public RoleSessions Sessions { get; private set; } = null!;
+
+    /// <summary>The API's own login (no role switch), as PaymentStore uses it.</summary>
+    public Database Owner => _database;
 
     public async Task InitializeAsync()
     {
@@ -90,6 +94,11 @@ public abstract class RecordsTestBase(RecordsDatabase database) : IAsyncLifetime
     protected RecordingAppointmentEvents Events { get; } = new();
 
     protected RoleSessions Sessions => Database.Sessions;
+
+    /// <summary>Payments switched off, as in an environment without a Paystack secret: no call waits for a fee.</summary>
+    protected static readonly PaymentSettings PaymentsOff = new(null, PaymentSettings.DefaultFeePesewas);
+
+    protected PaymentStore Payments => new(Database.Owner, NullLogger<PaymentStore>.Instance);
 
     public Task InitializeAsync() => Database.ResetAsync();
 

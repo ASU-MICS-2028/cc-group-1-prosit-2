@@ -8,13 +8,14 @@ import {
   RefreshCw,
   ShieldCheck,
   Users,
+  Wallet,
   type IconComponent,
 } from "@/components/icons"
 import type { Role } from "@/auth/session"
 
 export interface NavItem {
   to: string
-  key: `nav.${"home" | "patients" | "add" | "referrals" | "appointments" | "summary" | "audit" | "sync" | "profile"}`
+  key: `nav.${"home" | "patients" | "add" | "referrals" | "appointments" | "summary" | "payments" | "audit" | "sync" | "profile"}`
   icon: IconComponent
   end: boolean
   /** The design's centre "Agregar" tab: orange when active */
@@ -53,6 +54,12 @@ const summary: NavItem = {
   icon: ChartColumn,
   end: false,
 }
+const payments: NavItem = {
+  to: "/payments",
+  key: "nav.payments",
+  icon: Wallet,
+  end: false,
+}
 const audit: NavItem = {
   to: "/audit",
   key: "nav.audit",
@@ -78,8 +85,8 @@ const profile: NavItem = {
  * summary for officers. Sync is reached from the offline banner, Home and Profile.
  */
 export function navFor(role: Role): readonly NavItem[] {
-  if (role === "admin") return [audit, summary, sync, profile]
-  if (role === "district_officer") return [summary, sync, profile]
+  if (role === "admin") return [audit, summary, payments, sync, profile]
+  if (role === "district_officer") return [summary, payments, sync, profile]
   // Nurses and doctors receive referrals; CHVs register patients.
   if (role === "nurse" || role === "doctor")
     return [home, patients, referrals, appointments, profile]

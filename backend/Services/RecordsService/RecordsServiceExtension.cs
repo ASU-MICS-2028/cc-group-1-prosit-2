@@ -8,6 +8,7 @@ using HealthConnect.RecordsService.Demo;
 using HealthConnect.RecordsService.Events;
 using HealthConnect.RecordsService.Features;
 using HealthConnect.RecordsService.Media;
+using HealthConnect.RecordsService.Payments;
 using HealthConnect.SharedLibrary.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -59,6 +60,15 @@ public static class RecordsServiceExtension
         services.AddSingleton<CallRooms>();
         services.AddSingleton(sp => CallOptions.From(sp.GetRequiredService<IConfiguration>()));
 
+        // Consultation fees by mobile money (Paystack). Off until the environment's Paystack secret exists.
+        services.AddSingleton(sp => PaymentSettings.From(sp.GetRequiredService<IConfiguration>()));
+        services.AddSingleton<PaymentStore>();
+        services.AddHttpClient(PaystackClient.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(15));
+        services.AddSingleton<IPaystack>(sp => new PaystackClient(
+            sp.GetRequiredService<IHttpClientFactory>().CreateClient(PaystackClient.HttpClientName),
+            sp.GetRequiredService<PaymentSettings>(),
+            sp.GetRequiredService<ILogger<PaystackClient>>()));
+
         return services
             .AddFeature<PutPatient>()
             .AddFeature<GetPatients>()
@@ -72,6 +82,10 @@ public static class RecordsServiceExtension
             .AddFeature<PostMediaUploadUrl>()
             .AddFeature<GetSurveillance>()
             .AddFeature<PostCallTicket>()
-            .AddFeature<CallSocket>();
+            .AddFeature<CallSocket>()
+            .AddFeature<GetPayment>()
+            .AddFeature<PostCheckout>()
+            .AddFeature<PaystackWebhook>()
+            .AddFeature<GetPayments>();
     }
 }

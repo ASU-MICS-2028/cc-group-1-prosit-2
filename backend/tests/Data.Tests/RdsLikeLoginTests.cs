@@ -48,7 +48,7 @@ public sealed class RdsLikeLoginTests : IAsyncLifetime
         await using var db = await DbSession.StartAsync(_login);
 
         Assert.Equal("off", await db.ScalarAsync<string>("SHOW is_superuser"));
-        Assert.Equal(6L, await db.CountAsync("SELECT count(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Equal(8L, await db.CountAsync("SELECT count(*) FROM \"__EFMigrationsHistory\""));
         Assert.Equal(4L, await db.CountAsync("SELECT count(*) FROM pg_roles WHERE rolname LIKE 'hc\\_%'"));
     }
 
