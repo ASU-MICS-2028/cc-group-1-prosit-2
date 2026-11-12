@@ -8,7 +8,7 @@ otherwise. Synthetic data only: the targets below are for this MVP, not a hospit
 |---|---|---|---|
 | A bad release | none | minutes, automatic | 1 |
 | The app server is broken or deleted | none (it keeps no data) | ~5 min auto-recover; ~20 min rebuild | 2 |
-| Data deleted or corrupted in the database | back to any second of the last 7 days (≈5 min behind) | ~30 min, measured in the drill below | 3 |
+| Data deleted or corrupted in the database | back to any second of the last 7 days (≈5 min behind) | ~12 min to a running copy (drill), ~30 min with the switch-over | 3 |
 | Photos or recordings deleted | none (30 days of versions) | minutes | 4 |
 | Cape Town (af-south-1) unavailable, or the account's resources lost | ≈5 min (replicated backups) | a few hours | 5 |
 | Phones offline / server down for hours | none: records wait in each phone's outbox | n/a | — |
@@ -48,8 +48,17 @@ with `frontend_tag` / `backend_tag` set to an earlier commit SHA (the images sta
    Terraform and apply. Redeploy both environments.
 4. Keep the damaged instance until the restored one is confirmed, then delete it.
 
-**Drill (12 Nov 2026):** production restored to its latest restorable time as
-`healthconnect-dr-drill`, private, then deleted. Time to `available`: see the result recorded below.
+**Drill (12 Nov 2026):** production restored to its latest restorable time as a separate,
+private instance, `healthconnect-dr-drill`, in the same subnets and security group.
+
+| Step | Time (UTC) |
+|---|---|
+| Restore started (latest restorable point 06:33:46, ≈3.5 min behind live) | 06:37:14 |
+| Instance created and running (then RDS takes its first backup) | 06:40–06:45 |
+| `available` | 06:49:11 |
+| **Total** | **≈12 minutes** |
+
+It was then deleted (no final snapshot). Production was not touched.
 
 ## 4. Photos and recordings (S3)
 

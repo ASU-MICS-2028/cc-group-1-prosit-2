@@ -154,7 +154,7 @@ if not BEFORE:
     note("<font color='#D6336C'><b>Video call (WebRTC)</b></font><br>Signalling over the API's WebSocket. Audio/video go phone to phone when they can; otherwise through our TURN relay in Cape Town (a login per call, expires in 4 h). 320×240, 15 fps, ≤250 kbps. Open from 15 min before to 2 h after the booking, once the GHS 20 fee is paid.",
          20, 870, 360, 110, "#FFF0F5")
     edge(rds, drb, "backups copied to Ireland", dashed=True, color=NEW, pins="exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;")
-    note("<b>Recovery (docs/runbooks/disaster-recovery.md)</b><br>Bad release: automatic rollback. Server lost: auto-recover / Terraform. Database: point-in-time restore (RPO ≈ 5 min, drill-tested). Region lost: restore from Ireland.", 20, 1000, 360, 80, "#FFF0F5")
+    note("<b>Recovery (docs/runbooks/disaster-recovery.md)</b><br>Bad release: automatic rollback. Server lost: auto-recover / Terraform. Database: point-in-time restore (≈5 min of data; drill: running copy in 12 min). Region lost: restore from Ireland.", 20, 1000, 360, 80, "#FFF0F5")
     edge(phone, turn, "", dashed=True, color=NEW, pins="exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;")
 
     edge(phone, doc, "WebRTC media (direct)", dashed=True, color=NEW, pins="exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;")
