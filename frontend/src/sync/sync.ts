@@ -92,7 +92,11 @@ async function send(): Promise<SyncResult> {
       else result.failed++
       await db.outbox.update(item.seq!, {
         attempts: item.attempts + 1,
-        lastError: conflict ? "conflict" : String(error),
+        lastError: conflict
+          ? "conflict"
+          : error instanceof ApiError
+            ? `${error.status} ${error.message}`
+            : String(error),
       })
       // Offline or server down: stop and keep the order; the rest waits for the next try.
       if (!(error instanceof ApiError)) break
