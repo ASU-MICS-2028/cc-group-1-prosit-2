@@ -1,3 +1,4 @@
+import { useSession } from "@/auth/session"
 import { useLiveQuery } from "dexie-react-hooks"
 import {
   Fingerprint,
@@ -21,6 +22,7 @@ import { BpTrend } from "@/components/BpTrend"
 import { Card, EmptyState, PageHeader } from "@/components/PageHeader"
 import { db } from "@/db/local"
 import type { Appointment, AppointmentType, Patient, Vitals } from "@/db/types"
+import { TeleconsultJoin } from "@/features/payments/TeleconsultJoin"
 import { ReferralStatusChip } from "@/features/referrals/ReferralStatusChip"
 import { AuditRow } from "@/features/audit/AuditRow"
 import { logAccess, useAuditEvents } from "@/lib/audit"
@@ -37,6 +39,7 @@ import {
 import { fullName, usePatient } from "./usePatients"
 
 export function Component() {
+  const session = useSession()
   const { t } = useTranslation()
   const { id } = useParams()
   const patient = usePatient(id)
@@ -134,6 +137,17 @@ export function Component() {
                 <p className="text-muted-foreground">
                   {formatDateTime(a.scheduledAt)} · {t(`status.${a.status}`)}
                 </p>
+                {a.type === "teleconsult" &&
+                a.status === "scheduled" &&
+                a.referralStatus !== "declined" ? (
+                  <div className="mt-3">
+                    <TeleconsultJoin
+                      a={a}
+                      canCollect={session?.user.role === "chv"}
+                      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 text-sm font-semibold text-primary-foreground"
+                    />
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>

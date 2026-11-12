@@ -130,7 +130,8 @@
     "witness": "Adansefoɔ: {{name}}",
     "fileWaiting": "Ɛretwɛn sɛ ɛbɛkɔ",
     "fileSent": "Ɛkɔ dedaw",
-    "noEvidence": "Wɔankyere: adansefoɔ bi di ho adanse."
+    "noEvidence": "Wɔankyere: adansefoɔ bi di ho adanse.",
+    "openVisit": "Open"
   },
   "newPatient": {
     "title": "Kyerɛw ɔyarefoɔ din",
@@ -309,7 +310,10 @@
     "theme": "Sɛnea ɛte",
     "theme_system": "Fon no",
     "theme_light": "Hann",
-    "theme_dark": "Sum"
+    "theme_dark": "Sum",
+    "update": "Get the latest version",
+    "updating": "Getting the latest version…",
+    "version": "This version: {{when}}"
   },
   "pwa": {
     "updateTitle": "Nhyehyɛeɛ foforɔ aba",
@@ -359,7 +363,8 @@
     "tip1": "Kyerɛ ɔyarefoɔ no wɔ ne kasa mu nea enti a ɛsɛ sɛ ɔkɔ ɛnnɛ.",
     "tip2": "Sɛ ɔrentumi nkɔ a, frɛ ayaresabea no na ka kyerɛ nɔɔse a ɔwɔ hɔ no.",
     "book": "Hyɛ nsoma no da",
-    "later": "Ɛnyɛ seesei"
+    "later": "Ɛnyɛ seesei",
+    "teleconsult": "Book a video consultation instead"
   },
   "chart": {
     "title": "Mogya mmoroso",
