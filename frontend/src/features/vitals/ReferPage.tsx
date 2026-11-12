@@ -7,7 +7,7 @@ import { db } from "@/db/local"
 import { fullName, usePatient } from "@/features/patients/usePatients"
 import { formatDateTime } from "@/lib/dates"
 import { cn } from "@/lib/utils"
-import { URGENT_FLAGS, vitalsFlags } from "@/lib/vitals"
+import { priorityFromReadings, vitalsFlags } from "@/lib/vitals"
 
 /**
  * Shown straight after saving vitals that need a facility today (in the spirit of the Figma
@@ -28,7 +28,6 @@ export function Component() {
 
   if (latest === undefined || patient === undefined) return null
   const flags = latest ? vitalsFlags(latest) : []
-  const urgent = flags.filter((f) => URGENT_FLAGS.includes(f))
   const reasons = flags.map((f) => t(`flags.${f}`))
   const readings = latest
     ? [
@@ -43,7 +42,7 @@ export function Component() {
     : ""
   const referral = new URLSearchParams({
     type: "referral",
-    priority: urgent.length ? "urgent" : "routine",
+    priority: priorityFromReadings(latest),
     reason: `${reasons.join(", ")}. ${readings}`,
   })
   // The same request as a video call with a doctor, for when the patient can't travel.

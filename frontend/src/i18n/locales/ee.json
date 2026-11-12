@@ -6,7 +6,8 @@
     "choose": "Tia…",
     "next": "Yi edzi",
     "stepOf": "Afɔɖeɖe {{step}} le {{total}} me",
-    "draft": "Gɔmeɖeɖe gbãtɔ"
+    "draft": "Gɔmeɖeɖe gbãtɔ",
+    "cancel": "Tɔtɔe"
   },
   "nav": {
     "label": "Menu vevitɔ",
@@ -216,7 +217,9 @@
     "reason": "Susu",
     "save": "Ɖoe",
     "editTitle": "Trɔ sasrãkpɔ la",
-    "saveChanges": "Dzra tɔtrɔwo ɖo"
+    "saveChanges": "Dzra tɔtrɔwo ɖo",
+    "fromReadings": "Dzidzeme mamlɛtɔwo na wɔe be wòanye {{priority}}.",
+    "belowReadings": "Dzidzeme mamlɛtɔwo bia {{priority}}. Megaɖii ɖe anyi o negbe lãmesẽ dɔwɔla alo dɔkta gblɔe na wò ko."
   },
   "appointmentType": {
     "follow_up": "Gbugbɔgasra",
@@ -239,7 +242,9 @@
   "entity": {
     "patient": "Dɔnɔ",
     "vitals": "Dzidzemewo",
-    "appointment": "Sraɖekpɔ"
+    "appointment": "Sraɖekpɔ",
+    "result": "Dodokpɔ",
+    "prescription": "Atike ƒe agbalẽ"
   },
   "sync": {
     "title": "Ɖo ɖa",
@@ -456,7 +461,8 @@
     "photoN": "Foto {{n}}",
     "removePhoto": "Ɖe {{label}} ɖa",
     "dictate": "Ƒo nu ŋlɔ nyawo",
-    "listening": "Ele to ɖom… zi edzi nàdzudzɔ"
+    "listening": "Ele to ɖom… zi edzi nàdzudzɔ",
+    "photoOffline": "Ele server dzi. Ga intanɛt hafi nàkpɔe."
   },
   "editPatient": {
     "title": "Trɔ nyatakakawo",
@@ -493,7 +499,9 @@
     "serverIntact_other": "Checked: {{count}} entries, none changed.",
     "serverBroken": "Warning: entry {{id}} does not match the chain. The log may have been changed.",
     "serverOffline": "Connect to the internet to read the server's log.",
-    "serverEmpty": "The server has no entries yet."
+    "serverEmpty": "The server has no entries yet.",
+    "what_result": "dodokpɔ ƒe ŋuɖoɖo aɖe",
+    "what_prescription": "atike ƒe agbalẽ aɖe"
   },
   "time": {
     "justNow": "fifia ke",
@@ -660,5 +668,134 @@
     "role_doctor": "Doctor",
     "role_district_officer": "District officer",
     "role_admin": "Admin"
+  },
+  "results": {
+    "title": "Dodokpɔwo kple X-ray",
+    "add": "Tsɔ dodokpɔ kpe ɖe eŋu",
+    "empty": "Dodokpɔ aɖeke meli haɖe o. Tsɔ dodokpɔ kaba si nèwɔ kpe ɖe eŋu, alo ɖo dɔnɔ la ɖe lab alo X-ray.",
+    "newTitle": "Tsɔ dodokpɔ kpe ɖe eŋu",
+    "answerTitle": "Dodokpɔ ƒe ŋuɖoɖo va",
+    "whatKind": "Dodokpɔ ka ƒomevie?",
+    "category": {
+      "rapid": "Dodokpɔ kaba si wowɔ le afisia",
+      "lab": "Lab dodokpɔ",
+      "imaging": "X-ray alo scan"
+    },
+    "categoryHint": {
+      "rapid": "Malaria RDT, sukli le ʋu me, Hb, fukɔkɔ dodokpɔ: ŋuɖoɖoa le asi fifia.",
+      "lab": "Ehiã lab: lãmesẽ ƒe xɔ alo kɔdzi.",
+      "imaging": "Ehiã X-ray alo ultrasound mɔ̃, zi geɖe le nutoa ƒe kɔdzi."
+    },
+    "whereNow": "Afikae wòle fifia?",
+    "sendOut": "Ɖoe ɖe dodokpɔ",
+    "sendOutHint": "Mɔ̃a meli afisia o. Dɔnɔ la ayi teƒe si wòle.",
+    "backNow": "Dodokpɔ ƒe ŋuɖoɖo va",
+    "backNowHint": "Dɔnɔ la tsɔ agbalẽa, nyatakakaa alo film la va.",
+    "test": "Dodokpɔ",
+    "facility": "Kɔdzi",
+    "facilityHintSend": "Teƒe si te ɖe afisia wu si ate ŋu awɔe. Gblɔ na dɔnɔ la be wòagbugbɔ agbalẽa alo film la vɛ.",
+    "facilityHintDone": "Afi si wowɔe le.",
+    "facilityNeeded": "Gblɔ afi si dɔnɔ la nayi na dodokpɔa.",
+    "sendOutNext": "Ne dɔnɔ la tsɔ ŋuɖoɖoa va la, ʋu dodokpɔ sia ake eye nàtia \"Dodokpɔ ƒe ŋuɖoɖo va\" be nàtsɔe akpe ɖe eŋu, eye nàɖe agbalẽa alo film la ƒe foto.",
+    "result": "Ŋuɖoɖo",
+    "resultHint": {
+      "rapid": "Kpɔɖeŋu: Positive, 7.8 mmol/L, Hb 9.5 g/dL.",
+      "lab": "Ŋlɔ nu si le agbalẽa dzi, alo nya vevitɔ.",
+      "imaging": "Ŋlɔ nyatakakaa ƒe nuwuwu, ne ele eme."
+    },
+    "flagLegend": "Ɖe wònyo?",
+    "flag": {
+      "normal": "Enyo",
+      "abnormal": "Menyo o: ehiã be woagakpɔe"
+    },
+    "photos": "Agbalẽa, nyatakakaa alo film la ƒe fotowo",
+    "photosHint": "Ɖe agbalẽa katã ƒe foto, wòamlɔ anyi, le kekeli nyui me, ale be dɔkta naxlẽe.",
+    "photosHintImaging": "Lé X-ray film la ɖe fesre si me kekeli le alo dziƒo ŋu eye nàɖe foto la tẽ. Ɖe nyatakaka si woŋlɔ hã ƒe foto.",
+    "saveRequest": "Dzrae ɖo eye nàɖo dɔnɔ la ɖa",
+    "saveResult": "Dzra ŋuɖoɖoa ɖo",
+    "requestSaved": "Wodzra dodokpɔ biabia la ɖo",
+    "resultSaved": "Wodzra ŋuɖoɖoa ɖo",
+    "status": {
+      "requested": "Le ŋuɖoɖo lalam",
+      "resulted": "Ŋuɖoɖo",
+      "cancelled": "Wotɔtɔe"
+    },
+    "sentOn": "Woɖoe {{date}}"
+  },
+  "prescriptions": {
+    "title": "Atikewo ƒe agbalẽ",
+    "prescribe": "Ŋlɔ atike",
+    "empty": "Atike aɖeke ƒe agbalẽ meli haɖe o.",
+    "newTitle": "Atike ƒe agbalẽ yeye",
+    "medicineN": "Atike {{n}}",
+    "remove": "Ɖee ɖa",
+    "medicine": "Atike kple eƒe ŋusẽ",
+    "dose": "Agbɔsɔsɔ",
+    "dosePlaceholder": "atike ɖeka",
+    "days": "Ŋkekewo",
+    "frequency": "Zi nenie",
+    "freq": {
+      "once": "Zi ɖeka ko",
+      "daily": "Zi ɖeka gbesiagbe",
+      "twice": "Zi eve gbesiagbe",
+      "three": "Zi etɔ̃ gbesiagbe",
+      "four": "Zi ene gbesiagbe",
+      "night": "Le zã me",
+      "needed": "Ne ehiã"
+    },
+    "instructions": "Mɔfiame",
+    "instructionsPlaceholder": "Le nuɖuɖu megbe",
+    "addMedicine": "Tsɔ atike bubu kpe ɖe eŋu",
+    "forVisit": "Na sasrãkpɔ kae",
+    "noVisit": "Mekpe ɖe sasrãkpɔ aɖeke ŋu o",
+    "save": "Dzra atike ƒe agbalẽa ɖo",
+    "saved": "Wodzra atike ƒe agbalẽ {{code}} ɖo",
+    "needOne": "Tsɔ atike ɖeka ya teti kpe ɖe eŋu.",
+    "needDetails": "Atike ɖesiaɖe hiã agbɔsɔsɔ, zi nenie, kple ŋkeke nenie (1 va se ɖe 365).",
+    "status": {
+      "active": "Womena haɖe o",
+      "dispensed": "Wona",
+      "cancelled": "Wotɔtɔe"
+    },
+    "forDays_one": "na ŋkeke {{count}}",
+    "forDays_other": "na ŋkeke {{count}}",
+    "dispensedAt": "{{pharmacy}} ye nae · {{date}}",
+    "whichPharmacy": "Atikedzraƒe alo lãmesẽ ƒe xɔ kae nae?",
+    "confirmDispensed": "Dzrae ɖo",
+    "markDispensed": "Wona",
+    "share": "Ɖoe ɖe atikedzraƒe",
+    "cancel": "Tɔtɔe",
+    "dispensedSaved": "Woŋlɔe be wona",
+    "cancelledSaved": "Wotɔtɔ atike ƒe agbalẽa",
+    "copied": "Wokɔpi atike ƒe agbalẽa. Tsɔe de SMS alo WhatsApp me.",
+    "shareHeading": "HealthConnect atike ƒe agbalẽ",
+    "patient": "Dɔnɔ",
+    "by": "Ame si ŋlɔe"
+  },
+  "forecast": {
+    "title": "Kwasiɖa si gbɔna: ŋutilãdzoxɔxɔ ƒe nyagblɔɖi",
+    "intro": "Dɔnɔ siwo si ŋutilãdzoxɔxɔ ale le kwasiɖa si gbɔna me, tso nuto ɖesiaɖe ƒe kwasiɖa 8 siwo va yi me. Zãe tsɔ ɖo ɖoɖo na malaria dodokpɔ kple atikewo.",
+    "trend": {
+      "rising": "Le dzidzim",
+      "steady": "Le te",
+      "falling": "Le ɖiɖim"
+    },
+    "expected_one": "Abe dɔnɔ {{count}} ene",
+    "expected_other": "Abe dɔnɔ {{count}} ene",
+    "range": "Ɖewohĩ {{low}} va se ɖe {{high}} · tso kwasiɖa {{weeks}} me",
+    "stock_one": "Dzra ɖo: malaria RDT {{count}} kple paracetamol na dɔnɔ {{count}}.",
+    "stock_other": "Dzra ɖo: malaria RDT {{count}} kple paracetamol na dɔnɔ {{count}}.",
+    "method": "Akɔntabubu ƒe mɔ bɔbɔe (Holt's method) le kwasiɖa ɖesiaɖe ƒe xexlẽmewo dzi: mɔfiame na ɖoɖowɔwɔ, menye kakaɖedzi o. Womezãa kwasiɖa siwo me dɔnɔwo mede 5 o."
+  },
+  "education": {
+    "title": "Lãmesẽ ŋuti nufiafia",
+    "intro": "Lãmesẽ ŋuti nusɔsrɔ̃ kpuiwo be nàxlẽ, alo nàɖoe kple gbe sesẽ na dɔnɔ alo ƒome.",
+    "homeHint": "Malaria, ʋu ƒe ŋusẽ, fufɔfɔ, ORS kple bubuwo",
+    "goNow": "Yi kɔdzi fifia ne",
+    "play": "Ɖo {{title}}",
+    "stop": "Tɔ {{title}}",
+    "source": "Afi si wòtso: {{source}}",
+    "noVoice": "Fon sia mate ŋu axlẽ nu kple gbe sesẽ o. Xlẽ nuŋɔŋlɔa na dɔnɔ la.",
+    "englishOnly": "Fifia nusɔsrɔ̃awo le Eŋlisigbe me. Míatsɔ Twi, Eʋe, Hausa kple Dagbani ƒe gbeɖiɖiwo akpe ɖe eŋu ne gbegbɔgblɔ la ƒe tɔwo kpɔe vɔ."
   }
 }

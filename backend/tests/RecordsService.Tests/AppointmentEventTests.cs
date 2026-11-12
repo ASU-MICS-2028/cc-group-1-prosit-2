@@ -88,16 +88,20 @@ public sealed class AppointmentEventTests(RecordsDatabase database) : RecordsTes
     }
 
     [Fact]
-    public async Task A_nurse_accepting_a_referral_changes_nothing_a_reminder_cares_about_so_nothing_is_published()
+    public async Task A_nurse_answering_a_referral_is_published_so_the_patient_is_told_and_marking_it_seen_is_not()
     {
         var patient = await PatientWithPhoneAsync();
         var id = Guid.NewGuid();
         await PutAppointmentAsync(id, Appointment(id, patient), RecordsDatabase.Chv);
 
         var accepted = await PutAppointmentAsync(id, Appointment(id, patient, referralStatus: "accepted", version: 1), RecordsDatabase.Nurse);
+        var seen = await PutAppointmentAsync(id, Appointment(id, patient, referralStatus: "seen", version: 2), RecordsDatabase.Nurse);
 
         Assert.Equal(200, accepted.Status);
-        Assert.Single(Events.Published);
+        Assert.Equal(200, seen.Status);
+        Assert.Equal([AppointmentEventTypes.Created, AppointmentEventTypes.ReferralAnswered], Events.Published.Select(e => e.Type));
+        Assert.Equal("accepted", Events.Published[1].Appointment.ReferralStatus);
+        Assert.NotNull(Events.Published[1].Patient.Phone);
     }
 
     [Fact]

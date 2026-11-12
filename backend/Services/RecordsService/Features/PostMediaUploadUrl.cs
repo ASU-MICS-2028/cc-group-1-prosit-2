@@ -26,8 +26,8 @@ public sealed partial class PostMediaUploadUrl : IFeature
     public const int MaxBytes = 2 * 1024 * 1024;
     public static readonly TimeSpan LinkLifetime = TimeSpan.FromMinutes(5);
 
-    private static readonly string[] Kinds = ["consent-audio", "consent-signature", "consent-photo", "wound-photo"];
-    private static readonly string[] Owners = ["patient", "vitals", "appointment"];
+    private static readonly string[] Kinds = ["consent-audio", "consent-signature", "consent-photo", "wound-photo", "result-photo"];
+    private static readonly string[] Owners = ["patient", "vitals", "appointment", "result"];
 
     [GeneratedRegex("^[0-9a-f]{64}$")]
     private static partial Regex Sha256();
@@ -54,7 +54,7 @@ public sealed partial class PostMediaUploadUrl : IFeature
         var errors = new Dictionary<string, string>();
         if (!Kinds.Contains(r.Kind))
         {
-            errors["kind"] = "Must be consent-audio, consent-signature, consent-photo or wound-photo.";
+            errors["kind"] = "Must be consent-audio, consent-signature, consent-photo, wound-photo or result-photo.";
         }
 
         var isImage = r.Mime is "image/png" or "image/jpeg";
@@ -67,7 +67,7 @@ public sealed partial class PostMediaUploadUrl : IFeature
         {
             errors["mime"] = "A consent recording must be audio.";
         }
-        else if (r.Kind is "consent-signature" or "consent-photo" or "wound-photo" && !isImage)
+        else if (r.Kind is "consent-signature" or "consent-photo" or "wound-photo" or "result-photo" && !isImage)
         {
             errors["mime"] = "A signature or photo must be a PNG or JPEG image.";
         }
@@ -89,7 +89,7 @@ public sealed partial class PostMediaUploadUrl : IFeature
 
         if (!Owners.Contains(r.OwnerEntity))
         {
-            errors["ownerEntity"] = "Must be patient, vitals or appointment.";
+            errors["ownerEntity"] = "Must be patient, vitals, appointment or result.";
         }
 
         if (!Guid.TryParse(r.OwnerId, out _))
