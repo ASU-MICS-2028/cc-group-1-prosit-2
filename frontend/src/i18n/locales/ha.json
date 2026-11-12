@@ -543,6 +543,7 @@
     "error_closed": "This teleconsultation is closed, so it has no call.",
     "error_no_path": "The phones could not reach each other. This network needs a relay (TURN) server; try mobile data or Wi-Fi instead.",
     "error_server": "Could not reach the call server. Try again in a moment.",
-    "demo": "Video calls need a real sign-in. Demo accounts work offline only."
+    "demo": "Video calls need a real sign-in. Demo accounts work offline only.",
+    "tapForSound": "Tap to turn on the sound"
   }
 }
