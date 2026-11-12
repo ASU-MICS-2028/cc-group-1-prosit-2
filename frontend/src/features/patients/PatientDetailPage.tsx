@@ -19,11 +19,14 @@ import { type ReactNode, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
 import { BpTrend } from "@/components/BpTrend"
+import { PhotoThumb } from "@/components/capture/PhotoThumb"
 import { Card, EmptyState, PageHeader } from "@/components/PageHeader"
 import { db } from "@/db/local"
 import type { Appointment, AppointmentType, Patient, Vitals } from "@/db/types"
 import { TeleconsultJoin } from "@/features/payments/TeleconsultJoin"
 import { ReferralStatusChip } from "@/features/referrals/ReferralStatusChip"
+import { PrescriptionsSection } from "@/features/prescriptions/PrescriptionsSection"
+import { ResultsSection } from "@/features/results/ResultsSection"
 import { AuditRow } from "@/features/audit/AuditRow"
 import { logAccess, useAuditEvents } from "@/lib/audit"
 import { formatDateTime } from "@/lib/dates"
@@ -153,6 +156,8 @@ export function Component() {
           </ul>
         )}
       </section>
+      <ResultsSection patientId={patient.id} />
+      <PrescriptionsSection patient={patient} />
       <ConsentRecord patient={patient} />
       <RecordAccess patientId={patient.id} />
     </div>
@@ -442,24 +447,10 @@ function VitalsPhotos({ vitalsId }: { vitalsId: string }) {
   return (
     <div className="mt-2 flex gap-2">
       {media.map((m, i) => (
-        <MediaThumb key={m.id} blob={m.blob} n={i + 1} />
+        <PhotoThumb key={m.id} media={m} n={i + 1} />
       ))}
     </div>
   )
-}
-
-function MediaThumb({ blob, n }: { blob: Blob; n: number }) {
-  const { t } = useTranslation()
-  const url = useObjectUrl(blob)
-  return url ? (
-    <a href={url} target="_blank" rel="noreferrer">
-      <img
-        src={url}
-        alt={t("capture.photoN", { n })}
-        className="size-16 rounded-lg object-cover"
-      />
-    </a>
-  ) : null
 }
 
 /**

@@ -1,5 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { api } from "@/api/client"
 import { db, newId } from "@/db/local"
 import type { Entity, Media, MediaKind } from "@/db/types"
 
@@ -15,11 +16,15 @@ export async function sha256(blob: Blob): Promise<string> {
  * Shrinks a camera photo on the phone: big enough to read a thumbprint or see a wound, small
  * enough (~100-200 KB) to upload on 2G. The library is loaded only when a photo is taken.
  */
-export async function compressPhoto(file: Blob, longestSide = 1280) {
+export async function compressPhoto(
+  file: Blob,
+  longestSide = 1280,
+  maxSizeMB = 0.2
+) {
   const { default: compress } = await import("browser-image-compression")
   return compress(file as File, {
     maxWidthOrHeight: longestSide,
-    maxSizeMB: 0.2,
+    maxSizeMB,
     fileType: "image/jpeg",
     useWebWorker: true,
   })
@@ -62,4 +67,33 @@ export function useMediaFor(ownerId: string | undefined) {
         : [],
     [ownerId]
   )
+}
+
+/**
+ * Something an <img> can show for a file: the phone's own copy, or, for a photo another worker
+ * took, a 5-minute link from the server (GET /api/media/<id>/download-url). Null while waiting,
+ * offline, or when the server has no copy yet.
+ */
+export function usePhotoUrl(media: Media | undefined): string | null {
+  const local = useObjectUrl(media?.remote ? null : media?.blob)
+  const [remote, setRemote] = useState<string | null>(null)
+  const id = media?.remote && !media.blob ? media.id : undefined
+  useEffect(() => {
+    if (!id) return
+    let live = true
+    api<{ url: string }>(`/media/${id}/download-url`).then(
+      (r) => live && setRemote(r.url),
+      () => live && setRemote(null)
+    )
+    return () => {
+      live = false
+    }
+  }, [id])
+  return media?.remote ? (media.blob ? local : remote) : local
+}
+
+/** Photos of one kind for a record, oldest first. */
+export function usePhotosFor(ownerId: string | undefined, kind: MediaKind) {
+  const all = useMediaFor(ownerId)
+  return all?.filter((m) => m.kind === kind)
 }

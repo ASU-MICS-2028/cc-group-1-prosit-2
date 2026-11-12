@@ -71,7 +71,7 @@ public sealed class RecordsDatabase : IAsyncLifetime
     public async Task ResetAsync()
     {
         await using var connection = await Source.OpenConnectionAsync();
-        await connection.ExecuteAsync("TRUNCATE media, appointments, observations, vitals, consents, patient_identifiers, patients, users RESTART IDENTITY CASCADE");
+        await connection.ExecuteAsync("TRUNCATE prescriptions, test_results, media, appointments, observations, vitals, consents, patient_identifiers, patients, users RESTART IDENTITY CASCADE");
         var phone = 101;
         foreach (var worker in new[] { Chv, OtherChv, Nurse, Doctor, Officer, Admin })
         {
@@ -211,9 +211,17 @@ public sealed class RecordingAppointmentEvents : IAppointmentEvents
 {
     public List<AppointmentEvent> Published { get; } = [];
 
+    public List<CareEvent> PublishedCare { get; } = [];
+
     public Task PublishAsync(AppointmentEvent appointmentEvent, CancellationToken cancellationToken)
     {
         Published.Add(appointmentEvent);
+        return Task.CompletedTask;
+    }
+
+    public Task PublishAsync(CareEvent careEvent, CancellationToken cancellationToken)
+    {
+        PublishedCare.Add(careEvent);
         return Task.CompletedTask;
     }
 }

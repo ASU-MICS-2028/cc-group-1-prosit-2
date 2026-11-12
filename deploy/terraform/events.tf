@@ -4,8 +4,12 @@
 #                               |-- SQS reminders  (+ DLQ)  --> Lambda appointment-reminder
 #                               |                                   `-> EventBridge Scheduler one-off schedule
 #                               |                                         `-> same Lambda, "send" -> SMS (httpSMS or Arkesel, or logged)
-#                               `-- SQS specialist-notify (+ DLQ, referrals/teleconsults only)
+#                               `-- SQS specialist-notify (+ DLQ, referrals/teleconsults and abnormal results only)
 #                                                               --> Lambda specialist-notify --> SNS clinician alerts (email)
+#                                                                     `-> emergency: Scheduler timer -> same Lambda, "escalate"
+#
+# Besides visits, the API publishes referral answers (accepted/declined: texted to the patient), new
+# prescriptions (the code texted to the patient) and abnormal test results (an alert to the clinicians).
 #
 # Why SNS in front of the queues: one SQS message is consumed by one reader, so two consumers
 # reading the same queue would each see half of the events. SNS copies every event to every
@@ -84,9 +88,16 @@ locals {
   # consumer => SNS filter policy (null = every event)
   consumers = {
     reminders = null
+    # Referrals and teleconsults (new, moved, cancelled, answered: an answer stops an emergency's escalation timer),
+    # or a test result that came back not normal. Care events carry no appointmentType, hence the $or.
     specialist-notify = jsonencode({
-      appointmentType = ["referral", "teleconsult"]
-      eventType       = ["appointment.created", "appointment.rescheduled", "appointment.cancelled"]
+      "$or" = [
+        {
+          appointmentType = ["referral", "teleconsult"]
+          eventType       = ["appointment.created", "appointment.rescheduled", "appointment.cancelled", "appointment.referral_answered"]
+        },
+        { eventType = ["result.abnormal"] },
+      ]
     })
   }
   consumer_queues = { for pair in setproduct(local.event_envs, keys(local.consumers)) : "${pair[0]}/${pair[1]}" => {
@@ -270,8 +281,8 @@ data "aws_iam_policy_document" "function" {
 
   statement {
     sid = "UseEventsKey"
-    # The reminder also encrypts the schedules it creates with this key, which needs kms:Encrypt.
-    actions   = each.value.name == "appointment-reminder" ? ["kms:Decrypt", "kms:GenerateDataKey", "kms:Encrypt", "kms:DescribeKey"] : ["kms:Decrypt", "kms:GenerateDataKey"]
+    # Both functions encrypt the schedules they create (reminders, emergency escalations) with this key.
+    actions   = ["kms:Decrypt", "kms:GenerateDataKey", "kms:Encrypt", "kms:DescribeKey"]
     resources = [aws_kms_key.events.arn]
   }
 
@@ -286,22 +297,16 @@ data "aws_iam_policy_document" "function" {
     }
   }
 
-  dynamic "statement" {
-    for_each = each.value.name == "appointment-reminder" ? [1] : []
-    content {
-      sid       = "OwnReminderSchedules"
-      actions   = ["scheduler:CreateSchedule", "scheduler:UpdateSchedule", "scheduler:DeleteSchedule"]
-      resources = ["arn:aws:scheduler:${var.region}:${data.aws_caller_identity.current.account_id}:schedule/${aws_scheduler_schedule_group.reminders[each.value.env].name}/*"]
-    }
+  statement {
+    sid       = "OwnSchedules" # reminders (appt-*) and emergency escalations (esc-*), in the environment's group
+    actions   = ["scheduler:CreateSchedule", "scheduler:UpdateSchedule", "scheduler:DeleteSchedule"]
+    resources = ["arn:aws:scheduler:${var.region}:${data.aws_caller_identity.current.account_id}:schedule/${aws_scheduler_schedule_group.reminders[each.value.env].name}/*"]
   }
 
-  dynamic "statement" {
-    for_each = each.value.name == "appointment-reminder" ? [1] : []
-    content {
-      sid       = "HandScheduleItsRole"
-      actions   = ["iam:PassRole"]
-      resources = [aws_iam_role.reminder_scheduler[each.value.env].arn]
-    }
+  statement {
+    sid       = "HandScheduleItsRole"
+    actions   = ["iam:PassRole"]
+    resources = [aws_iam_role.reminder_scheduler[each.value.env].arn]
   }
 
   dynamic "statement" {
@@ -366,7 +371,12 @@ resource "aws_lambda_function" "event" {
         SMS_SECRET_ID      = "healthconnect/${each.value.env}/sms" # texts go out only once this secret exists
       } : {},
       each.value.name == "specialist-notify" ? {
-        CLINICIAN_TOPIC_ARN = aws_sns_topic.clinician_alerts[each.value.env].arn
+        CLINICIAN_TOPIC_ARN    = aws_sns_topic.clinician_alerts[each.value.env].arn
+        SCHEDULE_GROUP         = aws_scheduler_schedule_group.reminders[each.value.env].name
+        SELF_ARN               = "arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:healthconnect-${each.value.env}-specialist-notify"
+        SCHEDULER_ROLE_ARN     = aws_iam_role.reminder_scheduler[each.value.env].arn
+        EVENTS_KMS_KEY_ARN     = aws_kms_key.events.arn
+        ESCALATE_AFTER_MINUTES = tostring(var.escalate_after_minutes)
       } : {},
     )
   }
@@ -419,8 +429,11 @@ resource "aws_iam_role" "reminder_scheduler" {
 data "aws_iam_policy_document" "reminder_scheduler" {
   for_each = local.event_envs
   statement {
-    actions   = ["lambda:InvokeFunction"]
-    resources = [aws_lambda_function.event["${each.key}/appointment-reminder"].arn]
+    actions = ["lambda:InvokeFunction"]
+    resources = [
+      aws_lambda_function.event["${each.key}/appointment-reminder"].arn,
+      aws_lambda_function.event["${each.key}/specialist-notify"].arn, # emergency escalation timers
+    ]
   }
   statement {
     actions   = ["kms:Decrypt"]

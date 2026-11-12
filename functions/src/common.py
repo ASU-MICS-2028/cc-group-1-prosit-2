@@ -20,7 +20,15 @@ from botocore.exceptions import ClientError
 log = logging.getLogger()
 log.setLevel(logging.INFO)
 
-EVENT_TYPES = {"appointment.created", "appointment.rescheduled", "appointment.cancelled", "appointment.updated"}
+EVENT_TYPES = {
+    "appointment.created",
+    "appointment.rescheduled",
+    "appointment.cancelled",
+    "appointment.updated",
+    "appointment.referral_answered",
+}
+# Care events share the topic: a new prescription (texted to the patient) and an abnormal result (an alert for clinicians).
+CARE_TYPES = {"prescription.created": "prescription", "result.abnormal": "result"}
 IDEMPOTENCY_DAYS = 30
 
 _clients = {}
@@ -45,10 +53,16 @@ def parse(body):
         raise BadEvent(f"not JSON: {err}") from err
     if not isinstance(event, dict):
         raise BadEvent("not a JSON object")
-    if event.get("type") not in EVENT_TYPES:
-        raise BadEvent(f"unknown event type {event.get('type')!r}")
+    kind = event.get("type")
+    if kind not in EVENT_TYPES and kind not in CARE_TYPES:
+        raise BadEvent(f"unknown event type {kind!r}")
     if not event.get("eventId"):
         raise BadEvent("no eventId")
+    if kind in CARE_TYPES:
+        body = event.get(CARE_TYPES[kind])
+        if not isinstance(body, dict) or not body.get("id"):
+            raise BadEvent(f"no {CARE_TYPES[kind]} id")
+        return event
     appt = event.get("appointment")
     if not isinstance(appt, dict) or not appt.get("id") or not appt.get("scheduledAt"):
         raise BadEvent("no appointment id or time")
@@ -139,3 +153,43 @@ def each_message(event, consumer, handle):
             release(consumer, event_id)
             failures.append({"itemIdentifier": message_id})
     return {"batchItemFailures": failures}
+
+
+def upsert_schedule(name, at, payload, dead_letter_arn=None):
+    """A one-off EventBridge Scheduler schedule that calls this same function with `payload` at `at` (UTC).
+    The same name again moves it, so a moved visit never leaves a stale timer behind."""
+    args = {
+        "Name": name,
+        "GroupName": os.environ["SCHEDULE_GROUP"],
+        "ScheduleExpression": f"at({at.strftime('%Y-%m-%dT%H:%M:%S')})",
+        "ScheduleExpressionTimezone": "UTC",
+        "FlexibleTimeWindow": {"Mode": "OFF"},
+        "ActionAfterCompletion": "DELETE",
+        "Target": {
+            "Arn": os.environ["SELF_ARN"],
+            "RoleArn": os.environ["SCHEDULER_ROLE_ARN"],
+            "Input": json.dumps(payload),
+            "RetryPolicy": {"MaximumRetryAttempts": 3, "MaximumEventAgeInSeconds": 3600},
+        },
+    }
+    if dead_letter_arn:
+        # still failing after the retries: kept (and alarmed on) instead of vanishing
+        args["Target"]["DeadLetterConfig"] = {"Arn": dead_letter_arn}
+    if os.environ.get("EVENTS_KMS_KEY_ARN"):
+        args["KmsKeyArn"] = os.environ["EVENTS_KMS_KEY_ARN"]
+    scheduler = client("scheduler")
+    try:
+        scheduler.create_schedule(**args)
+    except ClientError as err:
+        if err.response["Error"]["Code"] != "ConflictException":
+            raise
+        scheduler.update_schedule(**args)
+
+
+def delete_schedule(name):
+    """Remove a pending schedule; one that already ran or never existed is fine."""
+    try:
+        client("scheduler").delete_schedule(Name=name, GroupName=os.environ["SCHEDULE_GROUP"])
+    except ClientError as err:
+        if err.response["Error"]["Code"] != "ResourceNotFoundException":
+            raise

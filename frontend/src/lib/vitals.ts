@@ -1,4 +1,4 @@
-import type { Vitals } from "@/db/types"
+import type { Priority, Vitals } from "@/db/types"
 
 export type Flag =
   | "bpCrisis"
@@ -62,3 +62,46 @@ export function ageFrom(dateOfBirth: string, today = new Date()): number {
 export function estimatedBirthDate(ageYears: number, today = new Date()) {
   return `${today.getFullYear() - ageYears}-07-01`
 }
+
+/** How recent a reading must be to set a referral's priority: older readings may no longer be true. */
+export const PRIORITY_READING_DAYS = 7
+
+/**
+ * Automatic case prioritisation (the brief's Week 2): the priority a referral should have from the
+ * patient's latest reading, so a crisis is not booked as "routine" by mistake. The CHV can still
+ * raise it; lowering it below this shows a warning. Like the flags, a prompt from common adult
+ * thresholds, not a diagnosis.
+ *  - emergency: two danger signs at once, or blood pressure in the hypertensive-emergency range
+ *    (200/130 and above);
+ *  - urgent: one danger sign (BP 180/120, temperature 39.5 °C, or below 35 °C);
+ *  - routine: anything else, or no reading in the last week.
+ */
+export function priorityFromReadings(
+  v: Partial<Vitals> | null | undefined,
+  now = Date.now()
+): Priority {
+  if (!v) return "routine"
+  if (
+    v.takenAt &&
+    now - Date.parse(v.takenAt) > PRIORITY_READING_DAYS * 86_400_000
+  )
+    return "routine"
+  const urgent = vitalsFlags(v).filter((f) => URGENT_FLAGS.includes(f))
+  if (
+    urgent.length >= 2 ||
+    (v.systolic ?? 0) >= 200 ||
+    (v.diastolic ?? 0) >= 130
+  )
+    return "emergency"
+  return urgent.length ? "urgent" : "routine"
+}
+
+const RANK: Record<Priority, number> = { routine: 0, urgent: 1, emergency: 2 }
+
+/** The higher of two priorities. */
+export const higherPriority = (a: Priority, b: Priority): Priority =>
+  RANK[a] >= RANK[b] ? a : b
+
+/** True when `chosen` is below what the readings call for. */
+export const belowReadings = (chosen: Priority, readings: Priority) =>
+  RANK[chosen] < RANK[readings]

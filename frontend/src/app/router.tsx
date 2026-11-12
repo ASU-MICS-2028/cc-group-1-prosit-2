@@ -97,6 +97,24 @@ export const routes: RouteObject[] = [
         lazy: () => import("@/features/vitals/NewVitalsPage"),
       },
       {
+        path: "patients/:id/results/new",
+        loader: clinical,
+        handle: { hideBottomNav: true },
+        lazy: () => import("@/features/results/NewResultPage"),
+      },
+      {
+        path: "patients/:id/results/:resultId",
+        loader: clinical,
+        handle: { hideBottomNav: true },
+        lazy: () => import("@/features/results/NewResultPage"),
+      },
+      {
+        path: "patients/:id/prescriptions/new",
+        loader: requireRole("doctor"),
+        handle: { hideBottomNav: true },
+        lazy: () => import("@/features/prescriptions/NewPrescriptionPage"),
+      },
+      {
         path: "patients/:id/appointments/new",
         loader: clinical,
         handle: { hideBottomNav: true },
@@ -153,6 +171,11 @@ export const routes: RouteObject[] = [
         path: "audit",
         loader: requireRole("admin"),
         lazy: () => import("@/features/audit/AuditPage"),
+      },
+      {
+        path: "learn",
+        loader: anyone,
+        lazy: () => import("@/features/education/EducationPage"),
       },
       {
         path: "sync",

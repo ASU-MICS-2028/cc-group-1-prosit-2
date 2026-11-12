@@ -1,13 +1,16 @@
 import Dexie, { type EntityTable } from "dexie"
 import { getSession } from "@/auth/session"
 import type {
+  AnyRecord,
   Appointment,
   Entity,
   OutboxItem,
   Patient,
   AuditEvent,
   Media,
+  Prescription,
   ProfilePhoto,
+  TestResult,
   Vitals,
 } from "./types"
 
@@ -23,6 +26,8 @@ export const db = new Dexie("healthconnect") as Dexie & {
   profilePhotos: EntityTable<ProfilePhoto, "userId">
   media: EntityTable<Media, "id">
   auditEvents: EntityTable<AuditEvent, "id">
+  results: EntityTable<TestResult, "id">
+  prescriptions: EntityTable<Prescription, "id">
 }
 
 db.version(1).stores({
@@ -50,17 +55,28 @@ db.version(3)
 // v4: the audit trail (lib/audit.ts).
 db.version(4).stores({ auditEvents: "id, at, patientId, action, syncedAt" })
 
-const table = {
+// v5: test results (lab slips, X-ray films) and prescriptions.
+db.version(5).stores({
+  results: "id, patientId, requestedAt, status",
+  prescriptions: "id, patientId, prescribedAt, status",
+})
+
+/** The table each kind of record lives in. */
+export const recordTable = {
   patient: db.patients,
   vitals: db.vitals,
   appointment: db.appointments,
-} as const
+  result: db.results,
+  prescription: db.prescriptions,
+} as const satisfies Record<Entity, unknown>
+
+const table = recordTable
 
 /**
  * Save a record and queue it for the server in one transaction: never one without the other,
  * and never without its audit entry (who created or changed it, when).
  */
-export async function saveAndQueue<T extends Patient | Vitals | Appointment>(
+export async function saveAndQueue<T extends AnyRecord>(
   entity: Entity,
   record: T,
   op: OutboxItem["op"] = "create"

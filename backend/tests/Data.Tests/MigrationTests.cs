@@ -12,12 +12,12 @@ namespace HealthConnect.Data.Tests;
 [Collection(SchemaCollection.Name)]
 public sealed class MigrationTests(SchemaFixture fixture)
 {
-    private static readonly string[] AllMigrations = ["20261109000000_UpgradeFirstDraft", "20261109000001_Baseline", "20261109000002_ClinicalRecords", "20261109000003_SignIn", "20261109000004_AuditEvents", "20261109000005_AuditChainOrder", "20261112000006_UserPhotos", "20261112000007_Payments", "20261112000008_PatientAccounts"];
+    private static readonly string[] AllMigrations = ["20261109000000_UpgradeFirstDraft", "20261109000001_Baseline", "20261109000002_ClinicalRecords", "20261109000003_SignIn", "20261109000004_AuditEvents", "20261109000005_AuditChainOrder", "20261112000006_UserPhotos", "20261112000007_Payments", "20261112000008_PatientAccounts", "20261112000009_ResultsAndPrescriptions"];
 
     private static readonly string[] AllTables =
     [
         "patients", "patient_identifiers", "consents", "observation_codes", "observations", "access_log",
-        "vitals", "appointments", "users", "login_codes", "media",
+        "vitals", "appointments", "users", "login_codes", "media", "test_results", "prescriptions",
     ];
 
     private async Task<List<string>> TablesAsync(string connectionString)

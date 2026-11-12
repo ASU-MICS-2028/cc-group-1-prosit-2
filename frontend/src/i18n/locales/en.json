@@ -6,7 +6,8 @@
     "choose": "Choose…",
     "next": "Next",
     "stepOf": "Step {{step}} of {{total}}",
-    "draft": "Draft translation"
+    "draft": "Draft translation",
+    "cancel": "Cancel"
   },
   "nav": {
     "label": "Main menu",
@@ -216,7 +217,9 @@
     "reason": "Reason",
     "save": "Book",
     "editTitle": "Change the visit",
-    "saveChanges": "Save changes"
+    "saveChanges": "Save changes",
+    "fromReadings": "Set to {{priority}} from the latest readings.",
+    "belowReadings": "The latest readings call for {{priority}}. Lower it only if a nurse or doctor told you to."
   },
   "appointmentType": {
     "follow_up": "Follow-up",
@@ -239,7 +242,9 @@
   "entity": {
     "patient": "Patient",
     "vitals": "Vitals",
-    "appointment": "Visit"
+    "appointment": "Visit",
+    "result": "Test",
+    "prescription": "Prescription"
   },
   "sync": {
     "title": "Sync",
@@ -280,7 +285,9 @@
     "discard_appointment": "Discard this visit",
     "discardYes": "Yes, discard it",
     "discardNo": "Keep it",
-    "orphan": "Its patient never reached the server and isn't waiting to be sent, so this can't be sent either."
+    "orphan": "Its patient never reached the server and isn't waiting to be sent, so this can't be sent either.",
+    "discard_result": "Discard this result",
+    "discard_prescription": "Discard this prescription"
   },
   "surveillance": {
     "title": "District summary",
@@ -456,7 +463,8 @@
     "photoN": "Photo {{n}}",
     "removePhoto": "Remove {{label}}",
     "dictate": "Speak notes",
-    "listening": "Listening… tap to stop"
+    "listening": "Listening… tap to stop",
+    "photoOffline": "On the server. Connect to see it."
   },
   "editPatient": {
     "title": "Edit details",
@@ -493,7 +501,9 @@
     "serverIntact_other": "Checked: {{count}} entries, none changed.",
     "serverBroken": "Warning: entry {{id}} does not match the chain. The log may have been changed.",
     "serverOffline": "Connect to the internet to read the server's log.",
-    "serverEmpty": "The server has no entries yet."
+    "serverEmpty": "The server has no entries yet.",
+    "what_result": "a test result",
+    "what_prescription": "a prescription"
   },
   "time": {
     "justNow": "just now",
@@ -660,5 +670,134 @@
     "role_doctor": "Doctor",
     "role_district_officer": "District officer",
     "role_admin": "Admin"
+  },
+  "results": {
+    "title": "Tests and scans",
+    "add": "Add test",
+    "empty": "No tests yet. Add a quick test you did, or send the patient for a lab test or X-ray.",
+    "newTitle": "Add a test",
+    "answerTitle": "Results are back",
+    "whatKind": "What kind of test?",
+    "category": {
+      "rapid": "Quick test done here",
+      "lab": "Laboratory test",
+      "imaging": "X-ray or scan"
+    },
+    "categoryHint": {
+      "rapid": "Malaria RDT, blood sugar, Hb, pregnancy test: the answer is known now.",
+      "lab": "Needs a laboratory: a health centre or hospital.",
+      "imaging": "Needs an X-ray or ultrasound machine, usually at the district hospital."
+    },
+    "whereNow": "Where is it now?",
+    "sendOut": "Send for the test",
+    "sendOutHint": "There is no machine here. The patient goes to a facility that has one.",
+    "backNow": "Results are back",
+    "backNowHint": "The patient brought the slip, report or film.",
+    "test": "Test",
+    "facility": "Facility",
+    "facilityHintSend": "The nearest place that can do it. Tell the patient to bring the slip or film back.",
+    "facilityHintDone": "Where it was done.",
+    "facilityNeeded": "Say where the patient should go for the test.",
+    "sendOutNext": "When the patient comes back with the result, open this test again and choose \"Results are back\" to add it and photograph the slip or film.",
+    "result": "Result",
+    "resultHint": {
+      "rapid": "For example: Positive, 7.8 mmol/L, Hb 9.5 g/dL.",
+      "lab": "Copy what the slip says, or the main finding.",
+      "imaging": "Copy the report's conclusion, if there is one."
+    },
+    "flagLegend": "Is it normal?",
+    "flag": {
+      "normal": "Normal",
+      "abnormal": "Not normal: needs follow-up"
+    },
+    "photos": "Photos of the slip, report or film",
+    "photosHint": "Photograph the whole slip, flat, in good light, so a doctor can read it.",
+    "photosHintImaging": "Hold the X-ray film up against a bright window or the sky and photograph it straight on. Photograph the written report too.",
+    "saveRequest": "Save and send patient",
+    "saveResult": "Save result",
+    "requestSaved": "Test request saved",
+    "resultSaved": "Result saved",
+    "status": {
+      "requested": "Waiting for result",
+      "resulted": "Result",
+      "cancelled": "Cancelled"
+    },
+    "sentOn": "Sent {{date}}"
+  },
+  "prescriptions": {
+    "title": "Prescriptions",
+    "prescribe": "Prescribe",
+    "empty": "No prescriptions yet.",
+    "newTitle": "New prescription",
+    "medicineN": "Medicine {{n}}",
+    "remove": "Remove",
+    "medicine": "Medicine and strength",
+    "dose": "Dose",
+    "dosePlaceholder": "1 tablet",
+    "days": "Days",
+    "frequency": "How often",
+    "freq": {
+      "once": "One dose only",
+      "daily": "Once a day",
+      "twice": "Twice a day",
+      "three": "3 times a day",
+      "four": "4 times a day",
+      "night": "At night",
+      "needed": "When needed"
+    },
+    "instructions": "Instructions",
+    "instructionsPlaceholder": "After food",
+    "addMedicine": "Add another medicine",
+    "forVisit": "For which visit",
+    "noVisit": "Not linked to a visit",
+    "save": "Save prescription",
+    "saved": "Prescription {{code}} saved",
+    "needOne": "Add at least one medicine.",
+    "needDetails": "Each medicine needs a dose, how often, and for how many days (1 to 365).",
+    "status": {
+      "active": "Not yet given out",
+      "dispensed": "Given out",
+      "cancelled": "Cancelled"
+    },
+    "forDays_one": "for {{count}} day",
+    "forDays_other": "for {{count}} days",
+    "dispensedAt": "Given out by {{pharmacy}} · {{date}}",
+    "whichPharmacy": "Which pharmacy or health centre gave it out?",
+    "confirmDispensed": "Save",
+    "markDispensed": "Given out",
+    "share": "Send to pharmacy",
+    "cancel": "Cancel",
+    "dispensedSaved": "Recorded as given out",
+    "cancelledSaved": "Prescription cancelled",
+    "copied": "Prescription copied. Paste it into an SMS or WhatsApp.",
+    "shareHeading": "HealthConnect prescription",
+    "patient": "Patient",
+    "by": "Prescribed by"
+  },
+  "forecast": {
+    "title": "Next week: fever forecast",
+    "intro": "Expected patients with fever next week, from each district's last 8 weeks. Use it to plan malaria tests and medicines.",
+    "trend": {
+      "rising": "Rising",
+      "steady": "Steady",
+      "falling": "Falling"
+    },
+    "expected_one": "About {{count}} patient",
+    "expected_other": "About {{count}} patients",
+    "range": "Likely {{low}} to {{high}} · based on {{weeks}} weeks",
+    "stock_one": "Have ready: {{count}} malaria RDT and paracetamol for {{count}} patient.",
+    "stock_other": "Have ready: {{count}} malaria RDTs and paracetamol for {{count}} patients.",
+    "method": "A simple trend model (Holt's method) on weekly counts: a guide for planning, not a certainty. Weeks with fewer than 5 patients are not used."
+  },
+  "education": {
+    "title": "Health education",
+    "intro": "Short health lessons to read, or play aloud to a patient or family.",
+    "homeHint": "Malaria, blood pressure, pregnancy, ORS and more",
+    "goNow": "Go to a health facility now if there is",
+    "play": "Play {{title}}",
+    "stop": "Stop {{title}}",
+    "source": "Source: {{source}}",
+    "noVoice": "This phone can't read aloud. Read the text to the patient instead.",
+    "englishOnly": "Lessons are in English for now. Recordings in Twi, Ewe, Hausa and Dagbani will be added once native speakers have checked them."
   }
 }
