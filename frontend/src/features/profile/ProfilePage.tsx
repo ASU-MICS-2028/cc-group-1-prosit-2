@@ -8,7 +8,10 @@ import { clearSession, useSession } from "@/auth/session"
 import { Dropdown } from "@/components/form/Dropdown"
 import { Field } from "@/components/form/Field"
 import { Segmented } from "@/components/form/Segmented"
-import { LogOut, PenLine, X } from "@/components/icons"
+import { LogOut, PenLine, RefreshCw, X } from "@/components/icons"
+import { BUILT_AT, getLatestVersion } from "@/lib/appUpdate"
+import { formatDateTime } from "@/lib/dates"
+import { cn } from "@/lib/utils"
 import { PageHeader } from "@/components/PageHeader"
 import { ProfileCard } from "@/components/ProfileCard"
 import { Button } from "@/components/ui/button"
@@ -26,6 +29,7 @@ export function Component() {
   const navigate = useNavigate()
   const picker = useRef<HTMLInputElement>(null)
   const [photoError, setPhotoError] = useState(false)
+  const [updating, setUpdating] = useState(false)
   const theme = useThemePref()
   const hasPhoto = useProfilePhoto(session?.user.id) !== null
 
@@ -119,6 +123,24 @@ export function Component() {
             label: t(`profile.theme_${v}`),
           }))}
         />
+        <div className="space-y-1">
+          <Button
+            size="xl"
+            variant="secondary"
+            className="w-full"
+            disabled={updating}
+            onClick={() => {
+              setUpdating(true)
+              void getLatestVersion()
+            }}
+          >
+            <RefreshCw className={cn("size-5", updating && "animate-spin")} />
+            {updating ? t("profile.updating") : t("profile.update")}
+          </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            {t("profile.version", { when: formatDateTime(BUILT_AT) })}
+          </p>
+        </div>
         <Button
           size="xl"
           variant="destructive"
