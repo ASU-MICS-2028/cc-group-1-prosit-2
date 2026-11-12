@@ -4,7 +4,8 @@ import { useSyncExternalStore } from "react"
  * Healthcare worker levels (Germain's role-permission matrix decides what each may see and do;
  * the API enforces it, the app only hides what a role cannot use).
  */
-export type Role = "chv" | "nurse" | "doctor" | "district_officer" | "admin"
+export type Role =
+  "chv" | "nurse" | "doctor" | "district_officer" | "admin" | "patient"
 
 export interface User {
   id: string
@@ -91,9 +92,15 @@ export function useSession(): Session | null {
 
 /** Where a signed-in person starts. */
 export function homeFor(role: Role): string {
+  if (role === "patient") return "/my"
   if (role === "admin") return "/audit"
   return role === "district_officer" ? "/surveillance" : "/"
 }
 
 /** Roles that work with individual patients (the officer view is anonymised counts only). */
 export const CLINICAL_ROLES: readonly Role[] = ["chv", "nurse", "doctor"]
+
+/** Where someone's visits are listed: a patient's own page, or the workers' Visits. */
+export function visitsPathFor(role: Role | undefined): string {
+  return role === "patient" ? "/my" : "/appointments"
+}

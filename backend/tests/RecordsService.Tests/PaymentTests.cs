@@ -57,15 +57,15 @@ public sealed class PaymentTests(RecordsDatabase database) : RecordsTestBase(dat
 
     private async Task<Reply> StatusAsync(Guid id, Worker? who = null, PaymentSettings? settings = null) =>
         await ResultReader.RunAsync(await GetPayment.Handle(
-            id, As(who ?? RecordsDatabase.Chv), Sessions, Payments, settings ?? On, _paystack, NullLogger<GetPayment>.Instance, CancellationToken.None));
+            id, As(who ?? RecordsDatabase.Chv), Sessions, Patients, Payments, settings ?? On, _paystack, NullLogger<GetPayment>.Instance, CancellationToken.None));
 
     private async Task<Reply> CheckoutAsync(Guid id, string? callback = null, PaymentSettings? settings = null) =>
         await ResultReader.RunAsync(await PostCheckout.Handle(
-            id, new CheckoutRequest(callback ?? Callback(id)), As(RecordsDatabase.Chv), Sessions, Payments, settings ?? On, _paystack, CancellationToken.None));
+            id, new CheckoutRequest(callback ?? Callback(id)), As(RecordsDatabase.Chv), Sessions, Patients, Payments, settings ?? On, _paystack, CancellationToken.None));
 
     private async Task<Reply> TicketAsync(Guid id) =>
         await ResultReader.RunAsync(await PostCallTicket.Handle(
-            id, As(RecordsDatabase.Doctor), Sessions, new CallTickets(TimeProvider.System), new CallOptions([]), On, Payments, CancellationToken.None));
+            id, As(RecordsDatabase.Doctor), Sessions, new CallTickets(TimeProvider.System), new CallOptions([]), On, Payments, Patients, CancellationToken.None));
 
     private async Task<string> PaidAsync(Guid id)
     {
@@ -154,7 +154,7 @@ public sealed class PaymentTests(RecordsDatabase database) : RecordsTestBase(dat
 
         Assert.Equal(503, (await CheckoutAsync(id, settings: PaymentsOff)).Status);
         var call = await ResultReader.RunAsync(await PostCallTicket.Handle(
-            id, As(RecordsDatabase.Doctor), Sessions, new CallTickets(TimeProvider.System), new CallOptions([]), PaymentsOff, Payments, CancellationToken.None));
+            id, As(RecordsDatabase.Doctor), Sessions, new CallTickets(TimeProvider.System), new CallOptions([]), PaymentsOff, Payments, Patients, CancellationToken.None));
         Assert.Equal(200, call.Status);
     }
 

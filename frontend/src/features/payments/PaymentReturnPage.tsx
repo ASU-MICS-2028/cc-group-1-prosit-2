@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
 import { cedis, paymentStatus, type PaymentStatus } from "@/api/payments"
+import { useSession, visitsPathFor } from "@/auth/session"
 import { buttonVariants } from "@/components/ui/button"
 import { CircleCheckBig, CircleX, Video } from "@/components/icons"
 import { Card, PageHeader } from "@/components/PageHeader"
@@ -21,6 +22,7 @@ const EVERY_MS = 3000
  */
 export function Component() {
   const { t, i18n } = useTranslation()
+  const session = useSession()
   const { appointmentId = "" } = useParams()
   const appointment = useLiveQuery(
     () => db.appointments.get(appointmentId),
@@ -69,7 +71,7 @@ export function Component() {
     <>
       <PageHeader
         title={t("payments.returnTitle")}
-        back="/appointments"
+        back={visitsPathFor(session?.user.role)}
         subtitle={
           appointment
             ? `${patient ? fullName(patient) : ""} · ${formatDateTime(appointment.scheduledAt)}`
@@ -132,7 +134,7 @@ export function Component() {
                   : t("payments.notPaid")}
             </p>
             <Link
-              to="/appointments"
+              to={visitsPathFor(session?.user.role)}
               className={cn(buttonVariants({ size: "lg" }), "w-full")}
             >
               {t("payments.backToVisits")}

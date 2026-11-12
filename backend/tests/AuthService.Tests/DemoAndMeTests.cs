@@ -73,7 +73,7 @@ public sealed class DemoUsersSeederTests(AuthDatabase database) : AuthTestBase(d
     {
         await SeedAsync();
 
-        Assert.Equal(Roles.All.Order(), (await UsersAsync()).Select(u => u.Role).Order());
+        Assert.Equal(Roles.Workers.Order(), (await UsersAsync()).Select(u => u.Role).Order());
     }
 
     [Fact]

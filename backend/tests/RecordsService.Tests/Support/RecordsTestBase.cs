@@ -6,6 +6,7 @@ using HealthConnect.RecordsService;
 using HealthConnect.RecordsService.Events;
 using HealthConnect.RecordsService.Features;
 using HealthConnect.RecordsService.Models;
+using HealthConnect.RecordsService.Patients;
 using HealthConnect.RecordsService.Payments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -99,6 +100,8 @@ public abstract class RecordsTestBase(RecordsDatabase database) : IAsyncLifetime
     protected static readonly PaymentSettings PaymentsOff = new(null, PaymentSettings.DefaultFeePesewas);
 
     protected PaymentStore Payments => new(Database.Owner, NullLogger<PaymentStore>.Instance);
+
+    protected PatientRecords Patients => new(Database.Owner);
 
     public Task InitializeAsync() => Database.ResetAsync();
 

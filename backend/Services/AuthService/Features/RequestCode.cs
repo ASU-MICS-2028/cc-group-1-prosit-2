@@ -54,6 +54,9 @@ public sealed partial class RequestCode : IFeature
         var settings = options.Value;
         var now = time.GetUtcNow();
 
+        // A patient's number gets its account here (PatientAccounts); a worker's number is always the worker's.
+        await PatientAccounts.SyncAsync(db, phone, now, cancellationToken);
+
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Phone == phone.E164 && u.Active, cancellationToken);
         if (user is null)
         {

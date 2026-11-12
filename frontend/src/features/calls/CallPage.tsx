@@ -2,7 +2,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { isDemoSession } from "@/auth/session"
+import { isDemoSession, useSession, visitsPathFor } from "@/auth/session"
 import { Mic, MicOff, PhoneOff, Video, VideoOff } from "@/components/icons"
 import { PageHeader } from "@/components/PageHeader"
 import { buttonVariants } from "@/components/ui/button"
@@ -20,6 +20,7 @@ import { MAX_VIDEO_BPS, useCall } from "./useCall"
  */
 export function Component() {
   const { t } = useTranslation()
+  const session = useSession()
   const { appointmentId = "" } = useParams()
   const appointment = useLiveQuery(
     () => db.appointments.get(appointmentId),
@@ -38,7 +39,7 @@ export function Component() {
       <>
         <PageHeader
           title={t("call.title")}
-          back="/appointments"
+          back={visitsPathFor(session?.user.role)}
           subtitle={subtitle}
         />
         <p className="rounded-xl bg-card p-4 text-sm shadow-card">
@@ -148,6 +149,7 @@ function CallSession({
   onLeave: () => void
 }) {
   const { t } = useTranslation()
+  const session = useSession()
   const call = useCall(appointmentId)
   const name = call.peer?.name ?? ""
   const status: string =
@@ -254,7 +256,7 @@ function CallSession({
             {t("call.rejoin")}
           </button>
           <Link
-            to="/appointments"
+            to={visitsPathFor(session?.user.role)}
             className={buttonVariants({ size: "xl", variant: "secondary" })}
           >
             {t("common.back")}

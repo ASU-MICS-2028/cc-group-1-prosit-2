@@ -9,6 +9,13 @@ const clinical = requireRole(...CLINICAL_ROLES)
 const everyone = requireRole(
   ...([...CLINICAL_ROLES, "district_officer", "admin"] as Role[])
 )
+/** A visit's call and fee: the clinical workers, or the patient whose visit it is. */
+const clinicalOrPatient = requireRole(
+  ...([...CLINICAL_ROLES, "patient"] as Role[])
+)
+const anyone = requireRole(
+  ...([...CLINICAL_ROLES, "district_officer", "admin", "patient"] as Role[])
+)
 
 // Every page is its own chunk (`lazy`), so the first screen only downloads
 // the code it needs. Each page module exports a component named `Component`.
@@ -103,14 +110,24 @@ export const routes: RouteObject[] = [
       },
       {
         path: "appointments/:appointmentId/call",
-        loader: clinical,
+        loader: clinicalOrPatient,
         handle: { hideBottomNav: true },
         lazy: () => import("@/features/calls/CallPage"),
       },
       {
         path: "appointments/:appointmentId/payment",
-        loader: clinical,
+        loader: clinicalOrPatient,
         lazy: () => import("@/features/payments/PaymentReturnPage"),
+      },
+      {
+        path: "my",
+        loader: requireRole("patient"),
+        lazy: () => import("@/features/my/MyHealthPage"),
+      },
+      {
+        path: "workers",
+        loader: requireRole("district_officer", "admin"),
+        lazy: () => import("@/features/workers/WorkersPage"),
       },
       {
         path: "payments",
@@ -144,7 +161,7 @@ export const routes: RouteObject[] = [
       },
       {
         path: "profile",
-        loader: everyone,
+        loader: anyone,
         lazy: () => import("@/features/profile/ProfilePage"),
       },
       { path: "*", lazy: () => import("@/features/NotFoundPage") },

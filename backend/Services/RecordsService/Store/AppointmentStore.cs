@@ -1,6 +1,7 @@
 using Dapper;
 using HealthConnect.Data;
 using HealthConnect.RecordsService.Models;
+using Npgsql;
 
 namespace HealthConnect.RecordsService.Store;
 
@@ -24,6 +25,20 @@ internal static class AppointmentStore
     }
 
     /// <summary>Appointments changed after a moment, oldest change first, for another worker's phone to pull (the referral inbox lives on this).</summary>
+    /// <summary>
+    /// A patient account's visits: those of every record registered with its phone number. Read with the API's own login, so the
+    /// phone number (from the users table, never from the request) is the only thing that decides what is returned.
+    /// </summary>
+    public static async Task<List<AppointmentDto>> ForPhoneAsync(NpgsqlConnection connection, string phone, CancellationToken cancellationToken) =>
+        [.. (await connection.QueryAsync<AppointmentRow>(new CommandDefinition(
+            SelectAppointments + " WHERE p.phone = @phone ORDER BY a.scheduled_at DESC LIMIT 200", new { phone }, cancellationToken: cancellationToken)))
+            .Select(r => r.ToStored().Dto)];
+
+    /// <summary>One visit, if it belongs to a record registered with this phone number.</summary>
+    public static async Task<StoredAppointment?> FindForPhoneAsync(NpgsqlConnection connection, Guid id, string phone, CancellationToken cancellationToken) =>
+        (await connection.QuerySingleOrDefaultAsync<AppointmentRow>(new CommandDefinition(
+            SelectAppointments + " WHERE a.id = @id AND p.phone = @phone", new { id, phone }, cancellationToken: cancellationToken)))?.ToStored();
+
     public static async Task<List<AppointmentDto>> PullAsync(RoleSession session, DateTimeOffset? since, int limit, CancellationToken cancellationToken)
     {
         var rows = await session.Connection.QueryAsync<AppointmentRow>(new CommandDefinition(

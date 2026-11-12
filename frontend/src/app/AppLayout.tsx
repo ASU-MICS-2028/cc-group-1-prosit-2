@@ -42,7 +42,8 @@ export function AppLayout() {
   const { t } = useTranslation()
   const session = useSession()
   const hideBottomNav = useHideBottomNav()
-  useAutoSync(session !== null)
+  // A patient only reads their records from the server; there is nothing on their phone to send.
+  useAutoSync(session !== null && session.user.role !== "patient")
   const items = session ? navFor(session.user.role) : []
 
   return (

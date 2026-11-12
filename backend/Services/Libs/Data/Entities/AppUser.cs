@@ -10,7 +10,7 @@ public sealed class AppUser
 
     public string Name { get; set; } = string.Empty;
 
-    /// <summary>chv, nurse, doctor, district_officer or admin (see SharedLibrary Roles).</summary>
+    /// <summary>chv, nurse, doctor, district_officer, admin or patient (see SharedLibrary Roles).</summary>
     public string Role { get; set; } = string.Empty;
 
     public string District { get; set; } = string.Empty;
@@ -22,4 +22,7 @@ public sealed class AppUser
     public bool Demo { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
+
+    /// <summary>The worker who added this one from the Health workers page; null for demo workers and patient accounts.</summary>
+    public string? AddedBy { get; set; }
 }

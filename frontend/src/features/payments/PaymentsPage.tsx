@@ -98,7 +98,9 @@ export function Component() {
                     })}
                   </p>
                   <p className="text-muted-foreground">
-                    {t("payments.collectedBy", { name: p.collectedBy })}
+                    {p.collectedBy === "patient"
+                      ? t("payments.paidByPatient")
+                      : t("payments.collectedBy", { name: p.collectedBy })}
                     {session?.user.role === "admin" ? ` · ${p.district}` : ""}
                   </p>
                   <p className="mt-1 font-mono text-xs break-all text-muted-foreground">

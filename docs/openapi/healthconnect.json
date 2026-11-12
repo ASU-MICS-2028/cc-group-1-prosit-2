@@ -219,6 +219,142 @@
         ]
       }
     },
+    "/api/workers": {
+      "get": {
+        "tags": [
+          "Workers"
+        ],
+        "operationId": "GetWorkers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkerDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Workers"
+        ],
+        "operationId": "PostWorker",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewWorkerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/workers/{id}": {
+      "patch": {
+        "tags": [
+          "Workers"
+        ],
+        "operationId": "PatchWorker",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkerChangeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/patients/{id}": {
       "put": {
         "tags": [
@@ -941,6 +1077,37 @@
           }
         ]
       }
+    },
+    "/api/my/health": {
+      "get": {
+        "tags": [
+          "Patients"
+        ],
+        "operationId": "GetMyHealth",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyHealthDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1479,6 +1646,105 @@
           }
         }
       },
+      "MyHealthDto": {
+        "required": [
+          "people",
+          "appointments",
+          "vitals"
+        ],
+        "type": "object",
+        "properties": {
+          "people": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyPersonDto"
+            }
+          },
+          "appointments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppointmentDto"
+            }
+          },
+          "vitals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VitalsDto"
+            }
+          }
+        }
+      },
+      "MyPersonDto": {
+        "required": [
+          "id",
+          "name",
+          "community",
+          "sex",
+          "dateOfBirth"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "community": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sex": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dateOfBirth": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "NewWorkerRequest": {
+        "required": [
+          "name",
+          "phone",
+          "role",
+          "district"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "phone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "role": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "district": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "PatientDto": {
         "required": [
           "id",
@@ -1899,6 +2165,81 @@
             "type": "boolean"
           }
         }
+      },
+      "WorkerChangeRequest": {
+        "required": [
+          "name",
+          "role",
+          "active"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "role": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "active": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        }
+      },
+      "WorkerDto": {
+        "required": [
+          "id",
+          "name",
+          "phone",
+          "role",
+          "district",
+          "active",
+          "demo",
+          "addedBy",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "demo": {
+            "type": "boolean"
+          },
+          "addedBy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -1916,6 +2257,9 @@
     },
     {
       "name": "Auth"
+    },
+    {
+      "name": "Workers"
     },
     {
       "name": "Patients"

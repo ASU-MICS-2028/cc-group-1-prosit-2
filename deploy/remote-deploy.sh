@@ -81,7 +81,9 @@ compose release.env pull --quiet
 docker rm -f "placeholder-$HOST_PORT" >/dev/null 2>&1 || true
 [ "$HOST_PORT" = 80 ] && docker rm -f placeholder >/dev/null 2>&1 || true
 
-compose release.env up -d --remove-orphans
+# Always start fresh containers: the API reads its secrets (SMS, Paystack, TURN) only at start-up, so a
+# redeploy after a secret is created or rotated must restart it even when the image is the same.
+compose release.env up -d --remove-orphans --force-recreate
 
 if healthy; then
   echo "$ENV is healthy on $FRONTEND_TAG${BACKEND_TAG:+ / backend $BACKEND_TAG}"
