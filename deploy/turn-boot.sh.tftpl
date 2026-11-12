@@ -1,0 +1,60 @@
+#!/bin/bash
+# First boot of the TURN relay (deploy/terraform/turn.tf): Docker, then coturn with the shared
+# secret read from Secrets Manager. Runs again only if the instance is replaced.
+set -euo pipefail
+
+dnf install -y docker jq
+systemctl enable --now docker
+
+# The Elastic IP is attached just after launch; nothing here needs it to be attached yet.
+for _ in $(seq 1 30); do
+  secret=$(aws secretsmanager get-secret-value --region "${region}" --secret-id "${secret_id}" \
+    --query SecretString --output text 2>/dev/null | jq -r .secret) && [ -n "$secret" ] && break
+  sleep 10
+done
+
+token=$(curl -fsS -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 60")
+private_ip=$(curl -fsS -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/local-ipv4)
+
+install -d -m 0755 /etc/coturn
+cat > /etc/coturn/turnserver.conf <<EOF
+listening-port=3478
+listening-ip=$private_ip
+relay-ip=$private_ip
+# AWS maps the Elastic IP to the private address; tell the phones the public one.
+external-ip=${public_ip}/$private_ip
+min-port=${min_port}
+max-port=${max_port}
+realm=healthconnect
+fingerprint
+# TURN REST logins: <expiry>:<user> and HMAC-SHA1 of it with this secret (CallOptions.ServersFor)
+use-auth-secret
+static-auth-secret=$secret
+# Not an open proxy: never relay into private networks or the VPC (the app server, the database).
+no-multicast-peers
+denied-peer-ip=0.0.0.0-0.255.255.255
+denied-peer-ip=10.0.0.0-10.255.255.255
+denied-peer-ip=100.64.0.0-100.127.255.255
+denied-peer-ip=127.0.0.0-127.255.255.255
+denied-peer-ip=169.254.0.0-169.254.255.255
+denied-peer-ip=172.16.0.0-172.31.255.255
+denied-peer-ip=192.168.0.0-192.168.255.255
+# ...except this relay itself, so two phones that both need the relay can reach each other.
+allowed-peer-ip=$private_ip
+# A low-bandwidth call is ~280 kbps each way; cap a session at 1 Mbps and the whole relay at 100 sessions.
+max-bps=125000
+user-quota=12
+total-quota=100
+stale-nonce=600
+no-cli
+no-tls
+no-dtls
+no-software-attribute
+log-file=stdout
+simple-log
+EOF
+chmod 0644 /etc/coturn/turnserver.conf # read by coturn inside its container; only root can log in here
+
+docker run -d --name coturn --restart unless-stopped --network host \
+  -v /etc/coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro \
+  coturn/coturn:4.6.3 -c /etc/coturn/turnserver.conf

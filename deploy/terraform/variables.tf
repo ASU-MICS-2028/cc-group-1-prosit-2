@@ -80,3 +80,15 @@ variable "clinician_alert_emails" {
   type        = list(string)
   default     = []
 }
+
+variable "turn_enabled" {
+  description = "Run the coturn TURN relay for video calls between phones on mobile data (turn.tf)"
+  type        = bool
+  default     = true
+}
+
+variable "turn_instance_type" {
+  description = "Instance type of the TURN relay (arm64)"
+  type        = string
+  default     = "t4g.micro"
+}
