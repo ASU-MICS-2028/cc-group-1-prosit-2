@@ -108,7 +108,82 @@ export interface Appointment {
   version: number
 }
 
-export type Entity = "patient" | "vitals" | "appointment"
+export type TestCategory = "rapid" | "lab" | "imaging"
+export type TestStatus = "requested" | "resulted" | "cancelled"
+
+/**
+ * A test the patient needs or had. Most villages have no laboratory or X-ray machine, so a test
+ * is often requested first (the patient is sent to a facility that has one) and resulted later,
+ * when the patient comes back with the slip or the film and the CHV photographs it. A quick test
+ * done on the spot (malaria RDT, blood sugar) is saved as resulted straight away.
+ * FHIR: ServiceRequest while requested, DiagnosticReport once resulted.
+ */
+export interface TestResult {
+  id: string
+  patientId: string
+  category: TestCategory
+  /** e.g. "Malaria RDT", "Full blood count", "Chest X-ray" */
+  test: string
+  status: TestStatus
+  /** where it is (to be) done */
+  facility?: string
+  /** what the slip or report says */
+  result?: string
+  flag?: "normal" | "abnormal"
+  notes?: string
+  /** ISO time */
+  requestedAt: string
+  resultedAt?: string
+  createdBy?: string
+  createdAt: string
+  updatedAt: string
+  version: number
+}
+
+export interface PrescriptionItem {
+  medicine: string
+  /** e.g. "500 mg", "1 tablet" */
+  dose: string
+  /** e.g. "3 times a day" */
+  frequency: string
+  days: number
+  instructions?: string
+}
+
+export type PrescriptionStatus = "active" | "dispensed" | "cancelled"
+
+/**
+ * Medicines a doctor prescribed (FHIR MedicationRequest). The code is made from the id, so it
+ * shows before the server has the record and a pharmacy can read it over the phone. The
+ * medicines never change: a wrong prescription is cancelled and a new one written.
+ */
+export interface Prescription {
+  id: string
+  patientId: string
+  /** the referral or teleconsult it came from */
+  appointmentId?: string
+  code: string
+  items: PrescriptionItem[]
+  notes?: string
+  status: PrescriptionStatus
+  prescribedBy?: string
+  prescriberName?: string
+  /** ISO time */
+  prescribedAt: string
+  dispensedBy?: string
+  dispensedAt?: string
+  /** the pharmacy or health centre that gave it out */
+  pharmacy?: string
+  createdAt: string
+  updatedAt: string
+  version: number
+}
+
+export type Entity =
+  "patient" | "vitals" | "appointment" | "result" | "prescription"
+
+export type AnyRecord =
+  Patient | Vitals | Appointment | TestResult | Prescription
 
 /** One change waiting to go to the server, oldest first. */
 export interface OutboxItem {
@@ -116,16 +191,20 @@ export interface OutboxItem {
   entity: Entity
   entityId: string
   op: "create" | "update"
-  payload: Patient | Vitals | Appointment
+  payload: AnyRecord
   queuedAt: string
   attempts: number
   lastError?: string
   /** For a patient change that met someone else's edit: the server's copy, kept so a person can choose (sync/sync.ts) */
-  serverCopy?: Patient | Vitals | Appointment
+  serverCopy?: AnyRecord
 }
 
 export type MediaKind =
-  "consent-audio" | "consent-signature" | "consent-photo" | "wound-photo"
+  | "consent-audio"
+  | "consent-signature"
+  | "consent-photo"
+  | "wound-photo"
+  | "result-photo"
 
 /**
  * A file that belongs to a record (consent evidence, a wound photo). Kept on the phone and
@@ -138,7 +217,10 @@ export interface Media {
   ownerEntity: Entity
   ownerId: string
   kind: MediaKind
-  blob: Blob
+  /** the file; missing for a photo another worker took, until it is fetched (see remote) */
+  blob?: Blob
+  /** true for a photo another worker took: it is on the server, not uploaded from here */
+  remote?: boolean
   mime: string
   size: number
   sha256: string

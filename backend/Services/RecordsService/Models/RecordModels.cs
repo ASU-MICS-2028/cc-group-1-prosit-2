@@ -110,3 +110,61 @@ public sealed record MediaUploadRequest(
 
 /// <summary>The link and what the phone must send with it. The link stops working at expiresAt.</summary>
 public sealed record MediaUploadResponse(string Url, IReadOnlyDictionary<string, string> Headers, DateTimeOffset ExpiresAt, string Key);
+
+/// <summary>
+/// A test the patient needs or had: a quick test done on the spot (rapid), a laboratory test, or an X-ray or scan (imaging).
+/// Requested first when it must be done elsewhere, resulted when the answer is known (photos of the slip or film are media).
+/// </summary>
+public sealed record TestResultDto(
+    string Id,
+    string PatientId,
+    string Category,
+    string Test,
+    string Status,
+    string? Facility,
+    string? Result,
+    string? Flag,
+    string? Notes,
+    DateTimeOffset RequestedAt,
+    DateTimeOffset? ResultedAt,
+    string? CreatedBy,
+    DateTimeOffset? CreatedAt,
+    DateTimeOffset? UpdatedAt,
+    int Version);
+
+/// <summary>One medicine on a prescription.</summary>
+public sealed record PrescriptionItemDto(string Medicine, string Dose, string Frequency, int Days, string? Instructions);
+
+/// <summary>Medicines a doctor prescribed, and whether a pharmacy has given them out.</summary>
+public sealed record PrescriptionDto(
+    string Id,
+    string PatientId,
+    string? AppointmentId,
+    string Code,
+    List<PrescriptionItemDto> Items,
+    string? Notes,
+    string Status,
+    string? PrescribedBy,
+    string? PrescriberName,
+    DateTimeOffset PrescribedAt,
+    string? DispensedBy,
+    DateTimeOffset? DispensedAt,
+    string? Pharmacy,
+    DateTimeOffset? CreatedAt,
+    DateTimeOffset? UpdatedAt,
+    int Version);
+
+/// <summary>A file another worker's phone may fetch: what it is and which record it belongs to (the bytes come from a download link).</summary>
+public sealed record MediaInfoDto(
+    string Id,
+    string PatientId,
+    string OwnerEntity,
+    string OwnerId,
+    string Kind,
+    string Mime,
+    int Size,
+    string Sha256,
+    DateTimeOffset CreatedAt);
+
+/// <summary>A link to read one file, valid until expiresAt.</summary>
+public sealed record MediaDownloadResponse(string Url, DateTimeOffset ExpiresAt);

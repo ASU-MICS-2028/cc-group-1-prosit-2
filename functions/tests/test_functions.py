@@ -259,7 +259,7 @@ def test_httpsms_sends_from_the_phone_number_with_the_text_encrypted(aws, monkey
     body = req["body"]
     assert body["from"] == "+233200000999" and body["to"] == "+233241234567" and body["encrypted"] is True
     assert "Dodowa" not in body["content"]                     # httpSMS's servers cannot read it
-    assert aes_cfb.httpsms_decrypt("phone passphrase", body["content"]) == appointment_reminder.reminder_text(e["appointment"])
+    assert aes_cfb.httpsms_decrypt("phone passphrase", body["content"]) == appointment_reminder.reminder_text(e["appointment"], e["patient"]["preferredLanguage"])
     assert "+233241234567" not in caplog.text and "hs-key" not in caplog.text
 
 
@@ -268,7 +268,7 @@ def test_httpsms_without_an_encryption_key_sends_plain_text(aws, monkeypatch):
     e = event()
     send(e)
     assert fake.requests[0]["body"]["encrypted"] is False
-    assert fake.requests[0]["body"]["content"] == appointment_reminder.reminder_text(e["appointment"])
+    assert fake.requests[0]["body"]["content"] == appointment_reminder.reminder_text(e["appointment"], e["patient"]["preferredLanguage"])
 
 
 @pytest.mark.parametrize("status, body", [(401, b""), (500, b"oops"), (200, b'{"status":"error","message":"no phone"}')])
@@ -352,3 +352,112 @@ def test_both_consumers_handle_the_same_event_independently(aws):
 def test_cancelled_referral_says_so(aws):
     specialist_notify.handler(sqs(event("appointment.cancelled", appt_type="referral", status="cancelled")), None)
     assert aws["sns"].published[0]["Subject"] == "HealthConnect: referral cancelled"
+
+
+# --- texts in the patient's language, referral answers, prescriptions ---------------------
+
+import messages  # noqa: E402
+
+
+def test_reminder_is_in_the_patients_language_and_english_when_there_is_none(aws):
+    appt = event()["appointment"]
+    assert appointment_reminder.reminder_text(appt, "tw").startswith("HealthConnect: yɛrekae wo")
+    assert appointment_reminder.reminder_text(appt, "dag") == appointment_reminder.reminder_text(appt, "en")
+    assert appointment_reminder.reminder_text(appt, None) == appointment_reminder.reminder_text(appt, "en")
+
+
+def test_every_language_has_every_text_with_the_same_placeholders():
+    import string
+
+    def fields(t):
+        return sorted(f for _, f, _, _ in string.Formatter().parse(t) if f)
+
+    for lang, texts in messages.TEXTS.items():
+        assert texts.keys() == messages.TEXTS["en"].keys(), lang
+        for kind, t in texts.items():
+            assert fields(t) == fields(messages.TEXTS["en"][kind]), (lang, kind)
+
+
+def test_an_accepted_referral_is_texted_and_its_reminder_stays(aws, caplog):
+    caplog.set_level("INFO")
+    appointment_reminder.handler(sqs(event(appt_type="referral")), None)
+    appointment_reminder.handler(sqs(event("appointment.referral_answered", version=2, appt_type="referral", referralStatus="accepted")), None)
+    assert "accepted_logged" in caplog.text
+    assert "appt-11111111-1111-4111-8111-111111111111" in aws["scheduler"].schedules
+
+
+def test_a_declined_referral_is_texted_and_its_reminder_dropped(aws, caplog):
+    caplog.set_level("INFO")
+    appointment_reminder.handler(sqs(event(appt_type="referral")), None)
+    appointment_reminder.handler(sqs(event("appointment.referral_answered", version=2, appt_type="referral", referralStatus="declined")), None)
+    assert "declined_logged" in caplog.text
+    assert aws["scheduler"].schedules == {}
+
+
+def care(kind, **body):
+    key = "prescription" if kind == "prescription.created" else "result"
+    return {
+        "eventId": f"{kind}:22222222-2222-4222-8222-222222222222",
+        "type": kind,
+        "occurredAt": datetime.now(timezone.utc).isoformat(),
+        key: {"id": "22222222-2222-4222-8222-222222222222", **body},
+        "patient": {"phone": "+233241234567", "preferredLanguage": "ha"},
+    }
+
+
+def test_a_new_prescription_texts_the_patient_its_code(aws, caplog, monkeypatch):
+    caplog.set_level("INFO")
+    sent = []
+    monkeypatch.setattr(sms, "send", lambda phone, text: sent.append((phone, text)) or ("log", None))
+    result = appointment_reminder.handler(sqs(care("prescription.created", code="RX-1A2B-3C4D", medicines=1)), None)
+    assert result == {"batchItemFailures": []}
+    assert sent == [("+233241234567", messages.text("prescription", "ha", code="RX-1A2B-3C4D"))]
+    assert "takardar maganinka RX-1A2B-3C4D" in sent[0][1]
+
+
+def test_an_abnormal_result_is_not_texted_to_the_patient(aws, monkeypatch):
+    monkeypatch.setattr(sms, "send", lambda *_: pytest.fail("no text for a result"))
+    result = appointment_reminder.handler(sqs(care("result.abnormal", category="imaging", test="Chest X-ray")), None)
+    assert result == {"batchItemFailures": []}
+
+
+# --- clinician alerts and emergency escalation --------------------------------------------
+
+def test_an_abnormal_result_alerts_the_clinicians_without_naming_the_patient(aws):
+    specialist_notify.handler(sqs(care("result.abnormal", category="imaging", test="Chest X-ray", facility="Dodowa District Hospital")), None)
+    alert = aws["sns"].published[0]
+    assert alert["Subject"] == "HealthConnect: Chest X-ray result not normal"
+    assert "X-ray or scan" in alert["Message"]
+    assert "+233" not in alert["Message"]
+
+
+def test_an_emergency_starts_an_escalation_timer_that_an_answer_stops(aws):
+    specialist_notify.handler(sqs(event(appt_type="referral", priority="emergency", referralStatus="requested")), None)
+    timer = aws["scheduler"].schedules["esc-11111111-1111-4111-8111-111111111111"]
+    assert json.loads(timer["Target"]["Input"])["action"] == "escalate"
+    due = datetime.strptime(timer["ScheduleExpression"][3:-1], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+    assert timedelta(minutes=29) < due - datetime.now(timezone.utc) <= timedelta(minutes=30)
+
+    specialist_notify.handler(sqs(event("appointment.referral_answered", version=2, appt_type="referral", priority="emergency", referralStatus="accepted")), None)
+    assert aws["scheduler"].schedules == {}
+
+
+def test_an_urgent_referral_has_no_escalation_timer(aws):
+    specialist_notify.handler(sqs(event(appt_type="referral", priority="urgent")), None)
+    assert aws["scheduler"].schedules == {}
+
+
+def test_cancelling_an_emergency_stops_its_timer(aws):
+    specialist_notify.handler(sqs(event(appt_type="teleconsult", priority="emergency")), None)
+    specialist_notify.handler(sqs(event("appointment.cancelled", version=2, appt_type="teleconsult", priority="emergency", status="cancelled")), None)
+    assert aws["scheduler"].schedules == {}
+
+
+def test_the_timer_firing_alerts_again_as_unanswered(aws, monkeypatch):
+    monkeypatch.setenv("ESCALATE_AFTER_MINUTES", "20")
+    appt = event(appt_type="referral", priority="emergency")["appointment"]
+    result = specialist_notify.handler({"action": "escalate", "appointment": appt}, None)
+    assert result["result"] == "escalated"
+    alert = aws["sns"].published[-1]
+    assert alert["Subject"] == "URGENT - UNANSWERED emergency referral (20 min)"
+    assert alert["MessageAttributes"]["priority"]["StringValue"] == "emergency"

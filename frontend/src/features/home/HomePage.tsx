@@ -209,6 +209,27 @@ export function Component() {
             )}
           </Card>
 
+          <Link to="/learn" className="block">
+            <Card className="flex items-center gap-4 p-4">
+              <HeartPulse
+                className="size-6 shrink-0 text-primary"
+                aria-hidden
+              />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">
+                  {t("education.title")}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t("education.homeHint")}
+                </p>
+              </div>
+              <ChevronRight
+                className="size-5 text-muted-foreground"
+                aria-hidden
+              />
+            </Card>
+          </Link>
+
           <Link to="/sync" className="block">
             <Card className="flex items-center gap-4 p-4">
               <CloudUpload

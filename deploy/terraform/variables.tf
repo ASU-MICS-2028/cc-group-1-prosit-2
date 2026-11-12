@@ -81,6 +81,16 @@ variable "clinician_alert_emails" {
   default     = []
 }
 
+variable "escalate_after_minutes" {
+  description = "How long an emergency referral or teleconsult may wait for a nurse or doctor before the clinicians are alerted again"
+  type        = number
+  default     = 30
+  validation {
+    condition     = var.escalate_after_minutes >= 5 && var.escalate_after_minutes <= 240
+    error_message = "Between 5 and 240 minutes."
+  }
+}
+
 variable "turn_enabled" {
   description = "Run the coturn TURN relay for video calls between phones on mobile data (turn.tf)"
   type        = bool

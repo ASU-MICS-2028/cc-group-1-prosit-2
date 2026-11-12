@@ -3,12 +3,19 @@ import { useTranslation } from "react-i18next"
 import { toast } from "@/lib/toast"
 import { saveFailed } from "@/lib/feedback"
 import { ErrorText } from "@/components/form/ErrorText"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { clearSession, useSession } from "@/auth/session"
 import { Dropdown } from "@/components/form/Dropdown"
 import { Field } from "@/components/form/Field"
 import { Segmented } from "@/components/form/Segmented"
-import { LogOut, PenLine, RefreshCw, X } from "@/components/icons"
+import {
+  ChevronRight,
+  HeartPulse,
+  LogOut,
+  PenLine,
+  RefreshCw,
+  X,
+} from "@/components/icons"
 import { BUILT_AT, getLatestVersion } from "@/lib/appUpdate"
 import { formatDateTime } from "@/lib/dates"
 import { cn } from "@/lib/utils"
@@ -100,6 +107,22 @@ export function Component() {
             </p>
           )}
         </ProfileCard>
+
+        <Link
+          to="/learn"
+          className="flex items-center gap-4 rounded-xl bg-card p-4 shadow-card"
+        >
+          <HeartPulse className="size-6 shrink-0 text-primary" aria-hidden />
+          <span className="flex-1">
+            <span className="block text-sm font-semibold text-foreground">
+              {t("education.title")}
+            </span>
+            <span className="block text-xs text-muted-foreground">
+              {t("education.homeHint")}
+            </span>
+          </span>
+          <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+        </Link>
 
         <Field id="language" label={t("profile.language")}>
           <Dropdown

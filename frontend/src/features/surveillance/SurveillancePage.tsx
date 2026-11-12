@@ -12,6 +12,7 @@ import { useSession } from "@/auth/session"
 import { BarTrend, type Bar } from "@/components/BarTrend"
 import { Card, EmptyState, PageHeader } from "@/components/PageHeader"
 import i18n from "@/i18n"
+import { forecastByDistrict, type DistrictForecast } from "@/lib/forecast"
 import { cn } from "@/lib/utils"
 
 type Period = "week" | "month"
@@ -133,6 +134,7 @@ export function Component() {
     }
   )
   const thisWeek = weekly.at(-1)?.key
+  const forecasts = forecastByDistrict(data.rows, thisWeek)
   const table = data.rows
     .filter((r) => r.week === thisWeek)
     .sort((a, b) => a.district.localeCompare(b.district))
@@ -242,6 +244,8 @@ export function Component() {
         </EmptyState>
       )}
 
+      <ForecastSection forecasts={forecasts} mine={district} />
+
       <section className="mt-6 space-y-2">
         <h2 className="flex items-center gap-2 text-base font-semibold text-heading">
           <Activity className="size-5 text-primary" aria-hidden />
@@ -332,5 +336,78 @@ function Stat({
         </p>
       ) : null}
     </Card>
+  )
+}
+
+/**
+ * Next week's fever cases per district, and what to have ready for them: a planning aid from a
+ * simple trend model (lib/forecast.ts), shown with its range and how many weeks it rests on so
+ * nobody mistakes it for a certainty.
+ */
+function ForecastSection({
+  forecasts,
+  mine,
+}: {
+  forecasts: DistrictForecast[]
+  mine: string
+}) {
+  const { t } = useTranslation()
+  if (forecasts.length === 0) return null
+  return (
+    <section className="mt-6 space-y-2">
+      <h2 className="flex items-center gap-2 text-base font-semibold text-heading">
+        <TrendingUp className="size-5 text-primary" aria-hidden />
+        {t("forecast.title")}
+      </h2>
+      <p className="text-sm text-muted-foreground">{t("forecast.intro")}</p>
+      <ul className="space-y-2">
+        {forecasts.map((f) => (
+          <li
+            key={f.district}
+            className={cn(
+              "rounded-xl bg-card p-4 text-sm shadow-card",
+              f.trend === "rising" && "border-2 border-warning"
+            )}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <p
+                className={cn(
+                  "text-heading",
+                  f.district === mine ? "font-bold" : "font-semibold"
+                )}
+              >
+                {f.district}
+              </p>
+              <span
+                className={cn(
+                  "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold",
+                  f.trend === "rising"
+                    ? "bg-warning/10 text-warning"
+                    : "bg-secondary text-secondary-foreground"
+                )}
+              >
+                {t(`forecast.trend.${f.trend}`)}
+              </span>
+            </div>
+            <p className="mt-1 text-2xl font-semibold text-foreground tabular-nums">
+              {t("forecast.expected", { count: f.expected })}
+            </p>
+            <p className="text-muted-foreground">
+              {t("forecast.range", {
+                low: f.low,
+                high: f.high,
+                weeks: f.weeks,
+              })}
+            </p>
+            {f.high > 0 ? (
+              <p className="mt-2 text-foreground">
+                {t("forecast.stock", { count: f.high })}
+              </p>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-muted-foreground">{t("forecast.method")}</p>
+    </section>
   )
 }

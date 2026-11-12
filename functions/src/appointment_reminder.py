@@ -1,4 +1,4 @@
-"""Consumer 1: reminds the patient of their visit by SMS (Lab 7 Part A).
+"""Consumer 1: texts the patient (Lab 7 Part A): visit reminders, the answer to their referral, and a new prescription.
 
 Triggered two ways:
 
@@ -8,6 +8,10 @@ Triggered two ways:
   from now is reminded straight away.
 * by that schedule when the time comes ({"action": "send", ...}): it sends the text.
 
+Besides reminders it texts the patient when a nurse or doctor accepts or declines their referral
+(a declined referral's reminder is dropped), and when a doctor writes them a prescription (its
+code, for the pharmacy). Every text is in the language on the patient's record (messages.py).
+
 The text goes out through the provider in SMS_PROVIDER (Arkesel or httpSMS, see sms.py) when its
 credentials are in Secrets Manager; otherwise it is only logged, which the lab allows for a sandbox.
 """
@@ -16,10 +20,11 @@ import json
 import os
 from datetime import datetime, timedelta, timezone
 
-from botocore.exceptions import ClientError
-
+import messages
 import sms
-from common import client, each_message, ghana_time, log, masked, when
+from common import delete_schedule
+from common import each_message, ghana_time, log, masked, when
+from common import upsert_schedule as _upsert
 
 CONSUMER = "appointment-reminder"
 REMIND_BEFORE = timedelta(hours=24)
@@ -63,8 +68,20 @@ def schedule_name(appointment_id):
 
 
 def on_event(event):
+    kind = event["type"]
+    if kind == "result.abnormal":
+        return   # for the clinicians (specialist-notify), not a text to the patient
+    if kind == "prescription.created":
+        return text_patient(event, "prescription", code=event["prescription"]["code"], subject_id=event["prescription"]["id"])
     appt = event["appointment"]
     name = schedule_name(appt["id"])
+    if kind == "appointment.referral_answered":
+        answer = appt.get("referralStatus")
+        if answer == "declined":
+            delete_schedule(name)   # the visit will not happen there: no reminder for it
+        if answer in ("accepted", "declined"):
+            text_patient(event, answer, facility=appt.get("facility", "the clinic"), when=ghana_time(appt["scheduledAt"]), subject_id=appt["id"])
+        return
     if event["type"] == "appointment.cancelled" or appt.get("status", "scheduled") != "scheduled":
         delete_schedule(name)
         log.info(json.dumps({"consumer": CONSUMER, "result": "reminder_cancelled", "appointmentId": appt["id"]}))
@@ -103,54 +120,38 @@ def on_event(event):
 
 
 def upsert_schedule(name, at, payload):
-    args = {
-        "Name": name,
-        "GroupName": os.environ["SCHEDULE_GROUP"],
-        "ScheduleExpression": f"at({at.strftime('%Y-%m-%dT%H:%M:%S')})",
-        "ScheduleExpressionTimezone": "UTC",
-        "FlexibleTimeWindow": {"Mode": "OFF"},
-        "ActionAfterCompletion": "DELETE",
-        "Target": {
-            "Arn": os.environ["SELF_ARN"],
-            "RoleArn": os.environ["SCHEDULER_ROLE_ARN"],
-            "Input": json.dumps(payload),
-            "RetryPolicy": {"MaximumRetryAttempts": 3, "MaximumEventAgeInSeconds": 3600},
-        },
-    }
-    if os.environ.get("REMINDER_DLQ_ARN"):
-        # a reminder that still fails after the retries is kept (and alarms) instead of vanishing
-        args["Target"]["DeadLetterConfig"] = {"Arn": os.environ["REMINDER_DLQ_ARN"]}
-    if os.environ.get("EVENTS_KMS_KEY_ARN"):
-        args["KmsKeyArn"] = os.environ["EVENTS_KMS_KEY_ARN"]
-    scheduler = client("scheduler")
-    try:
-        scheduler.create_schedule(**args)
-    except ClientError as err:
-        if err.response["Error"]["Code"] != "ConflictException":
-            raise
-        scheduler.update_schedule(**args)   # the visit moved: same name, new time
+    _upsert(name, at, payload, os.environ.get("REMINDER_DLQ_ARN"))
 
 
-def delete_schedule(name):
-    try:
-        client("scheduler").delete_schedule(Name=name, GroupName=os.environ["SCHEDULE_GROUP"])
-    except ClientError as err:
-        if err.response["Error"]["Code"] != "ResourceNotFoundException":
-            raise
+def reminder_text(appt, language=None):
+    kind = "teleconsult" if appt.get("type") == "teleconsult" else "visit"
+    return messages.text(kind, language, facility=appt.get("facility", "the clinic"), when=ghana_time(appt["scheduledAt"]))
 
 
-def reminder_text(appt):
-    what = "phone consultation with a doctor" if appt.get("type") == "teleconsult" else "health visit"
-    return (
-        f"HealthConnect: reminder of your {what} at {appt.get('facility', 'the clinic')} "
-        f"on {ghana_time(appt['scheduledAt'])}. If you cannot come, please tell your health volunteer."
-    )
+def text_patient(event, kind, subject_id, **values):
+    """One text to the patient straight away (no schedule): a referral answer or a prescription code."""
+    patient = event.get("patient") or {}
+    phone = patient.get("phone")
+    if not phone:
+        log.info(json.dumps({"consumer": CONSUMER, "result": "no_phone", "kind": kind, "id": subject_id}))
+        return
+    provider, status = sms.send(phone, messages.text(kind, patient.get("preferredLanguage"), **values))
+    log.info(json.dumps({
+        "consumer": CONSUMER,
+        "result": f"{kind}_{'logged' if provider == 'log' else 'sent'}",
+        "provider": provider,
+        "id": subject_id,
+        "to": masked(phone),
+        "language": patient.get("preferredLanguage"),
+        "providerStatus": status,
+    }))
 
 
 def send_reminder(payload):
     appt = payload["appointment"]
-    phone = (payload.get("patient") or {}).get("phone")
-    text = reminder_text(appt)
+    patient = payload.get("patient") or {}
+    phone = patient.get("phone")
+    text = reminder_text(appt, patient.get("preferredLanguage"))
     provider, status = sms.send(phone, text)
     result = "reminder_logged" if provider == "log" else "reminder_sent"   # log: the lab's simulated reminder
     log.info(json.dumps({
