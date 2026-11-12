@@ -94,6 +94,8 @@ note("<b>us-east-1</b>: CloudFront 5xx alarm + its SNS topic (CloudFront metrics
 
 if not BEFORE:
     ext = group("Outside AWS", "group_aws_cloud", 1590, 660, 260, 320, NEW, "#FFFFFF", dashed=1)
+    group("Disaster recovery: Europe (Ireland) eu-west-1", "group_region", 1590, 1000, 260, 170, NEW, "#FFFFFF", dashed=1)
+    drb = icon("<font color='#D6336C'><b>Database backups, replicated</b></font><br><font style='font-size:10px'>every automated backup copied here,<br>re-encrypted with a KMS key in Ireland;<br>any second of the last 7 days restorable</font>", "db", "rds_instance", 1695, 1040, 48)
     cell("<font style='font-size:10px'>Reached over HTTPS: the API through fck-nat and the internet gateway; the Lambdas directly. Keys come from Secrets Manager.</font>",
          "text;html=1;whiteSpace=wrap;align=left;verticalAlign=top;fontColor=#555555;", 1605, 920, 235, 50)
     httpsms = cell("<b>httpSMS</b><br><font style='font-size:10px'>Android phone, Telecel SIM<br>sign-in codes, reminders,<br>referral answers, prescriptions</font>",
@@ -151,13 +153,15 @@ if not BEFORE:
                60, 760, 41, 66)
     note("<font color='#D6336C'><b>Video call (WebRTC)</b></font><br>Signalling over the API's WebSocket. Audio/video go phone to phone when they can; otherwise through our TURN relay in Cape Town (a login per call, expires in 4 h). 320×240, 15 fps, ≤250 kbps. Open from 15 min before to 2 h after the booking, once the GHS 20 fee is paid.",
          20, 870, 360, 110, "#FFF0F5")
+    edge(rds, drb, "backups copied to Ireland", dashed=True, color=NEW, pins="exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;")
+    note("<b>Recovery (docs/runbooks/disaster-recovery.md)</b><br>Bad release: automatic rollback. Server lost: auto-recover / Terraform. Database: point-in-time restore (≈5 min of data; drill: running copy in 12 min). Region lost: restore from Ireland.", 20, 1000, 360, 80, "#FFF0F5")
     edge(phone, turn, "", dashed=True, color=NEW, pins="exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;")
 
     edge(phone, doc, "WebRTC media (direct)", dashed=True, color=NEW, pins="exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;")
 
 xml = f'''<mxfile host="app.diagrams.net" agent="HealthConnect deploy docs" version="24.7.17">
   <diagram id="healthconnect-aws" name="HealthConnect on AWS">
-    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1880" pageHeight="{1020 + H}" math="0" shadow="0">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1880" pageHeight="{1040 + H}" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
