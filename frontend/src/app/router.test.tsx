@@ -45,7 +45,7 @@ describe("routes and roles", () => {
     await user.type(await screen.findByLabelText("Phone number"), "0241234567")
     await user.click(screen.getByRole("button", { name: "Send code" }))
     expect(
-      await screen.findByText(/isn't registered as a health worker/)
+      await screen.findByText(/This number isn't registered/)
     ).toBeInTheDocument()
     await user.clear(screen.getByLabelText("Phone number"))
     await user.type(screen.getByLabelText("Phone number"), "0200000102")

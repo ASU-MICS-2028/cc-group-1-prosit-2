@@ -8,6 +8,7 @@ using HealthConnect.RecordsService.Demo;
 using HealthConnect.RecordsService.Events;
 using HealthConnect.RecordsService.Features;
 using HealthConnect.RecordsService.Media;
+using HealthConnect.RecordsService.Patients;
 using HealthConnect.RecordsService.Payments;
 using HealthConnect.SharedLibrary.Features;
 using Microsoft.Extensions.Configuration;
@@ -63,6 +64,7 @@ public static class RecordsServiceExtension
         // Consultation fees by mobile money (Paystack). Off until the environment's Paystack secret exists.
         services.AddSingleton(sp => PaymentSettings.From(sp.GetRequiredService<IConfiguration>()));
         services.AddSingleton<PaymentStore>();
+        services.AddSingleton<PatientRecords>();
         services.AddHttpClient(PaystackClient.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(15));
         services.AddSingleton<IPaystack>(sp => new PaystackClient(
             sp.GetRequiredService<IHttpClientFactory>().CreateClient(PaystackClient.HttpClientName),
@@ -86,6 +88,7 @@ public static class RecordsServiceExtension
             .AddFeature<GetPayment>()
             .AddFeature<PostCheckout>()
             .AddFeature<PaystackWebhook>()
-            .AddFeature<GetPayments>();
+            .AddFeature<GetPayments>()
+            .AddFeature<GetMyHealth>();
     }
 }

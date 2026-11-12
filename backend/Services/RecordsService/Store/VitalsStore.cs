@@ -3,6 +3,7 @@ using Dapper;
 using HealthConnect.Data;
 using HealthConnect.RecordsService.Models;
 using HealthConnect.RecordsService.Validation;
+using Npgsql;
 
 namespace HealthConnect.RecordsService.Store;
 
@@ -39,6 +40,24 @@ internal static class VitalsStore
         var measurements = (await session.Connection.QueryAsync<MeasurementRow>(new CommandDefinition(
             "SELECT vitals_id, observation_type, value FROM observations WHERE vitals_id = ANY(@ids) AND status <> 'entered-in-error'",
             new { ids }, session.Transaction, cancellationToken: cancellationToken))).ToLookup(m => m.VitalsId);
+        return [.. rows.Select(r => ToDto(r, measurements[r.Id]))];
+    }
+
+    /// <summary>A patient account's latest readings, for every record registered with its phone number (newest first).</summary>
+    public static async Task<List<VitalsDto>> ForPhoneAsync(NpgsqlConnection connection, string phone, int limit, CancellationToken cancellationToken)
+    {
+        var rows = (await connection.QueryAsync<VitalsRow>(new CommandDefinition(
+            SelectVitals + " WHERE p.phone = @phone ORDER BY v.taken_at DESC LIMIT @limit",
+            new { phone, limit }, cancellationToken: cancellationToken))).ToList();
+        if (rows.Count == 0)
+        {
+            return [];
+        }
+
+        var ids = rows.Select(r => r.Id).ToArray();
+        var measurements = (await connection.QueryAsync<MeasurementRow>(new CommandDefinition(
+            "SELECT vitals_id, observation_type, value FROM observations WHERE vitals_id = ANY(@ids) AND status <> 'entered-in-error'",
+            new { ids }, cancellationToken: cancellationToken))).ToLookup(m => m.VitalsId);
         return [.. rows.Select(r => ToDto(r, measurements[r.Id]))];
     }
 

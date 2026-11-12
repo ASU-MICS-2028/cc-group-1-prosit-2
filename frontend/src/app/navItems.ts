@@ -5,8 +5,9 @@ import {
   House,
   Inbox,
   Plus,
-  RefreshCw,
   ShieldCheck,
+  HeartPulse,
+  UserPlus,
   Users,
   Wallet,
   type IconComponent,
@@ -15,7 +16,7 @@ import type { Role } from "@/auth/session"
 
 export interface NavItem {
   to: string
-  key: `nav.${"home" | "patients" | "add" | "referrals" | "appointments" | "summary" | "payments" | "audit" | "sync" | "profile"}`
+  key: `nav.${"home" | "patients" | "add" | "referrals" | "appointments" | "summary" | "payments" | "workers" | "my" | "audit" | "sync" | "profile"}`
   icon: IconComponent
   end: boolean
   /** The design's centre "Agregar" tab: orange when active */
@@ -60,16 +61,22 @@ const payments: NavItem = {
   icon: Wallet,
   end: false,
 }
+const workers: NavItem = {
+  to: "/workers",
+  key: "nav.workers",
+  icon: UserPlus,
+  end: false,
+}
+const my: NavItem = {
+  to: "/my",
+  key: "nav.my",
+  icon: HeartPulse,
+  end: false,
+}
 const audit: NavItem = {
   to: "/audit",
   key: "nav.audit",
   icon: ShieldCheck,
-  end: false,
-}
-const sync: NavItem = {
-  to: "/sync",
-  key: "nav.sync",
-  icon: RefreshCw,
   end: false,
 }
 const profile: NavItem = {
@@ -85,8 +92,9 @@ const profile: NavItem = {
  * summary for officers. Sync is reached from the offline banner, Home and Profile.
  */
 export function navFor(role: Role): readonly NavItem[] {
-  if (role === "admin") return [audit, summary, payments, sync, profile]
-  if (role === "district_officer") return [summary, payments, sync, profile]
+  if (role === "patient") return [my, profile]
+  if (role === "admin") return [audit, summary, payments, workers, profile]
+  if (role === "district_officer") return [summary, payments, workers, profile]
   // Nurses and doctors receive referrals; CHVs register patients.
   if (role === "nurse" || role === "doctor")
     return [home, patients, referrals, appointments, profile]

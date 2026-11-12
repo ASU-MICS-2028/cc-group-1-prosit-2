@@ -19,22 +19,25 @@
     "add": "Add",
     "referrals": "Referrals",
     "audit": "Activity",
-    "payments": "Payments"
+    "payments": "Payments",
+    "my": "My health",
+    "workers": "Workers"
   },
   "roles": {
     "chv": "Community Health Volunteer",
     "nurse": "Nurse / Midwife",
     "doctor": "Doctor",
     "district_officer": "District Health Officer",
-    "admin": "Administrator (auditor)"
+    "admin": "Administrator (auditor)",
+    "patient": "Patient"
   },
   "login": {
     "title": "Sign in",
     "text": "Enter your phone number. We'll send you a 6-digit code by SMS.",
     "phone": "Phone number",
-    "phoneHint": "The number registered with your health service.",
+    "phoneHint": "The number registered with your health service, or the one your health worker put on your record.",
     "sendCode": "Send code",
-    "unknownNumber": "This number isn't registered as a health worker. Check it, or ask your district office.",
+    "unknownNumber": "This number isn't registered. Health workers: ask your district office. Patients: use the number your health worker put on your record.",
     "network": "Couldn't reach the server. Check your connection and try again.",
     "demoTitle": "Demo accounts (synthetic)",
     "demoText": "Tap a number to fill it in. The code is {{code}}.",
@@ -592,6 +595,47 @@
     "status_abandoned": "Abandoned",
     "status_unpaid": "Not paid",
     "status_exempt": "No fee",
-    "status_not_required": "No fee"
+    "status_not_required": "No fee",
+    "paidByPatient": "Paid by the patient"
+  },
+  "my": {
+    "title": "My health",
+    "hello": "Signed in as {{name}}",
+    "readOnly": "Your health worker records your visits and readings. If something here is wrong, tell them.",
+    "upcoming": "Upcoming visits",
+    "noUpcoming": "No visits booked.",
+    "readings": "Latest readings",
+    "noReadings": "No readings yet.",
+    "past": "Past visits",
+    "bp": "BP {{sys}}/{{dia}}",
+    "temp": "{{value}} °C",
+    "weight": "{{value}} kg",
+    "offline": "Your records need a connection. Try again when you have a signal."
+  },
+  "workers": {
+    "title": "Health workers",
+    "forDistrict": "Health workers in {{district}}",
+    "allDistricts": "Health workers in every district",
+    "add": "Add a health worker",
+    "name": "Full name",
+    "phone": "Phone number",
+    "role": "Role",
+    "district": "District",
+    "addHint": "They sign in with a code sent by SMS to this number.",
+    "addButton": "Add",
+    "added": "{{name}} was added. They can sign in now.",
+    "error_number_in_use": "That number already belongs to a health worker.",
+    "error_number_is_a_patients": "That number is registered for a patient. Use the worker's own number.",
+    "error_invalid": "Check the name, number and role.",
+    "error_other": "The worker couldn't be added. Try again.",
+    "offline": "The list needs a connection. Try again when you have a signal.",
+    "off": "Switched off: can't sign in",
+    "switchOff": "Switch off",
+    "switchOn": "Switch on",
+    "role_chv": "CHV",
+    "role_nurse": "Nurse",
+    "role_doctor": "Doctor",
+    "role_district_officer": "District officer",
+    "role_admin": "Admin"
   }
 }

@@ -175,8 +175,11 @@ public sealed class PaymentStore(Database database, ILogger<PaymentStore> logger
         await using var connection = await database.DataSource.OpenConnectionAsync(cancellationToken);
         var rows = await connection.QueryAsync<PaymentListRow>(new CommandDefinition(
             """
-            SELECT pay.reference, pay.appointment_id, pay.district, pay.amount_pesewas, pay.status, pay.channel, pay.created_by,
-                   u.name AS created_by_name, pay.created_at, pay.paid_at, a.facility, a.scheduled_at
+            SELECT pay.reference, pay.appointment_id, pay.district, pay.amount_pesewas, pay.status, pay.channel,
+                   -- A fee the patient paid from their own phone: never their name or their number (in the account id).
+                   CASE WHEN u.role = 'patient' THEN 'patient' ELSE pay.created_by END AS created_by,
+                   CASE WHEN u.role = 'patient' THEN NULL ELSE u.name END AS created_by_name,
+                   pay.created_at, pay.paid_at, a.facility, a.scheduled_at
               FROM payments pay
               JOIN appointments a ON a.id = pay.appointment_id
               LEFT JOIN users u ON u.id = pay.created_by

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using HealthConnect.Data;
 using HealthConnect.RecordsService.Models;
+using HealthConnect.RecordsService.Patients;
 using HealthConnect.RecordsService.Payments;
 using HealthConnect.RecordsService.Store;
 using HealthConnect.SharedLibrary.Features;
@@ -84,32 +85,12 @@ internal static class PaymentViews
             : new(id, settings.Enabled, row.Status, row.AmountPesewas, row.Currency, row.Reference, row.Channel, null);
     }
 
-    /// <summary>The visit, if this worker may see it: the role session's row-level security decides, exactly as for the visit itself.</summary>
+    /// <summary>The visit, if the caller may see it: a worker through row-level security, a patient only for their own records.</summary>
     public static async Task<(IResult? Refusal, AppointmentDto? Appointment)> VisibleAsync(
-        ClaimsPrincipal principal, RoleSessions sessions, Guid appointmentId, CancellationToken cancellationToken)
+        ClaimsPrincipal principal, RoleSessions sessions, PatientRecords patients, Guid appointmentId, CancellationToken cancellationToken)
     {
-        if (CurrentUser.From(principal) is not { } user)
-        {
-            return (ApiResults.Error(StatusCodes.Status401Unauthorized, "bad_token"), null);
-        }
-
-        await using var session = await sessions.TryBeginAsync(user, cancellationToken);
-        if (session is null)
-        {
-            return (ApiResults.Error(StatusCodes.Status401Unauthorized, "unknown_user"), null);
-        }
-
-        StoredAppointment? stored;
-        try
-        {
-            stored = await AppointmentStore.FindAsync(session, appointmentId, cancellationToken);
-        }
-        catch (PostgresException refusal) when (refusal.SqlState == PostgresErrorCodes.InsufficientPrivilege)
-        {
-            return (ApiResults.Error(StatusCodes.Status403Forbidden, "forbidden"), null);
-        }
-
-        return stored is null ? (ApiResults.Error(StatusCodes.Status404NotFound, "not_found"), null) : (null, stored.Dto);
+        var (refusal, visit, _) = await VisitAccess.FindAsync(principal, sessions, patients, appointmentId, cancellationToken);
+        return (refusal, visit?.Dto);
     }
 }
 
@@ -123,7 +104,7 @@ public sealed class GetPayment : IFeature
         app.MapGet("/api/payments/{appointmentId:guid}", Handle)
             .WithName("GetPayment")
             .WithTags("Payments")
-            .RequireAuthorization(AuthPolicies.Clinical)
+            .RequireAuthorization(AuthPolicies.ClinicalOrPatient)
             .Produces<PaymentStatusDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
@@ -132,13 +113,14 @@ public sealed class GetPayment : IFeature
         Guid appointmentId,
         ClaimsPrincipal principal,
         RoleSessions sessions,
+        PatientRecords patients,
         PaymentStore payments,
         PaymentSettings settings,
         IPaystack paystack,
         ILogger<GetPayment> logger,
         CancellationToken cancellationToken)
     {
-        var (refusal, appointment) = await PaymentViews.VisibleAsync(principal, sessions, appointmentId, cancellationToken);
+        var (refusal, appointment) = await PaymentViews.VisibleAsync(principal, sessions, patients, appointmentId, cancellationToken);
         if (refusal is not null)
         {
             return refusal;
@@ -175,7 +157,7 @@ public sealed class PostCheckout : IFeature
         app.MapPost("/api/payments/{appointmentId:guid}/checkout", Handle)
             .WithName("PostPaymentCheckout")
             .WithTags("Payments")
-            .RequireAuthorization(AuthPolicies.Clinical)
+            .RequireAuthorization(AuthPolicies.ClinicalOrPatient)
             .Produces<CheckoutDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)
@@ -196,12 +178,13 @@ public sealed class PostCheckout : IFeature
         CheckoutRequest request,
         ClaimsPrincipal principal,
         RoleSessions sessions,
+        PatientRecords patients,
         PaymentStore payments,
         PaymentSettings settings,
         IPaystack paystack,
         CancellationToken cancellationToken)
     {
-        var (refusal, appointment) = await PaymentViews.VisibleAsync(principal, sessions, appointmentId, cancellationToken);
+        var (refusal, appointment) = await PaymentViews.VisibleAsync(principal, sessions, patients, appointmentId, cancellationToken);
         if (refusal is not null)
         {
             return refusal;

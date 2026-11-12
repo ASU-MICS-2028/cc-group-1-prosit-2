@@ -63,7 +63,7 @@ public sealed class AuthDatabase : IAsyncLifetime
     public async Task ResetAsync()
     {
         await using var source = NpgsqlDataSource.Create(_postgres.ConnectionString);
-        await using var command = source.CreateCommand("TRUNCATE user_photos, users, login_codes, auth_keys CASCADE");
+        await using var command = source.CreateCommand("TRUNCATE user_photos, users, login_codes, auth_keys, patients CASCADE");
         await command.ExecuteNonQueryAsync();
     }
 }

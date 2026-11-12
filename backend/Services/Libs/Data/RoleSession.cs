@@ -108,9 +108,12 @@ public sealed class RoleSessions(Database database)
     /// <summary>The session, or null when the worker is unknown or switched off (the caller answers 401).</summary>
     public async Task<RoleSession?> TryBeginAsync(CurrentUser user, CancellationToken cancellationToken)
     {
-        await using (var check = database.DataSource.CreateCommand("SELECT count(*) FROM users WHERE id = @id AND active"))
+        // Still active, and still the role the token says: a worker switched off or given another role on the Health workers page
+        // loses access at their next request, not when their token runs out (the app then asks them to sign in again).
+        await using (var check = database.DataSource.CreateCommand("SELECT count(*) FROM users WHERE id = @id AND active AND role = @role"))
         {
             check.Parameters.AddWithValue("id", user.Id);
+            check.Parameters.AddWithValue("role", user.Role);
             if ((long)(await check.ExecuteScalarAsync(cancellationToken))! == 0)
             {
                 return null;

@@ -27,7 +27,7 @@ public sealed class DbRolesTests
 
     [Fact]
     public void Every_role_the_app_knows_has_a_database_role() =>
-        Assert.All(HealthConnect.SharedLibrary.Security.Roles.All, role => Assert.StartsWith("hc_", DbRoles.For(role)));
+        Assert.All(HealthConnect.SharedLibrary.Security.Roles.Workers, role => Assert.StartsWith("hc_", DbRoles.For(role)));
 }
 
 [IntegrationTest]
