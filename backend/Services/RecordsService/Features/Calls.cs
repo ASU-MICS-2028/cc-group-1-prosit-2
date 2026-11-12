@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using HealthConnect.Data;
 using HealthConnect.RecordsService.Calls;
+using HealthConnect.RecordsService.Patients;
 using HealthConnect.RecordsService.Payments;
 using HealthConnect.RecordsService.Store;
 using HealthConnect.SharedLibrary.Features;
@@ -32,7 +33,7 @@ public sealed class PostCallTicket : IFeature
         app.MapPost("/api/calls/{appointmentId:guid}/ticket", Handle)
             .WithName("PostCallTicket")
             .WithTags("Calls")
-            .RequireAuthorization(AuthPolicies.Clinical)
+            .RequireAuthorization(AuthPolicies.ClinicalOrPatient)
             .Produces<CallTicketDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status402PaymentRequired)
@@ -47,35 +48,17 @@ public sealed class PostCallTicket : IFeature
         CallOptions options,
         PaymentSettings payments,
         PaymentStore paid,
+        PatientRecords patients,
         CancellationToken cancellationToken)
     {
-        if (CurrentUser.From(principal) is not { } user)
+        // A worker who may see the visit, or the patient whose visit it is (they may call in from their own phone).
+        var (refusal, appointment, user) = await VisitAccess.FindAsync(principal, sessions, patients, appointmentId, cancellationToken);
+        if (refusal is not null)
         {
-            return ApiResults.Error(StatusCodes.Status401Unauthorized, "bad_token");
+            return refusal;
         }
 
-        await using var session = await sessions.TryBeginAsync(user, cancellationToken);
-        if (session is null)
-        {
-            return ApiResults.Error(StatusCodes.Status401Unauthorized, "unknown_user");
-        }
-
-        StoredAppointment? appointment;
-        try
-        {
-            appointment = await AppointmentStore.FindAsync(session, appointmentId, cancellationToken);
-        }
-        catch (PostgresException refusal) when (refusal.SqlState == PostgresErrorCodes.InsufficientPrivilege)
-        {
-            return ApiResults.Error(StatusCodes.Status403Forbidden, "forbidden");
-        }
-
-        if (appointment is null)
-        {
-            return ApiResults.Error(StatusCodes.Status404NotFound, "not_found");   // or not this worker's to see
-        }
-
-        if (appointment.Dto.Type != "teleconsult")
+        if (appointment!.Dto.Type != "teleconsult")
         {
             return ApiResults.Validation("appointmentId", "Only a teleconsultation has a video call.");
         }
@@ -91,8 +74,8 @@ public sealed class PostCallTicket : IFeature
             return ApiResults.Error(StatusCodes.Status402PaymentRequired, "payment_required");
         }
 
-        var (ticket, expires) = tickets.Issue(user, appointmentId);
-        return Results.Ok(new CallTicketDto(ticket, expires, $"/api/calls/{appointmentId}/ws", options.ServersFor(user.Id, expires)));
+        var (ticket, expires) = tickets.Issue(user!, appointmentId);
+        return Results.Ok(new CallTicketDto(ticket, expires, $"/api/calls/{appointmentId}/ws", options.ServersFor(user!.Id, expires)));
     }
 }
 

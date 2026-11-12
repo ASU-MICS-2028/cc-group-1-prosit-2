@@ -54,7 +54,10 @@ public static class AuthServiceExtension
             .AddFeature<RequestCode>()
             .AddFeature<VerifyCode>()
             .AddFeature<GetMe>()
-            .AddFeature<MyPhoto>();
+            .AddFeature<MyPhoto>()
+            .AddFeature<GetWorkers>()
+            .AddFeature<PostWorker>()
+            .AddFeature<PatchWorker>();
     }
 
     private static readonly TimeSpan Skew = TimeSpan.FromMinutes(1);

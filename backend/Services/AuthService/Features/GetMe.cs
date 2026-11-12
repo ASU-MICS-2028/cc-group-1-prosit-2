@@ -21,7 +21,7 @@ public sealed class GetMe : IFeature
         app.MapGet("/api/auth/me", Handle)
             .WithName("GetMe")
             .WithTags("Auth")
-            .RequireAuthorization(AuthPolicies.AnyWorker)
+            .RequireAuthorization(AuthPolicies.SignedIn)
             .Produces<UserDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
 

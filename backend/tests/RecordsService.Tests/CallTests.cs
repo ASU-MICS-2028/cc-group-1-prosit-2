@@ -17,7 +17,7 @@ public sealed class CallTicketEndpointTests(RecordsDatabase database) : RecordsT
     private readonly CallOptions _options = new([new IceServer(["stun:example.org:3478"])]);
 
     private async Task<Reply> TicketAsync(Guid appointment, Worker who) =>
-        await ResultReader.RunAsync(await PostCallTicket.Handle(appointment, As(who), Sessions, _tickets, _options, PaymentsOff, Payments, CancellationToken.None));
+        await ResultReader.RunAsync(await PostCallTicket.Handle(appointment, As(who), Sessions, _tickets, _options, PaymentsOff, Payments, Patients, CancellationToken.None));
 
     private async Task<Guid> BookedAsync(string type, string status = "scheduled")
     {

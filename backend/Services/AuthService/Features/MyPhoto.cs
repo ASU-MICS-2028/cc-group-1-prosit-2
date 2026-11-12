@@ -28,7 +28,7 @@ public sealed class MyPhoto : IFeature
         app.MapGet(Path, Get)
             .WithName("GetMyPhoto")
             .WithTags("Auth")
-            .RequireAuthorization(AuthPolicies.AnyWorker)
+            .RequireAuthorization(AuthPolicies.SignedIn)
             .Produces(StatusCodes.Status200OK, contentType: "image/jpeg")
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
@@ -36,7 +36,7 @@ public sealed class MyPhoto : IFeature
         app.MapPut(Path, Put)
             .WithName("PutMyPhoto")
             .WithTags("Auth")
-            .RequireAuthorization(AuthPolicies.AnyWorker)
+            .RequireAuthorization(AuthPolicies.SignedIn)
             .Accepts<byte[]>("image/jpeg", "image/png")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status401Unauthorized)
@@ -45,7 +45,7 @@ public sealed class MyPhoto : IFeature
         app.MapDelete(Path, Delete)
             .WithName("DeleteMyPhoto")
             .WithTags("Auth")
-            .RequireAuthorization(AuthPolicies.AnyWorker)
+            .RequireAuthorization(AuthPolicies.SignedIn)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status401Unauthorized);
     }
