@@ -48,6 +48,8 @@ public sealed partial class PutVitals : IFeature
         var errors = VitalsValidator.Check(id, vitals, time.GetUtcNow());
         if (errors.Count > 0)
         {
+            // Which fields, never their values: enough to see why a phone keeps failing without logging health data.
+            LogInvalid(logger, id, string.Join(",", errors.Keys));
             return ApiResults.Validation(errors);
         }
 
@@ -106,4 +108,7 @@ public sealed partial class PutVitals : IFeature
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Vitals {VitalsId} saved by {UserId}")]
     private static partial void LogSaved(ILogger logger, string userId, Guid vitalsId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Vitals {Id} refused as invalid: {Fields}")]
+    private static partial void LogInvalid(ILogger logger, Guid id, string fields);
 }
