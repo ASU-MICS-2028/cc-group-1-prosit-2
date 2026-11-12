@@ -17,7 +17,7 @@ public sealed class CallTicketEndpointTests(RecordsDatabase database) : RecordsT
     private readonly CallOptions _options = new([new IceServer(["stun:example.org:3478"])]);
 
     private async Task<Reply> TicketAsync(Guid appointment, Worker who) =>
-        await ResultReader.RunAsync(await PostCallTicket.Handle(appointment, As(who), Sessions, _tickets, _options, PaymentsOff, Payments, Patients, CancellationToken.None));
+        await ResultReader.RunAsync(await PostCallTicket.Handle(appointment, As(who), Sessions, _tickets, _options, PaymentsOff, Payments, Patients, AtVisitTime, CancellationToken.None));
 
     private async Task<Guid> BookedAsync(string type, string status = "scheduled")
     {
@@ -68,6 +68,30 @@ public sealed class CallTicketEndpointTests(RecordsDatabase database) : RecordsT
         var call = await BookedAsync("teleconsult");
         var reply = await TicketAsync(call, RecordsDatabase.Officer);
         Assert.NotEqual(200, reply.Status);
+    }
+
+    [Fact]
+    public async Task The_call_opens_15_minutes_before_the_booked_time_and_closes_2_hours_after()
+    {
+        var patient = await SavedPatientAsync();
+        var routine = Guid.NewGuid();
+        var emergency = Guid.NewGuid();
+        await PutAppointmentAsync(routine, Appointment(routine, patient, "teleconsult"), RecordsDatabase.Chv);
+        await PutAppointmentAsync(emergency, Appointment(emergency, patient, "teleconsult", priority: "emergency"), RecordsDatabase.Chv);
+        var booked = Start.AddDays(1);
+
+        async Task<Reply> At(Guid id, DateTimeOffset when) =>
+            await ResultReader.RunAsync(await PostCallTicket.Handle(
+                id, As(RecordsDatabase.Doctor), Sessions, _tickets, _options, PaymentsOff, Payments, Patients, new FakeTimeProvider(when), CancellationToken.None));
+
+        var early = await At(routine, booked.AddMinutes(-16));
+        Assert.Equal((409, "too_early"), (early.Status, early.Error));
+        Assert.Equal(200, (await At(routine, booked.AddMinutes(-15))).Status);
+        Assert.Equal(200, (await At(routine, booked.AddHours(2))).Status);
+        var late = await At(routine, booked.AddHours(2).AddMinutes(1));
+        Assert.Equal((409, "too_late"), (late.Status, late.Error));
+
+        Assert.Equal(200, (await At(emergency, booked.AddHours(-20))).Status);   // an emergency starts at once
     }
 }
 

@@ -65,7 +65,7 @@ public sealed class PaymentTests(RecordsDatabase database) : RecordsTestBase(dat
 
     private async Task<Reply> TicketAsync(Guid id) =>
         await ResultReader.RunAsync(await PostCallTicket.Handle(
-            id, As(RecordsDatabase.Doctor), Sessions, new CallTickets(TimeProvider.System), new CallOptions([]), On, Payments, Patients, CancellationToken.None));
+            id, As(RecordsDatabase.Doctor), Sessions, new CallTickets(TimeProvider.System), new CallOptions([]), On, Payments, Patients, AtVisitTime, CancellationToken.None));
 
     private async Task<string> PaidAsync(Guid id)
     {
@@ -154,7 +154,7 @@ public sealed class PaymentTests(RecordsDatabase database) : RecordsTestBase(dat
 
         Assert.Equal(503, (await CheckoutAsync(id, settings: PaymentsOff)).Status);
         var call = await ResultReader.RunAsync(await PostCallTicket.Handle(
-            id, As(RecordsDatabase.Doctor), Sessions, new CallTickets(TimeProvider.System), new CallOptions([]), PaymentsOff, Payments, Patients, CancellationToken.None));
+            id, As(RecordsDatabase.Doctor), Sessions, new CallTickets(TimeProvider.System), new CallOptions([]), PaymentsOff, Payments, Patients, AtVisitTime, CancellationToken.None));
         Assert.Equal(200, call.Status);
     }
 

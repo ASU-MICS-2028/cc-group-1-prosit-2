@@ -38,7 +38,7 @@ public sealed class PatientAccessTests(RecordsDatabase database) : RecordsTestBa
 
     private async Task<Reply> TicketAsync(Guid id, Worker who, PaymentSettings? settings = null) =>
         await ResultReader.RunAsync(await PostCallTicket.Handle(
-            id, As(who), Sessions, new CallTickets(TimeProvider.System), new CallOptions([]), settings ?? PaymentsOff, Payments, Patients, CancellationToken.None));
+            id, As(who), Sessions, new CallTickets(TimeProvider.System), new CallOptions([]), settings ?? PaymentsOff, Payments, Patients, AtVisitTime, CancellationToken.None));
 
     [Fact]
     public async Task A_patient_sees_everyone_registered_with_their_phone_and_no_one_else()

@@ -103,6 +103,9 @@ public abstract class RecordsTestBase(RecordsDatabase database) : IAsyncLifetime
 
     protected PatientRecords Patients => new(Database.Owner);
 
+    /// <summary>A clock at the booked time of the visits these tests make (Start + 1 day), when a call may start.</summary>
+    protected static TimeProvider AtVisitTime => new FakeTimeProvider(Start.AddDays(1));
+
     public Task InitializeAsync() => Database.ResetAsync();
 
     public Task DisposeAsync() => Task.CompletedTask;
