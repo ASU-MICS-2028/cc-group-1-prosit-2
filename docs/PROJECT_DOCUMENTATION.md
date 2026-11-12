@@ -41,7 +41,7 @@ flowchart LR
     CF["Amazon CloudFront<br/>Prod & Staging Distributions<br/>(HTTPS Only, PriceClass_200)"]
     VPCOrigin["CloudFront VPC Origin<br/>(Private ENI in VPC)"]
     ALB["Internal ALB<br/>(healthconnect-int :80)<br/>Routes X-HC-Env: staging -> :8081"]
-    
+
     subgraph VPC["VPC 10.30.0.0/16 (af-south-1, 2 AZs)"]
         subgraph PubSub["Public Subnets (10.30.0.0/24, 10.30.1.0/24)"]
             NAT["fck-nat Instance<br/>(t4g.nano, ASG ha_mode)"]
@@ -618,7 +618,7 @@ Because the `AppointmentEvent` published by the API carries all data the consume
 flowchart LR
     API["Backend API<br/>(PutAppointment.cs)"]
     Topic["SNS Topic<br/>healthconnect-&lt;env&gt;-appointment-events<br/>(KMS Encrypted)"]
-    
+
     subgraph Consumer1["Consumer 1: Patient Visit Reminders"]
         Q1["SQS Queue<br/>healthconnect-&lt;env&gt;-reminders"]
         DLQ1["SQS DLQ (14d)<br/>+ CloudWatch Alarm"]
