@@ -123,4 +123,28 @@ public sealed class CallTicketTests
         Assert.Equal(["turn:turn.example.org:3478?transport=udp", "turns:turn.example.org:443"], withTurn.IceServers[1].Urls);
         Assert.Equal("hc", withTurn.IceServers[1].Username);
     }
+
+    [Fact]
+    public void A_shared_secret_relay_gets_a_login_of_its_own_per_ticket_that_the_relay_can_check()
+    {
+        var options = CallOptions.From(new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["TURN_URLS"] = "turn:198.51.100.7:3478?transport=udp,turn:198.51.100.7:3478?transport=tcp",
+            ["TURN_SECRET"] = "shared-secret",
+        }).Build());
+        var now = new DateTimeOffset(2026, 11, 12, 9, 0, 0, TimeSpan.Zero);
+
+        var servers = options.ServersFor("chv-042", now);
+
+        Assert.Equal(2, servers.Count);
+        var relay = servers[1];
+        var expiry = now + CallOptions.TurnLoginLifetime;
+        Assert.Equal($"{expiry.ToUnixTimeSeconds()}:chv-042", relay.Username);
+        // coturn's use-auth-secret: password = base64(HMAC-SHA1(secret, username))
+        var expected = Convert.ToBase64String(System.Security.Cryptography.HMACSHA1.HashData(
+            Encoding.UTF8.GetBytes("shared-secret"), Encoding.UTF8.GetBytes(relay.Username!)));
+        Assert.Equal(expected, relay.Credential);
+        Assert.NotEqual(relay.Username, options.ServersFor("dr-eshun", now)[1].Username);
+        Assert.DoesNotContain(options.IceServers, s => s.Credential is not null); // the secret itself is never handed out
+    }
 }

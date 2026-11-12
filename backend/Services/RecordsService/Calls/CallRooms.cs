@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Security.Cryptography;
+using System.Text;
 using HealthConnect.SharedLibrary.Security;
 using Microsoft.Extensions.Configuration;
 
@@ -53,12 +54,19 @@ public sealed record IceServer(IReadOnlyList<string> Urls, string? Username = nu
 
 /// <summary>
 /// The ICE servers handed to the app. STUN (free, public) finds each phone's public address; it is enough when at least one
-/// side's NAT allows a direct path. Mobile networks often do not, and then only a TURN relay works: set TURN_URLS,
-/// TURN_USERNAME and TURN_CREDENTIAL (none is deployed yet, see the Lab 7 report for the cost).
+/// side's NAT allows a direct path. Mobile networks in Ghana usually sit behind carrier-grade NAT, and then only a TURN relay
+/// works. Two ways to configure one:
+///   TURN_URLS + TURN_SECRET: our coturn relay (deploy/terraform/turn.tf) with the TURN REST scheme. Every ticket gets its own
+///     login, "&lt;expiry&gt;:&lt;user&gt;" with an HMAC-SHA1 of it as the password, valid for <see cref="TurnLoginLifetime"/>. The
+///     relay checks it with the same secret, so nothing is stored and a login copied from a browser stops working.
+///   TURN_URLS + TURN_USERNAME + TURN_CREDENTIAL: a fixed login (a hosted relay such as Metered or Twilio).
 /// </summary>
-public sealed record CallOptions(IReadOnlyList<IceServer> IceServers)
+public sealed record CallOptions(IReadOnlyList<IceServer> IceServers, IReadOnlyList<string>? TurnUrls = null, string? TurnSecret = null)
 {
     public const string DefaultStun = "stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302";
+
+    /// <summary>Long enough for a consultation that starts late and runs over; a relay login is only checked when a call starts.</summary>
+    public static readonly TimeSpan TurnLoginLifetime = TimeSpan.FromHours(4);
 
     public static CallOptions From(IConfiguration configuration)
     {
@@ -66,12 +74,31 @@ public sealed record CallOptions(IReadOnlyList<IceServer> IceServers)
 
         var servers = new List<IceServer> { new(List(configuration["CALL_STUN_URLS"] ?? DefaultStun)) };
         var turn = List(configuration["TURN_URLS"]);
+        var secret = configuration["TURN_SECRET"];
+        if (turn.Length > 0 && !string.IsNullOrWhiteSpace(secret))
+        {
+            return new CallOptions(servers, turn, secret);
+        }
+
         if (turn.Length > 0)
         {
             servers.Add(new IceServer(turn, configuration["TURN_USERNAME"], configuration["TURN_CREDENTIAL"]));
         }
 
         return new CallOptions(servers);
+    }
+
+    /// <summary>The servers for one ticket: the fixed ones, plus a relay login of its own when the relay uses a shared secret.</summary>
+    public IReadOnlyList<IceServer> ServersFor(string userId, DateTimeOffset now)
+    {
+        if (TurnUrls is not { Count: > 0 } urls || string.IsNullOrWhiteSpace(TurnSecret))
+        {
+            return IceServers;
+        }
+
+        var username = $"{(now + TurnLoginLifetime).ToUnixTimeSeconds()}:{userId}";
+        var password = Convert.ToBase64String(HMACSHA1.HashData(Encoding.UTF8.GetBytes(TurnSecret), Encoding.UTF8.GetBytes(username)));
+        return [.. IceServers, new IceServer(urls, username, password)];
     }
 }
 
