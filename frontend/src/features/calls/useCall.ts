@@ -21,7 +21,13 @@ export type CallPhase =
   | "failed"
 
 export type CallError =
-  "camera" | "offline" | "not_allowed" | "closed" | "no_path" | "server"
+  | "camera"
+  | "offline"
+  | "not_allowed"
+  | "closed"
+  | "no_path"
+  | "server"
+  | "payment"
 
 type Signal =
   | { type: "waiting" | "peer-left" | "full" }
@@ -185,11 +191,13 @@ export function useCall(appointmentId: string) {
         const status = (e as { status?: number }).status
         setPhase("failed")
         setError(
-          status === 422
-            ? "closed"
-            : status === 403 || status === 404
-              ? "not_allowed"
-              : "server"
+          status === 402
+            ? "payment"
+            : status === 422
+              ? "closed"
+              : status === 403 || status === 404
+                ? "not_allowed"
+                : "server"
         )
         return
       }

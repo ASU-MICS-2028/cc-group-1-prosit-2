@@ -52,6 +52,16 @@ data "aws_iam_policy_document" "app" {
   }
 
   statement {
+    # Consultation fees: each environment's Paystack keys, created by hand when payments are switched on.
+    sid     = "HealthConnectPaystackSecrets"
+    actions = ["secretsmanager:GetSecretValue"]
+    resources = [
+      for env in ["production", "staging"] :
+      "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:healthconnect/${env}/paystack-*"
+    ]
+  }
+
+  statement {
     # Video calls: the TURN relay's shared secret, to make each call ticket its own relay login (turn.tf).
     sid       = "HealthConnectTurnSecret"
     actions   = ["secretsmanager:GetSecretValue"]
