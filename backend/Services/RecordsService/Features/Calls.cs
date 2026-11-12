@@ -82,7 +82,7 @@ public sealed class PostCallTicket : IFeature
         }
 
         var (ticket, expires) = tickets.Issue(user, appointmentId);
-        return Results.Ok(new CallTicketDto(ticket, expires, $"/api/calls/{appointmentId}/ws", options.IceServers));
+        return Results.Ok(new CallTicketDto(ticket, expires, $"/api/calls/{appointmentId}/ws", options.ServersFor(user.Id, expires)));
     }
 }
 

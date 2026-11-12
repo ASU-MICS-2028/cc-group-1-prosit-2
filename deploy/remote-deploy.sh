@@ -24,6 +24,16 @@ imds_token=$(curl -fsS -X PUT http://169.254.169.254/latest/api/token -H "X-aws-
 account=$(curl -fsS -H "X-aws-ec2-metadata-token: $imds_token" http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .accountId)
 export APPOINTMENT_TOPIC_ARN="arn:aws:sns:$AWS_REGION:$account:healthconnect-$ENV-appointment-events"
 
+# Video calls: the TURN relay's URLs and shared secret (deploy/terraform/turn.tf), if it exists.
+# Without it calls still work when a direct path exists, but not between phones on mobile data.
+if turn=$(aws secretsmanager get-secret-value --region "$AWS_REGION" --secret-id healthconnect/turn \
+  --query SecretString --output text 2>/dev/null); then
+  TURN_URLS=$(jq -r .urls <<<"$turn")
+  TURN_SECRET=$(jq -r .secret <<<"$turn")
+  export TURN_URLS TURN_SECRET
+fi
+unset turn
+
 echo "$COMPOSE_B64" | base64 -d > compose.yml
 
 aws ecr get-login-password --region "$AWS_REGION" \

@@ -52,6 +52,13 @@ data "aws_iam_policy_document" "app" {
   }
 
   statement {
+    # Video calls: the TURN relay's shared secret, to make each call ticket its own relay login (turn.tf).
+    sid       = "HealthConnectTurnSecret"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = ["arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:healthconnect/turn-*"]
+  }
+
+  statement {
     sid       = "HealthConnectKeyUseViaServicesOnly"
     actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
     resources = [aws_kms_key.data.arn]
